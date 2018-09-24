@@ -10,7 +10,12 @@ export function apiEditorRender(context: ExtensionContext, langClient: ExtendedL
         </div>
     `;
 
-    const styles = ``;
+    const styles = `
+        .api-container {
+            padding: 1em;
+        }
+    `;
+
     const script = `
         let docUri = ${JSON.stringify(docUri.toString())};
 
@@ -28,7 +33,7 @@ export function apiEditorRender(context: ExtensionContext, langClient: ExtendedL
                 try {
                     let width = window.innerWidth - 6;
                     let height = window.innerHeight;
-                    ballerinaDiagram.renderBallerinaAPIEditor(document.getElementById("api-visualizer"), JSON.stringify(response.ballerinaYaml));
+                    ballerinaDiagram.renderBallerinaAPIEditor(document.getElementById("api-visualizer"), JSON.stringify(response.ballerinaSwaggerJson));
                 } catch (e) {
                     console.log(e.stack);
                 }

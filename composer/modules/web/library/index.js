@@ -32,6 +32,7 @@ import TreeBuilder from 'plugins/ballerina/model/tree-builder.js';
 import FragmentUtils from 'plugins/ballerina/utils/fragment-utils';
 import SwaggerVisualizer from 'plugins/swagger-visualizer/dist/scripts';
 import '../src/ballerina-theme/semantic.less';
+import 'plugins/swagger-visualizer/dist/style/main.less';
 
 const BalDiagram = DragDropContext(HTML5Backend)(Diagram);
 const BallerinaDesignView = DragDropContext(HTML5Backend)(DesignView);

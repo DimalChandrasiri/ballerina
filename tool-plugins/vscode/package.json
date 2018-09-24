@@ -144,7 +144,7 @@
             },
             {
                 "command": "ballerina.showAPIEditor",
-                "title": "Show Ballerina API Editor"
+                "title": "Ballerina: Show API Editor"
             }
         ],
         "menus": {

@@ -79,7 +79,7 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
     /**
      * Service implementation to get Ballerina Source definition from a given swagger json.
      * @param request : Object with swagger json reference
-     * @return
+     * @return returns completable object
      */
     @Override
     public CompletableFuture<SwaggerBallerinaResponse> ballerinaDef(SwaggerBallerinaRequest request){
@@ -107,7 +107,7 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
     /**
      * Service implementation to get Swagger json for a provided Ballerina Document
      * @param request - Related ballerina document uri 
-     * @return
+     * @return returns completable object
      */
     @Override
     public CompletableFuture<BallerinaSwaggerResponse> swaggerDef(BallerinaSwaggerRequest request){
@@ -120,7 +120,6 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
         try {
             String fileContent = documentManager.getFileContent(compilationPath);
             String swaggerDefinition = SwaggerConverterUtils.generateSwaggerDefinitions(fileContent, request.getBallerinaService());
-            logger.error(swaggerDefinition);
             reply.setballerinaSwaggerJson(swaggerDefinition);
         } catch (Exception e) {
             logger.error("error: while processing service definition at converter service: " + e.getMessage(), e);

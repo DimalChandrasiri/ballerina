@@ -63,6 +63,14 @@ export interface BallerinaSwaggerRequest {
     ballerinaService?: string;
 }
 
+export interface SwaggerBallerinaResponse {
+    ballerinaSwaggerDef?: string;
+}
+
+export interface SwaggerBallerinaRequest {
+    swaggerDef?: string;
+}
+
 export interface BallerinaFragmentASTResponse {
 }
 
@@ -108,6 +116,13 @@ export class ExtendedLangClient extends LanguageClient {
             ballerinaService: service 
         };
         return this.sendRequest("ballerinaDocument/swaggerDef", req);
+    }
+
+    getBallerinaSource(swaggerJson: string): Thenable<SwaggerBallerinaResponse> {
+        const req: SwaggerBallerinaRequest = {
+            swaggerDef: swaggerJson
+        };
+        return this.sendRequest("ballerinaDocument/ballerinaDef", req);
     }
     
 }
