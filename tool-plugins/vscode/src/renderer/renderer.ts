@@ -139,7 +139,7 @@ function renderDiagram(context: ExtensionContext, docUri: Uri): string {
                 drawError('Oops. Something went wrong.');
             }
         }
-
+        
         function drawError(message) {
             document.getElementById("diagram").innerHTML = \`
             <div id="errors">
@@ -163,7 +163,7 @@ function renderDiagram(context: ExtensionContext, docUri: Uri): string {
     return getLibraryWebViewContent(context, body, script, styles);
 }
 
-function renderError() {
+/*function renderError() {
     return `
     <!DOCTYPE html>
     <html>
@@ -181,4 +181,4 @@ function renderError() {
     </body>
     </html>
     `;
-}
+}*/

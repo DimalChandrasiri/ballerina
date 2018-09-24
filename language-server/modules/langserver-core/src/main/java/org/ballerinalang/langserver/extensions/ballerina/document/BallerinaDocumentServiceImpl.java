@@ -31,6 +31,10 @@ import org.ballerinalang.langserver.compiler.format.JSONGenerationException;
 import org.ballerinalang.langserver.compiler.format.TextDocumentFormatUtil;
 import org.ballerinalang.langserver.compiler.workspace.WorkspaceDocumentException;
 import org.ballerinalang.langserver.compiler.workspace.WorkspaceDocumentManager;
+import org.ballerinalang.ballerina.swagger.convertor.service.SwaggerConverterUtils;
+import org.ballerinalang.swagger.utils.GeneratorConstants;
+import org.ballerinalang.swagger.CodeGenerator;
+import org.ballerinalang.swagger.model.GenSrcFile;
 import org.eclipse.lsp4j.ApplyWorkspaceEditParams;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
@@ -42,6 +46,10 @@ import org.slf4j.LoggerFactory;
 import org.wso2.ballerinalang.compiler.tree.BLangCompilationUnit;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.util.List;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
@@ -66,6 +74,61 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
     public BallerinaDocumentServiceImpl(LSGlobalContext globalContext) {
         this.ballerinaLanguageServer = globalContext.get(LSGlobalContextKeys.LANGUAGE_SERVER_KEY);
         this.documentManager = globalContext.get(LSGlobalContextKeys.DOCUMENT_MANAGER_KEY);
+    }
+
+    /**
+     * Service implementation to get Ballerina Source definition from a given swagger json.
+     * @param request : Object with swagger json reference
+     * @return
+     */
+    @Override
+    public CompletableFuture<SwaggerBallerinaResponse> ballerinaDef(SwaggerBallerinaRequest request){
+        SwaggerBallerinaResponse reply = new SwaggerBallerinaResponse();
+
+        try {
+            String swaggerSource = request.getSwaggerDef();
+            File temp = File.createTempFile("tempfile", ".json");
+            BufferedWriter bw = new BufferedWriter(new FileWriter(temp));
+            bw.write(swaggerSource);
+            bw.close();
+
+            CodeGenerator generator = new CodeGenerator();
+            List<GenSrcFile> source = generator.generate(GeneratorConstants.GenType.MOCK, temp.getPath());
+
+            reply.setBallerinaSwaggerDef(source.get(0).getContent());
+        } catch (Exception ex) {
+            logger.error("error: while processing service definition at converter service: " + ex.getMessage(), ex);
+        }
+
+        return CompletableFuture.supplyAsync(() -> reply);
+        
+    }
+
+    /**
+     * Service implementation to get Swagger json for a provided Ballerina Document
+     * @param request - Related ballerina document uri 
+     * @return
+     */
+    @Override
+    public CompletableFuture<BallerinaSwaggerResponse> swaggerDef(BallerinaSwaggerRequest request){
+        String fileUri = request.getBallerinaDocument().getUri();
+        Path formattingFilePath = new LSDocument(fileUri).getPath();
+        Path compilationPath = getUntitledFilePath(formattingFilePath.toString()).orElse(formattingFilePath);
+        Optional<Lock> lock = documentManager.lockFile(compilationPath);
+        BallerinaSwaggerResponse reply = new BallerinaSwaggerResponse();
+
+        try {
+            String fileContent = documentManager.getFileContent(compilationPath);
+            String swaggerDefinition = SwaggerConverterUtils.generateSwaggerDefinitions(fileContent, request.getBallerinaService());
+            logger.error(swaggerDefinition);
+            reply.setballerinaSwaggerJson(swaggerDefinition);
+        } catch (Exception e) {
+            logger.error("error: while processing service definition at converter service: " + e.getMessage(), e);
+        } finally {
+            lock.ifPresent(Lock::unlock);
+        }
+        
+        return CompletableFuture.supplyAsync(() -> reply);
     }
 
     @Override

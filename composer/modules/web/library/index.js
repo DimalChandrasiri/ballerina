@@ -30,6 +30,7 @@ import Diagram from 'plugins/ballerina/diagram/diagram.jsx';
 import DesignView from 'plugins/ballerina/views/design-view.jsx';
 import TreeBuilder from 'plugins/ballerina/model/tree-builder.js';
 import FragmentUtils from 'plugins/ballerina/utils/fragment-utils';
+import SwaggerVisualizer from 'plugins/swagger-visualizer/dist/scripts';
 import '../src/ballerina-theme/semantic.less';
 
 const BalDiagram = DragDropContext(HTML5Backend)(Diagram);
@@ -191,11 +192,29 @@ function renderSamplesList(target, samples, openSample, openLink) {
     ReactDOM.render(SamplesListElement, target);
 }
 
+/**
+ * Method to render the Swagger API editor for a given dom element.
+ * @param {Object} target Target dom element which the element needs to be rendered  
+ */
+function renderBallerinaAPIEditor(target, swaggerJson){
+    console.log(swaggerJson);
+
+    const oasJson = JSON.parse(swaggerJson);
+    const props = {
+        oasJson: JSON.parse(oasJson)
+    };
+
+    console.log(props);
+    const swaggerVisualizer = createElement(SwaggerVisualizer, props);
+    ReactDOM.render(swaggerVisualizer, target);
+}
+
 export {
     renderStaticDiagram,
     renderEditableDiagram,
     renderSamplesList,
     TreeBuilder,
     BallerinaDesignView,
+    renderBallerinaAPIEditor,
     BallerinaDiagram,
 };

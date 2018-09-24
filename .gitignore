@@ -35,3 +35,4 @@ velocity.log
 .project
 .settings
 .vscode
+tool-plugins/intellij/bin/
