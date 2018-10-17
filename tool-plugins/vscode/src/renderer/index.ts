@@ -43,6 +43,17 @@ function updateWebView(ast: BallerinaAST, docUri: Uri, stale: boolean): void {
 	}
 }
 
+function updateOASWebView(docUri: Uri, resp: string, stale: boolean): void {
+	if (oasEditorPanel) {
+		oasEditorPanel.webview.postMessage({ 
+			command: 'update',
+			docUri: docUri.toString(),
+			json: resp,
+			stale
+		});
+	}
+}
+
 export function activate(context: ExtensionContext, langClient: ExtendedLangClient) {
 	const { experimental } = langClient.initializeResult!.capabilities;
 	const serverProvidesAST = experimental && experimental.astProvider;
@@ -69,6 +80,15 @@ export function activate(context: ExtensionContext, langClient: ExtendedLangClie
 						updateWebView(resp.ast, docUri, stale);
 					}
 				});
+
+			if(oasEditorPanel){
+				langClient.getBallerinaOASDef(docUri, oasEditorPanel.title.split('-')[1].trim()).then((resp)=>{
+					if(resp.ballerinaOASJson != undefined) {
+						updateOASWebView(docUri, JSON.stringify(resp.ballerinaOASJson), false);
+					}
+				})
+			}
+			
 		}
 	}, DEBOUNCE_WAIT));
 
@@ -101,6 +121,7 @@ export function activate(context: ExtensionContext, langClient: ExtendedLangClie
 				}
 			);
 		}
+		let selectedService = '';
 		const editor = window.activeTextEditor;
 		if(!editor) {
             return "";
@@ -125,12 +146,22 @@ export function activate(context: ExtensionContext, langClient: ExtendedLangClie
 						const html = apiEditorRender(context, langClient, editor.document.uri, selected);
 						if (oasEditorPanel && html) {
 							oasEditorPanel.webview.html = html;
+							oasEditorPanel.title ="Ballerina API Editor - " + selected;
 						}
 					}
 				});
 				
 			}
 		})
+
+		const html = apiEditorRender(context, langClient, editor.document.uri, selectedService !== '' ? selectedService : '');
+		if (oasEditorPanel && html) {
+			oasEditorPanel.webview.html = html;
+		}
+
+		oasEditorPanel.onDidDispose(() => {
+			oasEditorPanel = undefined;
+		});
 	});
 
 	const diagramRenderDisposable = commands.registerCommand('ballerina.showDiagram', () => {

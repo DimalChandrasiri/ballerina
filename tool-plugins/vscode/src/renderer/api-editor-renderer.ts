@@ -18,7 +18,20 @@ export function apiEditorRender(context: ExtensionContext, langClient: ExtendedL
 
     const script = `
         let docUri = ${JSON.stringify(docUri.toString())};
+        let updatedJSON = '';
         let selectedService = ${JSON.stringify(selectedService.toString())};
+
+        // Handle the message inside the webview
+        window.addEventListener('message', event => {
+            const message = event.data; // The JSON data our extension sent
+            switch (message.command) {
+                case 'update':
+                    docUri = message.docUri;
+                    updatedJSON = message.json
+                    drawAPIEditor();
+                    break;
+            }
+        });
 
         function getSwaggerJson(docUri, serviceName) {
             return new Promise((resolve, reject) => {
@@ -33,19 +46,25 @@ export function apiEditorRender(context: ExtensionContext, langClient: ExtendedL
         }
 
         function drawAPIEditor() {
-            getSwaggerJson(docUri, selectedService).then((response)=>{
-                try {
-                    let width = window.innerWidth - 6;
-                    let height = window.innerHeight;
-                    console.log(JSON.stringify(response.ballerinaOASJson));
-                    ballerinaDiagram.renderBallerinaApiEditor(
-                        document.getElementById("api-visualizer"), JSON.stringify(response.ballerinaOASJson), onDidJsonChange);
-                } catch (e) {
-                    console.log(e.stack);
-                }
-            })
+            if(updatedJSON === '') {
+                getSwaggerJson(docUri, selectedService).then((response)=>{
+                    try {
+                        let width = window.innerWidth - 6;
+                        let height = window.innerHeight;
+                        debugger;
+                        ballerinaDiagram.renderBallerinaApiEditor(document.getElementById("api-visualizer"), JSON.stringify(response.ballerinaOASJson), onDidJsonChange);
+                    } catch (e) {
+                        console.log(e.stack);
+                    }
+                })
+            } else {
+                console.log(updatedJSON);
+                ballerinaDiagram.renderBallerinaApiEditor(document.getElementById("api-visualizer"), updatedJSON, onDidJsonChange);
+            }
+            
         }
 
+        window.onresize = drawAPIEditor;
         drawAPIEditor();
         drawAPIEditor();
 

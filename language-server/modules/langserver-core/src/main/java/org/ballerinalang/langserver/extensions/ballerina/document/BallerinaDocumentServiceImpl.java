@@ -32,11 +32,23 @@ import org.ballerinalang.langserver.compiler.format.JSONGenerationException;
 import org.ballerinalang.langserver.compiler.format.TextDocumentFormatUtil;
 import org.ballerinalang.langserver.compiler.workspace.WorkspaceDocumentException;
 import org.ballerinalang.langserver.compiler.workspace.WorkspaceDocumentManager;
-import org.ballerinalang.model.tree.*;
+import org.ballerinalang.langserver.extensions.OASGenerationException;
+import org.ballerinalang.model.tree.AnnotatableNode;
+import org.ballerinalang.model.tree.AnnotationAttachmentNode;
+import org.ballerinalang.model.tree.IdentifierNode;
+import org.ballerinalang.model.tree.ImportPackageNode;
+import org.ballerinalang.model.tree.ResourceNode;
+import org.ballerinalang.model.tree.ServiceNode;
+import org.ballerinalang.model.tree.TopLevelNode;
 import org.ballerinalang.swagger.CodeGenerator;
 import org.ballerinalang.swagger.model.GenSrcFile;
 import org.ballerinalang.swagger.utils.GeneratorConstants;
-import org.eclipse.lsp4j.*;
+import org.eclipse.lsp4j.ApplyWorkspaceEditParams;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.TextDocumentEdit;
+import org.eclipse.lsp4j.TextEdit;
+import org.eclipse.lsp4j.WorkspaceEdit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.ballerinalang.compiler.tree.BLangCompilationUnit;
@@ -49,7 +61,11 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
@@ -98,23 +114,32 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
     }
 
     @Override
-    public void swaggerDefDidChange(BallerinaASTOASChangeRequest request) {
-        String fileUri = request.getDocumentIdentifier().getUri();
-        Path formattingFilePath = new LSDocument(fileUri).getPath();
-        Path compilationPath = getUntitledFilePath(formattingFilePath.toString()).orElse(formattingFilePath);
-        Optional<Lock> lock = documentManager.lockFile(compilationPath);
+    public void apiDesignDidChange(ApiDesignDidChangeParams params) {
+        String fileUri = params.getDocumentIdentifier().getUri();
+        Path sourceFilePath = new LSDocument(fileUri).getPath();
+        Optional<Lock> lock = documentManager.lockFile(sourceFilePath);
 
         try {
             //Generate compilation unit for provided Open Api Sep JSON
-            File tempOasJsonFile = getSwaggerFile(request.getOasDefinition());
+            File tempOasJsonFile = getSwaggerFile(params.getOASDefinition());
             CodeGenerator generator = new CodeGenerator();
-            List<GenSrcFile> oasSource = generator.generate(GeneratorConstants.GenType.MOCK,
+            List<GenSrcFile> oasSources = generator.generate(GeneratorConstants.GenType.MOCK,
                     tempOasJsonFile.getPath());
-            BallerinaFile oasFile = LSCompiler.compileContent(oasSource.get(0).getContent(),
-                    CompilerPhase.CODE_ANALYZE);
-            Optional<BLangPackage> oasFilePackage = oasFile.getBLangPackage();
 
-            String fileContent = documentManager.getFileContent(compilationPath);
+            Optional<GenSrcFile> oasServiceFile = oasSources.stream()
+                    .filter(genSrcFile -> genSrcFile.getType().equals(GenSrcFile.GenFileType.GEN_SRC)).findAny();
+
+            if (!oasServiceFile.isPresent()) {
+               throw new OASGenerationException("OAS Service file is empty.");
+            }
+
+            //Generate ballerina file to get services
+            BallerinaFile oasServiceBal = LSCompiler.compileContent(oasServiceFile.get().getContent(),
+                    CompilerPhase.CODE_ANALYZE);
+
+            Optional<BLangPackage> oasFilePackage = oasServiceBal.getBLangPackage();
+
+            String fileContent = documentManager.getFileContent(sourceFilePath);
             String[] contentComponents = fileContent.split("\\n|\\r\\n|\\r");
             int lastNewLineCharIndex = Math.max(fileContent.lastIndexOf("\n"), fileContent.lastIndexOf("\r"));
             int lastCharCol = fileContent.substring(lastNewLineCharIndex + 1).length();
@@ -124,17 +149,20 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
             BallerinaFile ballerinaFile = LSCompiler.compileContent(fileContent, CompilerPhase.CODE_ANALYZE);
             Optional<BLangPackage> bLangPackage = ballerinaFile.getBLangPackage();
 
-            if (bLangPackage.isPresent() && bLangPackage.get().symbol != null) {
-                BLangCompilationUnit compilationUnit = bLangPackage.get().getCompilationUnits()
-                        .stream().findFirst().orElse(null);
-                BLangCompilationUnit oasCompilationUnit = oasFilePackage.get().getCompilationUnits()
-                        .stream().findFirst().orElse(null);
+            if (bLangPackage.isPresent() && bLangPackage.get().symbol != null && oasFilePackage.isPresent()) {
+                Optional<BLangCompilationUnit> compilationUnit = bLangPackage.get().getCompilationUnits()
+                        .stream().findFirst();
+                Optional<BLangCompilationUnit> oasCompilationUnit = oasFilePackage.get().getCompilationUnits()
+                        .stream().findFirst();
 
-                mergeAst(compilationUnit, oasCompilationUnit);
-                TextDocumentFormatUtil.generateJSON(compilationUnit, new HashMap<>());
+                if (!oasCompilationUnit.isPresent() || !compilationUnit.isPresent() ) {
+                    return;
+                }
+
+                mergeAst(compilationUnit.get(), oasCompilationUnit.get());
 
                 // generate source for the new ast.
-                JsonObject ast = TextDocumentFormatUtil.generateJSON(compilationUnit, new HashMap<>())
+                JsonObject ast = TextDocumentFormatUtil.generateJSON(compilationUnit.get(), new HashMap<>())
                         .getAsJsonObject();
                 SourceGen sourceGen = new SourceGen(0);
                 sourceGen.build(ast, null, "CompilationUnit");
@@ -144,7 +172,7 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
                 TextEdit textEdit = new TextEdit(range, textEditContent);
                 WorkspaceEdit workspaceEdit = new WorkspaceEdit();
                 ApplyWorkspaceEditParams applyWorkspaceEditParams = new ApplyWorkspaceEditParams();
-                TextDocumentEdit textDocumentEdit = new TextDocumentEdit(request.getDocumentIdentifier(),
+                TextDocumentEdit textDocumentEdit = new TextDocumentEdit(params.getDocumentIdentifier(),
                         Collections.singletonList(textEdit));
                 workspaceEdit.setDocumentChanges(Collections.singletonList(textDocumentEdit));
                 applyWorkspaceEditParams.setEdit(workspaceEdit);
@@ -160,21 +188,6 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
 
     }
 
-    /**
-     * A Util method to create a temporary swagger JSON file to be used to convert into ballerina definition.
-     *
-     * @param oasDefinition Swagger JSON string for file creation.
-     * @return Temporary file created with provided string
-     * @throws IOException
-     */
-    private File getSwaggerFile(String oasDefinition) throws IOException {
-        File oasTempFile = File.createTempFile("oasTempFile", ".json");
-        BufferedWriter bw = new BufferedWriter(new FileWriter(oasTempFile));
-        bw.write(oasDefinition);
-        bw.close();
-        return oasTempFile;
-    }
-
     @Override
     public CompletableFuture<BallerinaServiceListResponse> serviceList(BallerinaServiceListRequest request) {
         BallerinaServiceListResponse reply = new BallerinaServiceListResponse();
@@ -187,7 +200,7 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
             String fileContent = documentManager.getFileContent(compilationPath);
             BallerinaFile ballerinaFile = LSCompiler.compileContent(fileContent, CompilerPhase.CODE_ANALYZE);
             Optional<BLangPackage> bLangPackage = ballerinaFile.getBLangPackage();
-            ArrayList<String> services = new ArrayList<String>();
+            ArrayList<String> services = new ArrayList<>();
 
             if (bLangPackage.isPresent() && bLangPackage.get().symbol != null) {
                 BLangCompilationUnit compilationUnit = bLangPackage.get().getCompilationUnits().stream()
@@ -292,19 +305,40 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
         return null;
     }
 
-    private void mergeAst(BLangCompilationUnit ast, BLangCompilationUnit swaggerAst) {
-        swaggerAst.getTopLevelNodes().stream().forEach(topLevelNode -> {
+    /**
+     * A Util method to create a temporary swagger JSON file to be used to convert into ballerina definition.
+     *
+     * @param oasDefinition Swagger JSON string for file creation
+     * @return Temporary file created with provided string
+     * @throws IOException will throw IO Exception if file error
+     */
+    private File getSwaggerFile(String oasDefinition) throws IOException {
+        File oasTempFile = File.createTempFile("oasTempFile", ".json");
+        BufferedWriter bw = new BufferedWriter(new FileWriter(oasTempFile));
+        bw.write(oasDefinition);
+        bw.close();
+        return oasTempFile;
+    }
+
+    /**
+     * Util method to merge updated compilation unit to the current compilation unit.
+     *
+     * @param targetCompUnit target compilation unit
+     * @param generatedCompUnit generated compilation unit which needs to be merged
+     */
+    private void mergeAst(BLangCompilationUnit targetCompUnit, BLangCompilationUnit generatedCompUnit) {
+        generatedCompUnit.getTopLevelNodes().forEach(topLevelNode -> {
 
             if (topLevelNode instanceof ImportPackageNode) {
-                if (!hasImport(ast, (ImportPackageNode) topLevelNode)) {
-                    ast.getTopLevelNodes().add(0,topLevelNode);
+                if (!hasImport(targetCompUnit, (ImportPackageNode) topLevelNode)) {
+                    //TODO add new imports to last of imports
+                    targetCompUnit.getTopLevelNodes().add(0,topLevelNode);
                 }
             }
 
             if (topLevelNode instanceof ServiceNode) {
                 ServiceNode swaggerService = (ServiceNode) topLevelNode;
-                List<ServiceNode> serviceList = new ArrayList<>();
-                for (TopLevelNode astNode : ast.getTopLevelNodes()) {
+                for (TopLevelNode astNode : targetCompUnit.getTopLevelNodes()) {
                     if (astNode instanceof ServiceNode) {
                         ServiceNode astService = (ServiceNode) astNode;
                         if (astService.getName().getValue().equals(swaggerService.getName().getValue())) {
@@ -318,6 +352,12 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
 
     }
 
+    /**
+     * Util method to merge given two service nodes.
+     *
+     * @param originService Origin service
+     * @param targetService Target service which will get merged to origin service
+     */
     private void mergeServices(ServiceNode originService, ServiceNode targetService) {
         mergeAnnotations(originService, targetService);
         List<ResourceNode> targetServices = new ArrayList<>();
@@ -332,13 +372,20 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
             }
 
             if (!matched) {
+                targetResource.getBody().getStatements().clear();
                 targetServices.add(targetResource);
             }
         }
 
-        targetServices.forEach(service -> originService.addResource(service));
+        targetServices.forEach(originService::addResource);
     }
 
+    /**
+     * Util method to merge annotation attachments.
+     *
+     * @param targetNode target node
+     * @param sourceNode source node which will get merged to target node
+     */
     private void mergeAnnotations(AnnotatableNode targetNode, AnnotatableNode sourceNode) {
         for (AnnotationAttachmentNode sourceNodeAttachment : sourceNode.getAnnotationAttachments()) {
 
@@ -355,8 +402,10 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
                         int matchedKeyValuePairIndex = 0;
                         BLangRecordLiteral.BLangRecordKeyValue matchedObj = null;
 
-                        for (BLangRecordLiteral.BLangRecordKeyValue matchedKeyValue : matchedTargetRecord.getKeyValuePairs()) {
-                            if ((matchedKeyValue.key != null && matchedKeyValue.key.expr instanceof BLangSimpleVarRef)) {
+                        for (BLangRecordLiteral.BLangRecordKeyValue matchedKeyValue :
+                                matchedTargetRecord.getKeyValuePairs()) {
+                            if ((matchedKeyValue.key != null &&
+                                    matchedKeyValue.key.expr instanceof BLangSimpleVarRef)) {
                                 BLangSimpleVarRef matchedKey = (BLangSimpleVarRef) matchedKeyValue.key.expr;
                                 BLangSimpleVarRef sourceKey = (BLangSimpleVarRef) sourceKeyValue.key.expr;
                                 if (matchedKey.variableName.getValue().equals(sourceKey.variableName.getValue())) {
@@ -403,10 +452,7 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
      * @return true if matched else false
      */
     private boolean matchResource(ResourceNode astResource, ResourceNode swaggerResource) {
-        if (astResource.getName().getValue().equals(swaggerResource.getName().getValue())) {
-            return true;
-        }
-        return false;
+        return astResource.getName().getValue().equals(swaggerResource.getName().getValue());
     }
 
     /**

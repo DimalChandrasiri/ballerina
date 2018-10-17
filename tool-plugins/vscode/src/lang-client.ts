@@ -138,7 +138,7 @@ export class ExtendedLangClient extends LanguageClient {
                 uri: uri.toString()
             },
         }
-        return this.sendNotification("ballerinaDocument/swaggerDefDidChange", req);
+        return this.sendNotification("ballerinaDocument/apiDesignDidChange", req);
     }
 
     getServiceListForActiveFile(uri: Uri): Thenable<BallerinaServiceListResponse> {

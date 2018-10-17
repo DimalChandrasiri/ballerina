@@ -22,9 +22,9 @@ import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
 /**
  * Represents a Ballerina swagger change request.
  *
- * @since 0.981.2
+ * @since 0.983.0
  */
-public class BallerinaASTOASChangeRequest {
+public class ApiDesignDidChangeParams {
 
     private String oasDefinition;
     private VersionedTextDocumentIdentifier documentIdentifier;
@@ -37,11 +37,11 @@ public class BallerinaASTOASChangeRequest {
         this.documentIdentifier = documentIdentifier;
     }
 
-    public String getOasDefinition() {
+    public String getOASDefinition() {
         return this.oasDefinition;
     }
 
-    public void setOasDefinition(String oasDefinition) {
+    public void setOASDefinition(String oasDefinition) {
         this.oasDefinition = oasDefinition;
     }
 

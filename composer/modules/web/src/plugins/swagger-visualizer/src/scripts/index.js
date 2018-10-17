@@ -30,6 +30,7 @@ import 'semantic-ui-css/semantic.min.css';
 const EVENTS = {
     "ADD_RESOURCE": "add-resource",
     "ADD_OPERATION": "add-operation",
+    "DELETE_OPERATION": "delete_operation",
 }
 
 
@@ -83,6 +84,11 @@ class SwaggerVisualizer extends React.Component {
 
         SwaggerValidator.validate(oasJson)
             .then((json) => {
+                /*Object.keys(json.paths).forEach(function(t){
+                    if(Object.keys(json.paths[t]).includes("x-MULTI")){
+                        json.paths[t] = {}
+                    }
+                })*/
                 this.setState({
                     oasJson: json,
                 });
@@ -97,6 +103,45 @@ class SwaggerVisualizer extends React.Component {
             });
 
         return null;
+    }
+
+    componentWillReceiveProps(nextProps) {
+        console.log(nextProps);
+        
+        const { oasJson } = nextProps;
+
+        if (!oasJson) {
+            this.setState({
+                isError: {
+                    state: true,
+                    message: 'Open API Specification compliant JSON obejct is required.',
+                },
+            });
+            return false;
+        }
+
+        SwaggerValidator.validate(oasJson)
+            .then((json) => {
+                /*Object.keys(json.paths).forEach(function(t){
+                    if(Object.keys(json.paths[t]).includes("x-MULTI")){
+                        json.paths[t] = {}
+                    }
+                })*/
+                this.setState({
+                    oasJson: json,
+                });
+            })
+            .catch((error) => {
+                this.setState({
+                    isError: {
+                        state: true,
+                        message: error.message,
+                    },
+                });
+            });
+
+        return null;
+
     }
 
     onAddParameter(){
@@ -181,11 +226,12 @@ class SwaggerVisualizer extends React.Component {
     onDeleteOperation(deletedOp) {
         const path = deletedOp.path;
         const operation = deletedOp.operation;
-        const { onDeleteOperation } = this.props;
+        const { onDeleteOperation, onDidChange } = this.props;
 
         delete this.state.oasJson.paths[path][operation];
         this.setState(this.state, ()=>{
             onDeleteOperation(path, operation, deletedOp.operationObj, this.state);
+            onDidChange(EVENTS.DELETE_OPERATION, deletedOp.operationObj, this.state.oasJson);
         });
     }
 
