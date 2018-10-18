@@ -79,7 +79,7 @@ class OasResources extends React.Component {
         const { resObj } = this.props;
         const { activeIndex, showAddResource } = this.state;
         return (
-            <React.Fragment>
+            <div className='oas-resources'>
                 <Button size='mini' icon labelPosition='left' onClick={this.handleShowAddResource}>
                     <Icon name='plus' />
                     Add Resource
@@ -108,7 +108,7 @@ class OasResources extends React.Component {
                         })}
                     </Accordion>
                 }
-            </React.Fragment>
+            </div>
             
         );
     }

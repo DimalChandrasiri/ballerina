@@ -19,7 +19,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Accordion } from 'semantic-ui-react';
+import { Accordion, Icon } from 'semantic-ui-react';
 
 import OasOperations from '../operations/operations';
 
@@ -38,7 +38,8 @@ class OasResource extends React.Component {
         return (
             <div className='resource'>
                 <Accordion.Title className='res-title' index={currIndex} onClick={handleExpand}>
-                    <span>{resPath}</span>
+                    <Icon name='chevron down' />
+                    {resPath}
                 </Accordion.Title>
                 <Accordion.Content active={activeIndex === currIndex}>
                     <OasOperations oasOperations={oasOps} path={resPath} />

@@ -257,17 +257,21 @@ class SwaggerVisualizer extends React.Component {
                     onDeleteOperation: this.onDeleteOperation,
                 }}
             >
-                {info && 
-                    <div className='api-details'>
-                        <h1>
-                            {info.title}
-                            <sup>{info.version}</sup>
-                        </h1>
-                        <pre>
-                            <code>[ Base URL : {oasJson.host}{oasJson.basePath} ]</code>
-                        </pre>
-                        <p>{info.description}</p>
-                    </div>
+                {info &&
+                    <React.Fragment>
+                        <div className='oas-header'>
+                            <h1>
+                                {info.title}
+                                <span>{oasJson.host}{oasJson.basePath}</span>
+                            </h1>
+                            <span className='version'>{info.version}</span>
+                        </div> 
+                        {info.description && 
+                            <div className='oas-details'>
+                                <p>{info.description}</p>
+                            </div>
+                        }
+                    </React.Fragment>
                 }
                 {(() => {
                     if(actionState.state === 'error') {

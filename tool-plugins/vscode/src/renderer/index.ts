@@ -31,6 +31,7 @@ let previewPanel: WebviewPanel | undefined;
 let oasEditorPanel: WebviewPanel | undefined;
 let activeEditor: TextEditor | undefined;
 let preventDiagramUpdate = false;
+let preventAPIDesignerUpdate = false;
 
 function updateWebView(ast: BallerinaAST, docUri: Uri, stale: boolean): void {
 	if (previewPanel) {
@@ -68,7 +69,8 @@ export function activate(context: ExtensionContext, langClient: ExtendedLangClie
 	workspace.onDidChangeTextDocument(_.debounce((e: TextDocumentChangeEvent) => {
         if (activeEditor && (e.document === activeEditor.document) &&
             e.document.fileName.endsWith('.bal')) {
-			if (preventDiagramUpdate) {
+			if (preventDiagramUpdate || preventAPIDesignerUpdate) {
+				preventAPIDesignerUpdate = false;
 				return;
 			}
 			const docUri = e.document.uri;
@@ -106,62 +108,88 @@ export function activate(context: ExtensionContext, langClient: ExtendedLangClie
 						updateWebView(resp.ast, docUri, stale);
 					}
 				});
+				
+			if(oasEditorPanel){
+				langClient.getServiceListForActiveFile(activeEditor.document.uri).then((resp) => {
+					if(resp.services) {
+						window.showQuickPick(resp.services).then((selected) => {
+							if(selected && activeEditor){
+								const html = apiEditorRender(context, langClient, activeEditor.document.uri, selected);
+								if (oasEditorPanel && html) {
+									oasEditorPanel.webview.html = html;
+									oasEditorPanel.title ="Ballerina API Editor - " + selected;
+								}
+							}
+						});
+						
+					}
+				})
+			}
 		}
 	});
 
 	commands.registerCommand('ballerina.showAPIEditor', () => {
-		if(!oasEditorPanel) {
-			oasEditorPanel = window.createWebviewPanel(
-				'ballerinaOASEditor',
-				"Ballerina API Editor",
-				{ viewColumn: ViewColumn.Two, preserveFocus: true } ,
-				{
-					enableScripts: true,
-					retainContextWhenHidden: true,
-				}
-			);
-		}
 		let selectedService = '';
 		const editor = window.activeTextEditor;
 		if(!editor) {
             return "";
 		}
 		activeEditor = editor;
-		WebViewRPCHandler.create([{
-			methodName: 'getSwaggerDef',
-			handler: (args: any[]) => {
-				return langClient.getBallerinaOASDef(args[0], args[1]);
-			}
-		},{
-			methodName: 'triggerSwaggerDefChange',
-			handler: (args: any[]) => {
-				return langClient.triggerSwaggerDefChange(args[0], args[1]);
-			}
-		}], oasEditorPanel.webview)
-
 		langClient.getServiceListForActiveFile(activeEditor.document.uri).then((resp) => {
 			if(resp.services) {
 				window.showQuickPick(resp.services).then((selected) => {
 					if(selected && activeEditor){
-						const html = apiEditorRender(context, langClient, editor.document.uri, selected);
+						let html = apiEditorRender(context, langClient, editor.document.uri, selected);
+						if(!oasEditorPanel) {
+							oasEditorPanel = window.createWebviewPanel(
+								'ballerinaOASEditor',
+								"Ballerina API Editor",
+								{ viewColumn: ViewColumn.Two, preserveFocus: true } ,
+								{
+									enableScripts: true,
+									retainContextWhenHidden: true,
+								}
+							);
+						}
+						oasEditorPanel.webview.html = html;
+						oasEditorPanel.title ="Ballerina API Editor - " + selected;
+
+						WebViewRPCHandler.create([{
+							methodName: 'getSwaggerDef',
+							handler: (args: any[]) => {
+								return langClient.getBallerinaOASDef(args[0], args[1]);
+							}
+						},{
+							methodName: 'triggerSwaggerDefChange',
+							handler: (args: any[]) => {
+								return langClient.triggerSwaggerDefChange(args[0], args[1]);
+							}
+						}], oasEditorPanel.webview)
+				
+						oasEditorPanel.webview.onDidReceiveMessage(message => {
+							switch (message.command) {
+								case 'astModified':
+									if (activeEditor && activeEditor.document.fileName.endsWith('.bal')) {
+										preventAPIDesignerUpdate = true;
+									}
+									return;
+							}
+						}, undefined, context.subscriptions);
+				
+						html = apiEditorRender(context, langClient, editor.document.uri, selectedService !== '' ? selectedService : '');
 						if (oasEditorPanel && html) {
 							oasEditorPanel.webview.html = html;
-							oasEditorPanel.title ="Ballerina API Editor - " + selected;
 						}
+				
+						oasEditorPanel.onDidDispose(() => {
+							oasEditorPanel = undefined;
+						});
 					}
 				});
 				
 			}
-		})
-
-		const html = apiEditorRender(context, langClient, editor.document.uri, selectedService !== '' ? selectedService : '');
-		if (oasEditorPanel && html) {
-			oasEditorPanel.webview.html = html;
-		}
-
-		oasEditorPanel.onDidDispose(() => {
-			oasEditorPanel = undefined;
 		});
+		
 	});
 
 	const diagramRenderDisposable = commands.registerCommand('ballerina.showDiagram', () => {

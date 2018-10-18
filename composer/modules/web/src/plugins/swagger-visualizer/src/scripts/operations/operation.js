@@ -51,11 +51,15 @@ class OasOperation extends React.Component {
                     <p>{oasOp.description}</p>
                     <div className='op-section'>
                         <p>Parameters</p>
-                        <OasParameters paramType='parameter' parameterObj={oasOp.parameters} />
+                        {oasOp.parameters ?
+                            <OasParameters paramType='parameter' parameterObj={oasOp.parameters} /> : <p className='message'>No parameters available to show</p>
+                        }
                     </div>
                     <div className='op-section '>
                         <p>Responses</p>
-                        <OasParameters paramType='response' parameterObj={oasOp.responses} />
+                        {oasOp.responses ?
+                            <OasParameters paramType='response' parameterObj={oasOp.responses} /> : <p className='message'>No responses available to show</p>
+                        }
                     </div>
                 </Accordion.Content>
             </div>

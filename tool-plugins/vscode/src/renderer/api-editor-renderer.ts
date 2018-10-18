@@ -11,8 +11,9 @@ export function apiEditorRender(context: ExtensionContext, langClient: ExtendedL
     `;
 
     const styles = `
-        .api-container {
-            padding: 1em;
+        body {
+            background-color: #1e1e1e;
+            color: #fff;
         }
     `;
 
@@ -61,6 +62,10 @@ export function apiEditorRender(context: ExtensionContext, langClient: ExtendedL
                 console.log(updatedJSON);
                 ballerinaDiagram.renderBallerinaApiEditor(document.getElementById("api-visualizer"), updatedJSON, onDidJsonChange);
             }
+
+            vscode.postMessage({
+                command: 'astModified'
+            })
             
         }
 
