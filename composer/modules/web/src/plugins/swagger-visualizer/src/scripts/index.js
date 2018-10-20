@@ -106,7 +106,6 @@ class SwaggerVisualizer extends React.Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        console.log(nextProps);
         
         const { oasJson } = nextProps;
 

@@ -9,7 +9,7 @@
 @Operation-Options : get, post, put, delete, patch, head, options;
 
 .operation {
-    background-color: #4c4c4c;
+    background-color: #272727;
     margin: 0.3em 0;
 } 
 
@@ -41,6 +41,7 @@
 .operation .delete-op{
     margin: 6px 10px;
     float: right;
+    color: #b3b3b3;
 }
 
 .add-operation {
@@ -53,7 +54,7 @@
     margin-bottom: 1.5em;
 }
 
-.message {
+.no-data {
     padding: .7em .5em;
     background-color: #616161;
 }
@@ -72,6 +73,7 @@
     .operation.@{value} .op-title .op-method{
         font-weight: 600;
         background-color: @@borderColor;
+        color: #fff;
     }
 
 }

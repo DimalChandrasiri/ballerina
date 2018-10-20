@@ -49,18 +49,18 @@ class OasOperation extends React.Component {
                 </Accordion.Title>
                 <Accordion.Content active={activeIndex === currIndex}>
                     <p>{oasOp.description}</p>
-                    <div className='op-section'>
-                        <p>Parameters</p>
-                        {oasOp.parameters ?
-                            <OasParameters paramType='parameter' parameterObj={oasOp.parameters} /> : <p className='message'>No parameters available to show</p>
-                        }
-                    </div>
-                    <div className='op-section '>
-                        <p>Responses</p>
-                        {oasOp.responses ?
-                            <OasParameters paramType='response' parameterObj={oasOp.responses} /> : <p className='message'>No responses available to show</p>
-                        }
-                    </div>
+                    {oasOp.parameters && Object.keys(oasOp.parameters) !== 0 &&
+                        <div className='op-section'>
+                            <p>Parameters</p>
+                                <OasParameters paramType='parameter' parameterObj={oasOp.parameters} />
+                        </div>
+                    }
+                    {oasOp.responses && Object.keys(oasOp.responses) !== 0 &&
+                        <div className='op-section '>
+                            <p>Responses</p>
+                            <OasParameters paramType='response' parameterObj={oasOp.responses} />
+                        </div>
+                    }
                 </Accordion.Content>
             </div>
         );

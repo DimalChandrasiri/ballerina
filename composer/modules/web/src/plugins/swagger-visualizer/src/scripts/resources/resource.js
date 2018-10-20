@@ -38,7 +38,7 @@ class OasResource extends React.Component {
         return (
             <div className='resource'>
                 <Accordion.Title className='res-title' index={currIndex} onClick={handleExpand}>
-                    <Icon name='chevron down' />
+                    <Icon name={activeIndex === currIndex ? 'chevron down' : 'chevron right'}/>
                     {resPath}
                 </Accordion.Title>
                 <Accordion.Content active={activeIndex === currIndex}>

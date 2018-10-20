@@ -97,7 +97,8 @@ export function activate(context: ExtensionContext, langClient: ExtendedLangClie
 	window.onDidChangeActiveTextEditor((activatedEditor: TextEditor | undefined) => {
 		if (window.activeTextEditor && activatedEditor 
 					&& (activatedEditor.document === window.activeTextEditor.document) 
-					&& activatedEditor.document.fileName.endsWith('.bal')) {
+					&& activatedEditor.document.fileName.endsWith('.bal')
+					&& activatedEditor !== activeEditor) {
 			activeEditor = window.activeTextEditor;
 			const docUri = activatedEditor.document.uri;
 			langClient.getAST(docUri)
@@ -111,7 +112,7 @@ export function activate(context: ExtensionContext, langClient: ExtendedLangClie
 				
 			if(oasEditorPanel){
 				langClient.getServiceListForActiveFile(activeEditor.document.uri).then((resp) => {
-					if(resp.services) {
+					if(resp.services && resp.services.length > 1) {
 						window.showQuickPick(resp.services).then((selected) => {
 							if(selected && activeEditor){
 								const html = apiEditorRender(context, langClient, activeEditor.document.uri, selected);
@@ -121,7 +122,14 @@ export function activate(context: ExtensionContext, langClient: ExtendedLangClie
 								}
 							}
 						});
-						
+					} else {
+						if(activeEditor){
+							const html = apiEditorRender(context, langClient, activeEditor.document.uri, resp.services[0]);
+							if (oasEditorPanel && html) {
+								oasEditorPanel.webview.html = html;
+								oasEditorPanel.title ="Ballerina API Editor - " + resp.services[0];
+							}
+						}
 					}
 				})
 			}
