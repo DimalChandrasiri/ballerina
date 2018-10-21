@@ -22,13 +22,43 @@ import PropTypes from 'prop-types';
 import { Accordion, Icon } from 'semantic-ui-react';
 
 import OasParameters from '../parameters/parameters';
+import OasAddResponse from '../parameters/add-response';
+import OasAddParameter from '../parameters/add-parameter';
 
 /* eslint-disable */
 class OasOperation extends React.Component {
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            showAddResponse: false,
+            showAddParameter: false,
+        };
+
+        this.handleShowAddParameter = this.handleShowAddParameter.bind(this);
+        this.handleShowAddResponse = this.handleShowAddResponse.bind(this);
+    }
+
+    handleShowAddParameter () {
+        const { showAddParameter } = this.state;
+        this.setState({
+            showAddParameter: !showAddParameter,
+        });
+    }
+
+    handleShowAddResponse () {
+        const { showAddResponse } = this.state;
+        this.setState({
+            showAddResponse: !showAddResponse,
+        });
+    }
+
     render() {
         const {
             path, opType, oasOp, activeIndex, currIndex, handleExpand, onDeleteOperation
         } = this.props;
+        const { showAddResponse, showAddParameter } = this.state;
         return (
             <div className={'operation '  + opType}>
                 <Accordion.Title className='op-title ' index={currIndex} onClick={handleExpand}>
@@ -49,18 +79,33 @@ class OasOperation extends React.Component {
                 </Accordion.Title>
                 <Accordion.Content active={activeIndex === currIndex}>
                     <p>{oasOp.description}</p>
-                    {oasOp.parameters && Object.keys(oasOp.parameters) !== 0 &&
-                        <div className='op-section'>
+                    
+                    <div className='op-section'>
+                        <div className='title'>
                             <p>Parameters</p>
-                                <OasParameters paramType='parameter' parameterObj={oasOp.parameters} />
+                            <a onClick={this.handleShowAddParameter} >Add Parameter</a>
                         </div>
-                    }
-                    {oasOp.responses && Object.keys(oasOp.responses) !== 0 &&
-                        <div className='op-section '>
+                        {showAddParameter &&
+                            <OasAddParameter/>
+                        }
+                        {oasOp.parameters && Object.keys(oasOp.parameters) !== 0 &&
+                            <OasParameters paramType='parameter' parameterObj={oasOp.parameters} />
+                        }
+                    </div>
+                    
+                    <div className='op-section '>
+                        <div className='title'>
                             <p>Responses</p>
-                            <OasParameters paramType='response' parameterObj={oasOp.responses} />
+                            <a onClick={this.handleShowAddResponse} >Add Response</a>
                         </div>
-                    }
+                        {showAddResponse &&
+                            <OasAddResponse />
+                        }
+                        {oasOp.responses && Object.keys(oasOp.responses) !== 0 &&
+                            <OasParameters paramType='response' parameterObj={oasOp.responses} />
+                        }   
+                    </div>
+                   
                 </Accordion.Content>
             </div>
         );

@@ -14,6 +14,7 @@ export function apiEditorRender(context: ExtensionContext, langClient: ExtendedL
         body {
             background-color: #1e1e1e;
             color: #fff;
+            user-select: none;
         }
     `;
 

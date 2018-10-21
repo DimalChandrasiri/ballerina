@@ -19,7 +19,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Accordion, Icon } from 'semantic-ui-react';
+import { Accordion, Icon, Button } from 'semantic-ui-react';
 
 import OasOperations from '../operations/operations';
 
@@ -28,21 +28,48 @@ import OasOperations from '../operations/operations';
  */
 /* eslint-disable */
 class OasResource extends React.Component {
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            showAddOperation: false,
+        };
+
+        this.handleShowAddOperation = this.handleShowAddOperation.bind(this);
+    }
+
+    /**
+     * Event handler for show add resource form
+     */
+    handleShowAddOperation(e) {
+        e.stopPropagation();
+        const { showAddOperation } = this.state;
+        this.setState({
+            showAddOperation: !showAddOperation,
+        });
+    }
+
     /**
      * @returns {React.ReactElement} React Element
      */
     render() {
         const {
-            oasOps, handleExpand, activeIndex, resPath, currIndex,
+            oasOps, handleExpand, activeIndex, resPath, currIndex, expandAll
         } = this.props;
         return (
             <div className='resource'>
                 <Accordion.Title className='res-title' index={currIndex} onClick={handleExpand}>
-                    <Icon name={activeIndex === currIndex ? 'chevron down' : 'chevron right'}/>
+                    <Icon name={expandAll || activeIndex === currIndex ? 'chevron down' : 'chevron right'}/>
                     {resPath}
+                    {expandAll || activeIndex === currIndex ? 
+                        <Button Title='Add operation to resource.' icon size='mini' circular className='add-operation-action' onClick={(e)=>{this.handleShowAddOperation(e)}}>
+                            <Icon name='plus' />
+                        </Button> : ''
+                    }
                 </Accordion.Title>
-                <Accordion.Content active={activeIndex === currIndex}>
-                    <OasOperations oasOperations={oasOps} path={resPath} />
+                <Accordion.Content className='resource-content' active={expandAll || activeIndex === currIndex}>
+                    <OasOperations oasOperations={oasOps} path={resPath} showAddOperation={this.state.showAddOperation} />
                 </Accordion.Content>
             </div>
         );
@@ -55,5 +82,6 @@ OasResource.propTypes = {
     handleExpand: PropTypes.func.isRequired,
     currIndex: PropTypes.number.isRequired,
     resPath: PropTypes.string.isRequired,
+    expandAll: PropTypes.bool.isRequired,
 };
 export default OasResource;

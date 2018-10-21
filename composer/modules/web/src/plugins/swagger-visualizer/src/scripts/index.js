@@ -82,25 +82,18 @@ class SwaggerVisualizer extends React.Component {
             return false;
         }
 
-        SwaggerValidator.validate(oasJson)
-            .then((json) => {
-                /*Object.keys(json.paths).forEach(function(t){
-                    if(Object.keys(json.paths[t]).includes("x-MULTI")){
-                        json.paths[t] = {}
-                    }
-                })*/
-                this.setState({
-                    oasJson: json,
-                });
-            })
-            .catch((error) => {
-                this.setState({
-                    isError: {
-                        state: true,
-                        message: error.message,
-                    },
-                });
+        this.setState({
+            oasJson: oasJson,
+        });
+
+        SwaggerValidator.validate(oasJson).catch(error => {
+            this.setState({
+                isError: {
+                    state: true,
+                    message: error.message,
+                },
             });
+        })
 
         return null;
     }
@@ -240,11 +233,6 @@ class SwaggerVisualizer extends React.Component {
      */
     render() {
         const { isError, oasJson: { paths, info }, actionState, oasJson } = this.state;
-        if (isError.state) {
-            return (
-                <Message error content={isError.message} />
-            );
-        }
 
         return (
             <SwaggerAppContext.Provider
@@ -256,6 +244,9 @@ class SwaggerVisualizer extends React.Component {
                     onDeleteOperation: this.onDeleteOperation,
                 }}
             >
+                {isError.state && 
+                    <Message error content={isError.message} />
+                }
                 {info &&
                     <React.Fragment>
                         <div className='oas-header'>

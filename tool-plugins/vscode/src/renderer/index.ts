@@ -144,9 +144,9 @@ export function activate(context: ExtensionContext, langClient: ExtendedLangClie
 		}
 		activeEditor = editor;
 		langClient.getServiceListForActiveFile(activeEditor.document.uri).then((resp) => {
-			if(resp.services) {
-				window.showQuickPick(resp.services).then((selected) => {
-					if(selected && activeEditor){
+			if(resp.services && resp.services.length > 1) {
+				window.showQuickPick(resp.services).then(selected => {
+					if(selected && activeEditor) {
 						let html = apiEditorRender(context, langClient, editor.document.uri, selected);
 						if(!oasEditorPanel) {
 							oasEditorPanel = window.createWebviewPanel(
@@ -193,8 +193,56 @@ export function activate(context: ExtensionContext, langClient: ExtendedLangClie
 							oasEditorPanel = undefined;
 						});
 					}
-				});
-				
+				})
+			} else { 
+				const selected = resp.services[0]
+				if(selected && activeEditor) {
+					let html = apiEditorRender(context, langClient, editor.document.uri, selected);
+					if(!oasEditorPanel) {
+						oasEditorPanel = window.createWebviewPanel(
+							'ballerinaOASEditor',
+							"Ballerina API Editor",
+							{ viewColumn: ViewColumn.Two, preserveFocus: true } ,
+							{
+								enableScripts: true,
+								retainContextWhenHidden: true,
+							}
+						);
+					}
+					oasEditorPanel.webview.html = html;
+					oasEditorPanel.title ="Ballerina API Editor - " + selected;
+
+					WebViewRPCHandler.create([{
+						methodName: 'getSwaggerDef',
+						handler: (args: any[]) => {
+							return langClient.getBallerinaOASDef(args[0], args[1]);
+						}
+					},{
+						methodName: 'triggerSwaggerDefChange',
+						handler: (args: any[]) => {
+							return langClient.triggerSwaggerDefChange(args[0], args[1]);
+						}
+					}], oasEditorPanel.webview)
+			
+					oasEditorPanel.webview.onDidReceiveMessage(message => {
+						switch (message.command) {
+							case 'astModified':
+								if (activeEditor && activeEditor.document.fileName.endsWith('.bal')) {
+									preventAPIDesignerUpdate = true;
+								}
+								return;
+						}
+					}, undefined, context.subscriptions);
+			
+					html = apiEditorRender(context, langClient, editor.document.uri, selectedService !== '' ? selectedService : '');
+					if (oasEditorPanel && html) {
+						oasEditorPanel.webview.html = html;
+					}
+			
+					oasEditorPanel.onDidDispose(() => {
+						oasEditorPanel = undefined;
+					});
+				}
 			}
 		});
 		

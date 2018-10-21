@@ -41,10 +41,12 @@ class OasResources extends React.Component {
         this.state = {
             activeIndex: -1,
             showAddResource: false,
+            expandAll: false,
         };
 
         this.handleResourceExpand = this.handleResourceExpand.bind(this);
         this.handleShowAddResource = this.handleShowAddResource.bind(this);
+        this.handleExpandAll = this.handleExpandAll.bind(this);
     }
 
     /**
@@ -55,7 +57,13 @@ class OasResources extends React.Component {
     handleResourceExpand(e, titleProps) {
         const { index } = titleProps;
         const { activeIndex } = this.state;
-        const newIndex = activeIndex === index ? -1 : index;
+        let newIndex;
+
+        if(this.state.expandAll) {
+            newIndex = -1;
+        } else {
+            newIndex = activeIndex === index ? -1 : index;
+        }
 
         this.setState({ activeIndex: newIndex });
     }
@@ -70,6 +78,13 @@ class OasResources extends React.Component {
         });
     }
 
+    handleExpandAll(){
+        const { expandAll } = this.state;
+        this.setState({
+            expandAll: !expandAll,
+        });
+    }
+
     /**
      * Render Method
      * @returns {ReactElement} Resource element
@@ -77,12 +92,16 @@ class OasResources extends React.Component {
     /* eslint-disable */
     render() {
         const { resObj } = this.props;
-        const { activeIndex, showAddResource } = this.state;
+        const { activeIndex, showAddResource, expandAll } = this.state;
         return (
             <div className='oas-resources'>
                 <Button size='mini' icon labelPosition='left' onClick={this.handleShowAddResource}>
                     <Icon name='plus' />
                     Add Resource
+                </Button>
+                <Button size='mini' icon labelPosition='left' floated='right' onClick={this.handleExpandAll}>
+                    <Icon name={expandAll ? 'compress' : 'expand'} />
+                    {expandAll ? 'Collapse All' : 'Expand All'}
                 </Button>
                 {showAddResource && 
                     <SwaggerAppContext.Consumer>
@@ -94,7 +113,7 @@ class OasResources extends React.Component {
                     </SwaggerAppContext.Consumer>
                 }
                 {resObj && Object.keys(resObj).length > 0 &&
-                    <Accordion className='resource-container' fluid>
+                    <Accordion className='resource-container' fluid exclusive={false}>
                         {resObj && Object.keys(resObj).map((resource, index) => {
                             return (
                                 <OasResource
@@ -103,6 +122,7 @@ class OasResources extends React.Component {
                                     activeIndex={activeIndex}
                                     currIndex={index}
                                     handleExpand={this.handleResourceExpand}
+                                    expandAll={expandAll}
                                 />
                             );
                         })}

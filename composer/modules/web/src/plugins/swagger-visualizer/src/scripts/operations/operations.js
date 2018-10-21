@@ -31,12 +31,10 @@ class OasOperations extends React.Component {
         super(props);
 
         this.state = {
-            activeIndex: -1,
-            showAddOperation: false,
+            activeIndex: -1
         };
 
         this.handleOperationExpand = this.handleOperationExpand.bind(this);
-        this.handleShowAddOperation = this.handleShowAddOperation.bind(this);
     }
 
     /**
@@ -52,25 +50,11 @@ class OasOperations extends React.Component {
         this.setState({ activeIndex: newIndex });
     }
 
-    /**
-     * Event handler for show add resource form
-     */
-    handleShowAddOperation() {
-        const { showAddOperation } = this.state;
-        this.setState({
-            showAddOperation: !showAddOperation,
-        });
-    }
-
     render() {
-        const { oasOperations, path } = this.props;
-        const { activeIndex, showAddOperation } = this.state;
+        const { oasOperations, path, showAddOperation } = this.props;
+        const { activeIndex } = this.state;
         return (
             <React.Fragment>
-                <Button size='mini' icon labelPosition='left' onClick={this.handleShowAddOperation}>
-                    <Icon name='plus' />
-                    Add Operation
-                </Button>
                 {showAddOperation && 
                     <SwaggerAppContext.Consumer>
                         {(appContext) => {
@@ -115,6 +99,7 @@ class OasOperations extends React.Component {
 OasOperations.prototypes = {
     oasOperations: proptypes.object.isRequired,
     path: proptypes.string.isRequired,
+    showAddOperation: proptypes.bool.isRequired,
 };
 
 export default OasOperations;
