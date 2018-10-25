@@ -19,7 +19,7 @@
 
 import React from 'react';
 import propTypes from 'prop-types';
-import { Form, Button, Select } from 'semantic-ui-react';
+import { Form, Button } from 'semantic-ui-react';
 
 /**
  * Component for add operation feature

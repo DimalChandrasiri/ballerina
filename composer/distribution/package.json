@@ -17,6 +17,7 @@
     "@ballerina/diagram": "file:../diagram",
     "@ballerina/ballerina-by-examples": "file:../bbe",
     "@ballerina/theme": "file:../theme",
+    "@ballerina/api-designer": "file:../api-designer",
     "react-dom": "^16.2.0",
     "react": "^16.2.0"
   },

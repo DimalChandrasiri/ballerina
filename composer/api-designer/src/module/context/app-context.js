@@ -17,19 +17,14 @@
  *
  */
 
-export interface WebViewMethodHandler {
-    (args: any[]) : Thenable<any> | void | any;
-}
+import React from 'react';
 
-export interface WebViewMethod {
-    methodName: string;
-    handler: WebViewMethodHandler;
-}
+const SwaggerAppContext = React.createContext({
+    oasJson: {},
+    onAddResource: () => {},
+    onAddParameter: () => {},
+    onAddOperation: () => {},
+    onDeleteOperation: () => {},
+});
 
-export interface WebViewRPCMessage {
-    id?: number;
-    methodName?: any;
-    arguments?: any[];
-    originId?: number;
-    response?: any;
-}
+export default SwaggerAppContext;

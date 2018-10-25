@@ -17,19 +17,15 @@
  *
  */
 
-export interface WebViewMethodHandler {
-    (args: any[]) : Thenable<any> | void | any;
-}
+import { createElement } from 'react';
+import ReactDOM from 'react-dom';
+import { SwaggerVisualizer } from './module/scripts/index';
 
-export interface WebViewMethod {
-    methodName: string;
-    handler: WebViewMethodHandler;
-}
-
-export interface WebViewRPCMessage {
-    id?: number;
-    methodName?: any;
-    arguments?: any[];
-    originId?: number;
-    response?: any;
+export default function renderBallerinaApiEditor(target, swaggerJson, onJsonChange) {
+    const props = {
+        oasJson: JSON.parse(JSON.parse(swaggerJson)),
+        onDidChange: onJsonChange
+    };
+    const oasComponent = createElement(SwaggerVisualizer, props);
+    ReactDOM.render(oasComponent, target);
 }

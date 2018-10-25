@@ -3,3 +3,7 @@ declare module '@ballerina/diagram' {
     export function renderEditableDiagram(target: HTMLElement | null,
         docUri: string, width: number, height: number, getAST: Function) : void;
 }
+
+declare module '@ballerina/api-designer' {
+    export function renderBallerinaApiEditor(args: any, callback: any) : void;
+}
