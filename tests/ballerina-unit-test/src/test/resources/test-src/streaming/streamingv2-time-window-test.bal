@@ -15,8 +15,6 @@
 // under the License.
 
 import ballerina/runtime;
-import ballerina/io;
-import ballerina/streams;
 
 type Teacher record {
     string name;
@@ -26,8 +24,8 @@ type Teacher record {
 };
 
 int index = 0;
-stream<Teacher> inputStream;
-stream<Teacher > outputStream;
+stream<Teacher> inputStreamTimeWindowTest;
+stream<Teacher > outputStreamTimeWindowTest;
 Teacher[] globalEmployeeArray = [];
 
 function startTimeWindowTest() returns (Teacher[]) {
@@ -41,23 +39,33 @@ function startTimeWindowTest() returns (Teacher[]) {
 
     testTimeWindow();
 
-    outputStream.subscribe(printTeachers);
+    outputStreamTimeWindowTest.subscribe(printTeachers);
     foreach t in teachers {
-        inputStream.publish(t);
+        inputStreamTimeWindowTest.publish(t);
     }
 
-    runtime:sleep(1000);
-    io:println(globalEmployeeArray);
+    int count = 0;
+    while(true) {
+        runtime:sleep(500);
+        count += 1;
+        if((lengthof globalEmployeeArray) == 2 || count == 10) {
+            break;
+        }
+    }
+
     return globalEmployeeArray;
 }
 
 function testTimeWindow() {
 
     forever {
-        from inputStream window timeWindow(1000)
-        select inputStream.name, inputStream.age, inputStream.status, inputStream.school
+        from inputStreamTimeWindowTest window timeWindow(1000)
+        select inputStreamTimeWindowTest.name, inputStreamTimeWindowTest.age, inputStreamTimeWindowTest.status, inputStreamTimeWindowTest
+        .school
         => (Teacher [] emp) {
-            outputStream.publish(emp);
+            foreach e in emp {
+                outputStreamTimeWindowTest.publish(e);
+            }
         }
     }
 }

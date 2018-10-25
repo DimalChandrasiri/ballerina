@@ -15,8 +15,6 @@
 // under the License.
 
 import ballerina/runtime;
-import ballerina/io;
-import ballerina/streams;
 
 type Teacher record {
     string name;
@@ -57,8 +55,10 @@ function testFilterQuery() {
     forever {
         from inputStream where getAge(inputStream.age) > getMaxAgeLimit() as input
         select input.name, input.age, input.status, input.batch, input.school
-        => (Teacher[] emp) {
-            outputStream.publish(emp);
+        => (Teacher[] teachers) {
+            foreach t in teachers {
+                outputStream.publish(t);
+            }
         }
     }
 }

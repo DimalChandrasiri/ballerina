@@ -23,7 +23,7 @@ import ballerina/io;
 DefaultLogFormatter logFormatter = new DefaultLogFormatter();
 boolean isBuild;
 
-# This object denotes the default log formatter used when pulling a package directly.
+# This object denotes the default log formatter used when pulling a module directly.
 #
 # + offset - Offset from the terminal width.
 type DefaultLogFormatter object {
@@ -33,7 +33,7 @@ type DefaultLogFormatter object {
     }
 };
 
-# This object denotes the build log formatter used when pulling a package while building.
+# This object denotes the build log formatter used when pulling a module while building.
 #
 # + offset - Offset from the terminal width.
 type BuildLogFormatter object {
@@ -54,9 +54,9 @@ function createError (string errMessage) returns error {
     return endpointError;
 }
 
-# This function pulls a package from ballerina central.
+# This function pulls a module from ballerina central.
 #
-# + args - Arguments for pulling a package
+# + args - Arguments for pulling a module
 # + return - nil if no error occurred, else error.
 public function invokePull (string... args) returns error? {
     string url = args[0];
@@ -92,11 +92,11 @@ public function invokePull (string... args) returns error? {
     return pullPackage(httpEndpoint, url, pkgPath, dirPath, versionRange, fileSeparator, terminalWidth);
 }
 
-# Pulling a package
+# Pulling a module
 #
 # + httpEndpoint - The endpoint to call
 # + url - Central URL
-# + pkgPath - Package Path
+# + pkgPath - Module Path
 # + dirPath - Directory path
 # + versionRange - Balo version range
 # + fileSeparator - System file separator
@@ -137,7 +137,7 @@ function pullPackage(http:Client httpEndpoint, string url, string pkgPath, strin
                 }
             }
             error err => {
-                return createError("error occurred when pulling the package");
+                return createError("error occurred when pulling the module");
             }
         }
     } else {
@@ -148,10 +148,10 @@ function pullPackage(http:Client httpEndpoint, string url, string pkgPath, strin
             contentLengthHeader = httpResponse.getHeader("content-length");
             pkgSize = check <int> contentLengthHeader;
         } else {
-            return createError("package size information is missing from remote repository. please retry.");
+            return createError("module size information is missing from remote repository. please retry.");
         }
 
-        io:ByteChannel sourceChannel = check (httpResponse.getByteChannel());
+        io:ReadableByteChannel sourceChannel = check (httpResponse.getByteChannel());
 
         string resolvedURI = httpResponse.resolvedRequestedURI;
         if (resolvedURI == "") {
@@ -173,17 +173,18 @@ function pullPackage(http:Client httpEndpoint, string url, string pkgPath, strin
             if (!createDirectories(destDirPath)) {
                 internal:Path pkgArchivePath = new(destArchivePath);
                 if (pkgArchivePath.exists()) {
-                    return createError("package already exists in the home repository");
+                    return createError("module already exists in the home repository");
                 }
             }
 
-            io:ByteChannel destDirChannel = getFileChannel(destArchivePath, io:WRITE);
+            io:WritableByteChannel wch = io:openWritableFile(untaint destArchivePath);
+
             string toAndFrom = " [central.ballerina.io -> home repo]";
             int rightMargin = 3;
-            int width = (check <int> terminalWidth) - rightMargin;
-            copy(pkgSize, sourceChannel, destDirChannel, fullPkgPath, toAndFrom, width);
+            int width = (check <int>terminalWidth) - rightMargin;
+            copy(pkgSize, sourceChannel, wch, fullPkgPath, toAndFrom, width);
 
-            match destDirChannel.close() {
+            match wch.close() {
                 error destChannelCloseError => {
                     return createError("error occured while closing the channel: " + destChannelCloseError.message);
                 }
@@ -199,7 +200,7 @@ function pullPackage(http:Client httpEndpoint, string url, string pkgPath, strin
                 }
             }
         } else {
-            return createError("package version could not be detected");
+            return createError("module version could not be detected");
         }
     }
 }
@@ -252,22 +253,12 @@ function defineEndpointWithoutProxy (string url) returns http:Client{
     return httpEndpointWithoutProxy;
 }
 
-# This function will get the file channel.
-#
-# + filePath - File path
-# + permission - Permissions provided
-# + return - `ByteChannel` of the file content
-function getFileChannel (string filePath, io:Mode permission) returns (io:ByteChannel) {
-    io:ByteChannel byteChannel = io:openFile(untaint filePath, permission);
-    return byteChannel;
-}
-
 # This function will read the bytes from the byte channel.
 #
 # + byteChannel - Byte channel
 # + numberOfBytes - Number of bytes to be read
 # + return - Read content as byte[] along with the number of bytes read.
-function readBytes (io:ByteChannel byteChannel, int numberOfBytes) returns (byte[], int) {
+function readBytes(io:ReadableByteChannel byteChannel, int numberOfBytes) returns (byte[], int) {
     byte[] bytes;
     int numberOfBytesRead;
     (bytes, numberOfBytesRead) = check (byteChannel.read(numberOfBytes));
@@ -280,20 +271,21 @@ function readBytes (io:ByteChannel byteChannel, int numberOfBytes) returns (byte
 # + content - Content to be written as a byte[]
 # + startOffset - Offset
 # + return - number of bytes written.
-function writeBytes (io:ByteChannel byteChannel, byte[] content, int startOffset) returns int {
+function writeBytes(io:WritableByteChannel byteChannel, byte[] content, int startOffset) returns int {
     int numberOfBytesWritten = check (byteChannel.write(content, startOffset));
     return numberOfBytesWritten;
 }
 
 # This function will copy files from source to the destination path.
 #
-# + pkgSize - Size of the package pulled
+# + pkgSize - Size of the module pulled
 # + src - Byte channel of the source file
 # + dest - Byte channel of the destination folder
-# + fullPkgPath - Full package path
-# + toAndFrom - Pulled package details
+# + fullPkgPath - Full module path
+# + toAndFrom - Pulled module details
 # + width - Width of the terminal
-function copy (int pkgSize, io:ByteChannel src, io:ByteChannel dest, string fullPkgPath, string toAndFrom, int width) {
+function copy(int pkgSize, io:ReadableByteChannel src, io:WritableByteChannel dest,
+              string fullPkgPath, string toAndFrom, int width) {
     int terminalWidth = width - logFormatter.offset;
     int bytesChunk = 8;
     byte[] readContent;
@@ -386,6 +378,33 @@ function createDirectories(string directoryPath) returns (boolean) {
     } else {
         return false;
     }
+}
+
+# This function will close the byte channel.
+#
+# + byteChannel - Byte channel to be closed
+function closeChannel(io:ReadableByteChannel|io:WritableByteChannel byteChannel) {
+    match byteChannel {
+        io:ReadableByteChannel rc => {
+            match rc.close() {
+                error channelCloseError => {
+                    io:println(logFormatter.formatLog("Error occured while closing the channel: " +
+                                channelCloseError.message));
+                }
+                () => return;
+            }
+        }
+        io:WritableByteChannel wc => {
+            match wc.close() {
+                error channelCloseError => {
+                    io:println(logFormatter.formatLog("Error occured while closing the channel: " +
+                                channelCloseError.message));
+                }
+                () => return;
+            }
+        }
+    }
+
 }
 
 # This function sets the proxy configurations for the endpoint.
