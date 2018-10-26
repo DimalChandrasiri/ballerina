@@ -42,4 +42,7 @@ public interface BallerinaDocumentService {
 
     @JsonRequest
     CompletableFuture<BallerinaServiceListResponse> serviceList(BallerinaServiceListRequest request);
+
+    @JsonRequest
+    CompletableFuture<BallerinaProject> project(BallerinaProjectParams params);
 }

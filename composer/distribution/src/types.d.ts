@@ -7,3 +7,7 @@ declare module '@ballerina/diagram' {
 declare module '@ballerina/api-designer' {
     export function renderBallerinaApiEditor(args: any, callback: any) : void;
 }
+
+declare module '@ballerina/documentation' {
+    export function renderDocPreview(ast: any, el: any): void;
+}

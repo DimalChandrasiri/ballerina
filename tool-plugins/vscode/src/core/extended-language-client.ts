@@ -93,6 +93,18 @@ export interface BallerinaAstOasChangeRequest {
     };
 }
 
+export interface BallerinaProject {
+    path?: string;
+    version?: string;
+    author?: string;
+}
+
+export interface GetBallerinaProjectParams {
+    documentIdentifier: {
+        uri: string;
+    };
+}
+
 export interface BallerinaAstOasChangeResponse {
     oasAST?: string
 }
@@ -168,5 +180,9 @@ export class ExtendedLangClient extends LanguageClient {
             },
         }
         return this.sendRequest("ballerinaDocument/serviceList", req)
+    }
+
+    getBallerinaProject(params: GetBallerinaProjectParams): Thenable<BallerinaProject> {
+        return this.sendRequest("ballerinaDocument/project", params);
     }
 }
