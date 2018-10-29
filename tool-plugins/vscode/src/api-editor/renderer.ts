@@ -21,7 +21,9 @@ import { ExtendedLangClient } from '../core/extended-language-client';
 import { Uri, ExtensionContext } from 'vscode';
 import { getLibraryWebViewContent } from '../utils/index';
 
-export function apiEditorRender(context: ExtensionContext, langClient: ExtendedLangClient, docUri: Uri, selectedService: string, retries: number = 1) : string {
+export function apiEditorRender(context: ExtensionContext, langClient: ExtendedLangClient,
+    docUri: Uri, selectedService: string, retries: number = 1) : string {
+
     const body = `
         <div class='api-container'>
             <div class='message'></div>
@@ -95,5 +97,5 @@ export function apiEditorRender(context: ExtensionContext, langClient: ExtendedL
 
     `;
 
-    return getLibraryWebViewContent(context, body, script, styles);
+    return getLibraryWebViewContent(context, body, script, styles, true);
 }

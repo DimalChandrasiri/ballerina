@@ -102,7 +102,7 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
         try {
             String fileContent = documentManager.getFileContent(compilationPath);
             String swaggerDefinition = SwaggerConverterUtils
-                .generateSwaggerDefinitions(fileContent, request.getBallerinaService());
+                .generateOAS3Definitions(fileContent, request.getBallerinaService());
             reply.setBallerinaOASJson(swaggerDefinition);
         } catch (Exception e) {
             reply.isIsError(true);

@@ -19,7 +19,9 @@
 
 import { createElement } from 'react';
 import ReactDOM from 'react-dom';
-import { SwaggerVisualizer } from './module/scripts/index';
+import SwaggerVisualizer from './module/scripts/index';
+
+import './module/style/main.less';
 
 export default function renderBallerinaApiEditor(target, swaggerJson, onJsonChange) {
     const props = {

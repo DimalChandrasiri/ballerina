@@ -111,7 +111,7 @@ function createAPIEditorPanel(selectedService: string, renderHtml: string,
 export function activate(ballerinaExtInstance: BallerinaExtension) {
     let context = <ExtensionContext> ballerinaExtInstance.context;
     let langClient = <ExtendedLangClient> ballerinaExtInstance.langClient;
-    const examplesListRenderer = commands.registerCommand('ballerina.showAPIEditor', () => {
+    const showAPIRenderer = commands.registerCommand('ballerina.showAPIEditor', () => {
         ballerinaExtInstance.onReady()
         .then(() => {
             const { experimental } = langClient.initializeResult!.capabilities;
@@ -133,5 +133,5 @@ export function activate(ballerinaExtInstance: BallerinaExtension) {
 		});
     });
     
-    context.subscriptions.push(examplesListRenderer);
+    context.subscriptions.push(showAPIRenderer);
 }

@@ -13,13 +13,13 @@
   "author": "ballerina.io",
   "license": "Apache-2.0",
   "dependencies": {
+    "@ballerina/api-designer": "file:../api-designer",
     "@ballerina/ballerina-by-examples": "file:../bbe",
     "@ballerina/theme": "file:../theme",
-    "@ballerina/api-designer": "file:../api-designer",
     "@ballerina/diagram": "file:../diagram",
     "@ballerina/documentation": "file:../documentation",
-    "react-dom": "^16.2.0",
-    "react": "^16.2.0",
+    "react-dom": "^16.4.0",
+    "react": "^16.4.0"
   },
   "devDependencies": {
     "css-loader": "^1.0.0",
