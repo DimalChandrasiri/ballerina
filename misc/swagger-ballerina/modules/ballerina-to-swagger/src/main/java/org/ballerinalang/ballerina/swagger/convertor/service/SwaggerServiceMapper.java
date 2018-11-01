@@ -256,9 +256,12 @@ public class SwaggerServiceMapper {
             if (contactAttributes.containsKey("email")) {
                 contact.setEmail(ConverterUtils.getStringLiteralValue(contactAttributes.get("email")));
             }
-            if (contactAttributes.containsKey(ConverterConstants.ATTR_URL)) {
+            if (contactAttributes.containsKey(ConverterConstants.ATTR_URL) &&
+                    !"".equals(contactAttributes.get(ConverterConstants.ATTR_URL))) {
                 contact.setUrl(
                         ConverterUtils.getStringLiteralValue(contactAttributes.get(ConverterConstants.ATTR_URL)));
+            } else {
+                contact.setUrl(null);
             }
     
             info.setContact(contact);
@@ -282,9 +285,12 @@ public class SwaggerServiceMapper {
                 license.setName(
                         ConverterUtils.getStringLiteralValue(licenseAttributes.get(ConverterConstants.ATTR_NAME)));
             }
-            if (licenseAttributes.containsKey(ConverterConstants.ATTR_URL)) {
+            if (licenseAttributes.containsKey(ConverterConstants.ATTR_URL) &&
+                    !"".equals(licenseAttributes.get(ConverterConstants.ATTR_URL))) {
                 license.setUrl(
                         ConverterUtils.getStringLiteralValue(licenseAttributes.get(ConverterConstants.ATTR_URL)));
+            } else {
+                license.setUrl(null);
             }
             
             info.setLicense(license);

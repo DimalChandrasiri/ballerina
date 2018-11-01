@@ -36,6 +36,7 @@ service {{cut info.title " "}} bind {{#servers}}ep{{@index}}{{#unless @last}}, {
         parameters: [{{#parameters}}
             {
                 name: "{{name}}",
+                param_type: "{{schema.type}}",
                 inInfo: "{{in}}",
                 description: "{{description}}", {{#required}}
                 required: {{required}},{{/required}} {{#deprecated}}

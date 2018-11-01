@@ -33,8 +33,8 @@ export function apiEditorRender(context: ExtensionContext, langClient: ExtendedL
 
     const styles = `
         body {
-            background-color: #1e1e1e;
-            color: #fff;
+            background-color: #1e1e1e !important;
+            color: #fff !important;
             user-select: none;
         }
     `;
