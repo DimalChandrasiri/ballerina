@@ -333,42 +333,7 @@ public class SwaggerResourceMapper {
                 operationAdaptor.getOperation().addParameter(messageParameter);
             }
         }
-    
-        for (int i = 2; i < resource.getParameters().size(); i++) {
-            VariableNode parameterDef = resource.getParameters().get(i);
-            String typeName = parameterDef.getTypeNode().toString().toLowerCase(Locale.getDefault());
-            PathParameter pathParameter = new PathParameter();
-            // Set in value
-            pathParameter.setIn("path");
-            // Set parameter name
-            String parameterName = parameterDef.getName().getValue();
-            pathParameter.setName(parameterName);
-            // Note: 'description' to be added using annotations, hence skipped here.
-            // Note: 'allowEmptyValue' to be added using annotations, hence skipped here.
-            // Set type
-            if (typeName.contains("[]")) {
-                pathParameter.setType("array");
-                switch (typeName.replace("[]", "").trim()) {
-                    case "string":
-                        pathParameter.items(new StringProperty());
-                        break;
-                    case "int":
-                        pathParameter.items(new IntegerProperty());
-                        break;
-                    case "boolean":
-                        pathParameter.items(new BooleanProperty());
-                        break;
-                    default:
-                        break;
-                }
-            } else if ("int".equals(typeName)) {
-                pathParameter.setType("integer");
-            } else {
-                pathParameter.setType(typeName);
-            }
-            // Note: 'format' to be added using annotations, hence skipped here.
-            operationAdaptor.getOperation().addParameter(pathParameter);
-        }
+
     }
 
     /**
@@ -394,26 +359,26 @@ public class SwaggerResourceMapper {
                     in = "path";
                 }
 
-                Parameter pram = buildParameter(in);
+                Parameter param = buildParameter(in, paramAttributes);
                 if (paramAttributes.containsKey(ConverterConstants.ATTR_NAME)) {
-                    pram.setName(
+                    param.setName(
                             ConverterUtils.getStringLiteralValue(paramAttributes.get(ConverterConstants.ATTR_NAME)));
                 }
                 if (paramAttributes.containsKey(ConverterConstants.ATTR_DESCRIPTION)) {
-                    pram.setDescription(ConverterUtils
+                    param.setDescription(ConverterUtils
                             .getStringLiteralValue(paramAttributes.get(ConverterConstants.ATTR_DESCRIPTION)));
                 }
                 if (paramAttributes.containsKey(ConverterConstants.ATTR_REQUIRED)) {
-                    pram.setRequired(Boolean.parseBoolean(ConverterUtils
+                    param.setRequired(Boolean.parseBoolean(ConverterUtils
                             .getStringLiteralValue(paramAttributes.get(ConverterConstants.ATTR_REQUIRED))));
                 }
                 if (paramAttributes.containsKey(ConverterConstants.ATTR_ALLOW_EMPTY)) {
-                    pram.setAllowEmptyValue(Boolean.parseBoolean(ConverterUtils
+                    param.setAllowEmptyValue(Boolean.parseBoolean(ConverterUtils
                             .getStringLiteralValue(paramAttributes.get(ConverterConstants.ATTR_ALLOW_EMPTY))));
                 }
                 // TODO: 5/2/18 Set Param Schema Details
 
-                parameters.add(pram);
+                parameters.add(param);
             }
 
             operation.setParameters(parameters);
@@ -650,9 +615,10 @@ public class SwaggerResourceMapper {
      * Builds a Swagger {@link Parameter} for provided parameter location.
      *
      * @param in location of the parameter in the request definition
+     * @param paramAttributes
      * @return Swagger {@link Parameter} for parameter location {@code in}
      */
-    private Parameter buildParameter(String in) {
+    private Parameter buildParameter(String in, Map<String, BLangExpression> paramAttributes) {
         Parameter param;
 
         switch (in) {
@@ -660,7 +626,23 @@ public class SwaggerResourceMapper {
                 param = new BodyParameter();
                 break;
             case "query":
-                param = new QueryParameter();
+                QueryParameter qParam = new QueryParameter();
+                String attrType = ConverterUtils
+                        .getStringLiteralValue(paramAttributes.get(ConverterConstants.ATTR_TYPE)).trim();
+                String type;
+                switch (attrType) {
+                    case "int":
+                        type = "integer";
+                        break;
+                    case "float":
+                        type = "number";
+                        break;
+                    default:
+                        type = attrType;
+                        break;
+                }
+                qParam.setType(type);
+                param = qParam;
                 break;
             case "header":
                 param = new HeaderParameter();
@@ -673,7 +655,10 @@ public class SwaggerResourceMapper {
                 break;
             case "path":
             default:
-                param = new PathParameter();
+                PathParameter pParam = new PathParameter();
+                pParam.setType(ConverterUtils
+                        .getStringLiteralValue(paramAttributes.get(ConverterConstants.ATTR_TYPE)));
+                param = pParam;
         }
 
         return param;
