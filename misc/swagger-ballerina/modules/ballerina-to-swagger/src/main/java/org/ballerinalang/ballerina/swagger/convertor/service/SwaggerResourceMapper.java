@@ -623,7 +623,13 @@ public class SwaggerResourceMapper {
 
         switch (in) {
             case "body":
-                param = new BodyParameter();
+                // TODO : support for inline and other types of schemas
+                BodyParameter bParam = new BodyParameter();
+                RefModel m = new RefModel();
+                m.set$ref(ConverterUtils
+                        .getStringLiteralValue(paramAttributes.get(ConverterConstants.ATTR_TYPE)));
+                bParam.setSchema(m);
+                param = bParam;
                 break;
             case "query":
                 QueryParameter qParam = new QueryParameter();
