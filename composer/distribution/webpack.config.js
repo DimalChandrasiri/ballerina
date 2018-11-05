@@ -2,9 +2,13 @@ const path = require('path');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
+    entry: {
+      index: './src/index.ts',
+      apiEditor: './src/api-editor.ts',
+    },
     output: {
       path: path.resolve(__dirname, 'build'),
-      filename: 'composer.js',
+      filename: '[name].js',
       library: 'ballerinaComposer',
       libraryTarget: 'umd'
     },
