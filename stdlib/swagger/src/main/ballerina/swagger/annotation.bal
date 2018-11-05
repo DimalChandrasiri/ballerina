@@ -95,6 +95,7 @@ public type SecurityRequirement record {
 
 # Model for keeping Swagger parameter information.
 #
+# + param_type - Parameter type
 # + inInfo - Where the parameter is located. Ex: query
 # + name - Parameter name
 # + description - Description of the parameter
@@ -107,6 +108,7 @@ public type ParameterInformation record {
     string name;
     string description;
     boolean required;
+    string param_type;
     boolean discontinued;
     string allowEmptyValue;
     Schema schema;
