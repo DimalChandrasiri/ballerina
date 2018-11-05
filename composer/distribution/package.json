@@ -17,8 +17,9 @@
     "@ballerina/theme": "file:../theme",
     "@ballerina/diagram": "file:../diagram",
     "@ballerina/documentation": "file:../documentation",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0"
+    "@ballerina/api-designer": "file:../api-designer",
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2"
   },
   "devDependencies": {
     "css-loader": "^1.0.0",
