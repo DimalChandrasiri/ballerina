@@ -75,14 +75,14 @@ export function apiEditorRender(context: ExtensionContext, langClient: ExtendedL
                         let width = window.innerWidth - 6;
                         let height = window.innerHeight;
                         debugger;
-                        ballerinaComposer.renderBallerinaApiEditor(document.getElementById("api-visualizer"), JSON.stringify(response.ballerinaOASJson), onDidJsonChange);
+                        ballerinaComposer.renderAPIEditor(document.getElementById("api-visualizer"), JSON.stringify(response.ballerinaOASJson), onDidJsonChange);
                     } catch (e) {
                         console.log(e.stack);
                     }
                 })
             } else {
                 console.log(updatedJSON);
-                ballerinaComposer.renderBallerinaApiEditor(document.getElementById("api-visualizer"), updatedJSON, onDidJsonChange);
+                ballerinaComposer.renderAPIEditor(document.getElementById("api-visualizer"), updatedJSON, onDidJsonChange);
             }
 
             vscode.postMessage({

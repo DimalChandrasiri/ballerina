@@ -18,13 +18,15 @@
  */
 
 import * as React from 'react';
-import { validate } from 'swagger-parser';
+import * as SwaggerParser from 'swagger-parser';
 import { Message } from 'semantic-ui-react';
 
 import { OpenApiContextProvider, OpenApiContext } from './context/open-api-context';
 import OpenApiResourceList from './components/resource/resources';
-
 import { OpenApiResource } from './components/resource/add-resource';
+
+import 'semantic-ui-css/semantic.min.css';
+import './components/style/main.less';
 
 export interface OasProps {
     openApiJson: any,
@@ -153,7 +155,8 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
      * @param onvalidattion Function to be run as a callback after validation
      */
     validateOpenApiJson(json: string, onvalidattion?: Function) {
-        validate(json).then(validjson => {
+        debugger;
+        SwaggerParser.validate(JSON.parse(json)).then(validjson => {
             this.setState({
                 openApiJson: validjson
             });
@@ -199,7 +202,6 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
             onDidAddParameter: this.onDidAddParameter,
             onDidDeleteOperation: this.onDidDeleteOperation
         }
-
         if (status && !inline) {
             return (
                 <Message error content={isError.message} />
