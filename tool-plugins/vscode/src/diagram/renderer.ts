@@ -160,7 +160,7 @@ function renderDiagram(context: ExtensionContext, docUri: Uri): string {
         drawDiagram();
     `;
 
-    return getLibraryWebViewContent(context, body, script, styles);
+    return getLibraryWebViewContent(context, body, script, styles, false);
 }
 
 export function renderError() {
