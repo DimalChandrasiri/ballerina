@@ -41,6 +41,11 @@ export interface OpenApiResourceState {
 class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResourceState> {
     constructor(props: OpenApiResourceProps) {
         super(props);
+
+        this.state = {
+            showAddParameter: false,
+            showAddResponse: false
+        }
     }
 
     handleShowAddParameter () {

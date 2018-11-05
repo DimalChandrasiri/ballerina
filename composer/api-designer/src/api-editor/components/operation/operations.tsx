@@ -38,6 +38,10 @@ class OpenApiOperationsList extends React.Component<OasOperationsListProps, OasO
     constructor(props: OasOperationsListProps) {
         super(props);
 
+        this.state = {
+            activeIndex: -1
+        }
+
         this.expandOperation = this.expandOperation.bind(this)
     }
 

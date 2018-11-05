@@ -11,7 +11,7 @@ export function getLibraryWebViewContent(context: ExtensionContext,
     const composerResourcesRoot = process.env.COMPOSER_DEBUG === "true" 
                 ? process.env.COMPOSER_DEV_HOST
                 : `${resourceRoot}/composer`;
-    const jsModule = isAPIDesigner ? 'apiDesigner' : 'composer';
+    const jsModule = isAPIDesigner ? 'apiEditor' : 'composer';
     return `
     <!DOCTYPE html>
     <html>
