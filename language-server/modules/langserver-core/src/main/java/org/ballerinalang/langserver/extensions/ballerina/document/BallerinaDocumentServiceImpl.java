@@ -15,8 +15,11 @@
  */
 package org.ballerinalang.langserver.extensions.ballerina.document;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minidev.json.JSONObject;
 import org.ballerinalang.ballerina.swagger.convertor.service.SwaggerConverterUtils;
 import org.ballerinalang.compiler.CompilerPhase;
 import org.ballerinalang.langserver.BallerinaLanguageServer;
@@ -56,17 +59,14 @@ import org.wso2.ballerinalang.compiler.tree.BLangCompilationUnit;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangSimpleVarRef;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
@@ -104,7 +104,7 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
             String fileContent = documentManager.getFileContent(compilationPath);
             String swaggerDefinition = SwaggerConverterUtils
                 .generateOAS3Definitions(fileContent, request.getBallerinaService());
-            reply.setBallerinaOASJson(swaggerDefinition);
+            reply.setBallerinaOASJson(convertToJson(swaggerDefinition));
         } catch (Exception e) {
             reply.isIsError(true);
             logger.error("error: while processing service definition at converter service: " + e.getMessage(), e);
@@ -113,6 +113,14 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
         }
 
         return CompletableFuture.supplyAsync(() -> reply);
+    }
+
+    private static String convertToJson(String yamlString) throws IOException {
+        ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+        Object obj = yamlReader.readValue(yamlString, Object.class);
+
+        ObjectMapper jsonWriter = new ObjectMapper();
+        return jsonWriter.writeValueAsString(obj);
     }
 
     @Override

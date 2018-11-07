@@ -122,7 +122,7 @@ public class SwaggerConverterUtils {
                 throw new SwaggerConverterException("Please check if input source is valid and complete");
             }
 
-            return Json.pretty(converter.convert(result).getOpenAPI());
+            return Yaml.pretty(converter.convert(result).getOpenAPI());
         } catch (LSCompilerException e) {
             return "Error";
         }
