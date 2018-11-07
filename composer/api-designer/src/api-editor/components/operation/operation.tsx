@@ -22,6 +22,9 @@ import { Accordion, Icon, AccordionTitleProps } from 'semantic-ui-react';
 
 import OpenApiAddParameter from '../parameter/add-parameter';
 import OpenApiAddResponse from '../parameter/add-response';
+import OpenApiParameterList from '../parameter/parameters';
+
+import { OpenApiContextConsumer, OpenApiContext } from '../../context/open-api-context';
 
 export interface OpenApiResourceProps {
     resourcePath: string,
@@ -46,10 +49,14 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
             showAddParameter: false,
             showAddResponse: false
         }
+
+        this.handleShowAddParameter = this.handleShowAddParameter.bind(this);
+        this.handleShowAddResponse = this.handleShowAddResponse.bind(this);
     }
 
     handleShowAddParameter () {
         const { showAddParameter } = this.state;
+        debugger;
         this.setState({
             showAddParameter: !showAddParameter,
         });
@@ -57,6 +64,7 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
 
     handleShowAddResponse () {
         const { showAddResponse } = this.state;
+        debugger;
         this.setState({
             showAddResponse: !showAddResponse,
         });
@@ -67,7 +75,7 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
             resourcePath, operationType, operationObject, activeIndex, currIndex, handleExpand, onDeleteOperation
         } = this.props;
         const { showAddResponse, showAddParameter } = this.state;
-
+        debugger;
         return (
             <div className={'operation '  + operationType}>
                 <Accordion.Title className='op-title ' index={currIndex} onClick={handleExpand}>
@@ -97,6 +105,9 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
                         {showAddParameter &&
                             <OpenApiAddParameter/>
                         }
+                        {operationObject.parameters && Object.keys(operationObject.parameters).length !== 0 &&
+                            <OpenApiParameterList parameterType='parameter' parameterList={operationObject.parameters} />
+                        }
                     </div>
                     
                     <div className='op-section '>
@@ -104,9 +115,23 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
                             <p>Responses</p>
                             <a onClick={this.handleShowAddResponse} >Add Response</a>
                         </div>
-                        {showAddResponse &&
-                            <OpenApiAddResponse />
+                        {showAddResponse && 
+                            <OpenApiContextConsumer>
+                                {(appContext: OpenApiContext) => {
+                                    return (
+                                        <OpenApiAddResponse
+                                            openApiJson={appContext.openApiJson}
+                                            onAddResponse={appContext.onDidAddResponse}
+                                            operation={operationType}
+                                            resourcePath={resourcePath}
+                                        />
+                                    )
+                                }}
+                            </OpenApiContextConsumer>
                         }
+                        {operationObject.responses && Object.keys(operationObject.responses).length !== 0 &&
+                            <OpenApiParameterList parameterType='response' parameterList={operationObject.responses} />
+                        }   
                     </div>
                    
                 </Accordion.Content>

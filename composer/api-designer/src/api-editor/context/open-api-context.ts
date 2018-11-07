@@ -24,6 +24,7 @@ export interface OpenApiContext {
     onDidAddResource: Function,
     onDidAddOperation: Function,
     onDidAddParameter: Function,
+    onDidAddResponse: Function,
     onDidDeleteOperation: Function,
 }
 

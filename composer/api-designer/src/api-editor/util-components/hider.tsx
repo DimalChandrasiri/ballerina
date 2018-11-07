@@ -36,8 +36,6 @@ class HideComponent extends React.Component<HideComponentProps, HideComponentSta
     constructor(props: HideComponentProps) {
         super(props);
 
-        let timer: any = null;
-
         this.state = {
             visible: false,
             defaultTime: 1000,

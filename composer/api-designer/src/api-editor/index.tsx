@@ -25,6 +25,7 @@ import { OpenApiContextProvider, OpenApiContext } from './context/open-api-conte
 import OpenApiResourceList from './components/resource/resources';
 import { OpenApiResource } from './components/resource/add-resource';
 import { OpenApiOperation } from './components/operation/add-operation';
+import { OpenApiResponse } from './components/parameter/add-response';
 import HideComponent from './util-components/hider'; 
 
 import 'semantic-ui-css/semantic.min.css';
@@ -62,9 +63,11 @@ enum EVENTS {
     ADD_RESOURCE,
     ADD_OPERATION,
     ADD_PARAMETER,
+    ADD_RESPONSE,
     DELETE_OPERATION,
     DELETE_RESOURCE,
-    DELETE_PARAMETER
+    DELETE_PARAMETER,
+    DELETE_RESPONSE
 }
 
 /**
@@ -95,6 +98,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
     }
     componentDidMount() {
         const { openApiJson } = this.props;
+        debugger;
 
         this.validateJsonProp(openApiJson);
         this.validateOpenApiJson(openApiJson);
@@ -154,7 +158,6 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
         const { onDidAddOperation, onDidChange } = this.props;
         const path = operationsObj.path;
 
-        debugger;
         this.setState(prevState => ({
             ...prevState,
             openApiJson: {
@@ -199,11 +202,62 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
     onDidAddParameter() {
 
     }
-    onDidAddResponse() {
 
+    /**
+     * Event which will get triggerred when a new response is added
+     * 
+     * @param responseObj response object which is added
+     */
+    onDidAddResponse(responseObj: OpenApiResponse ) {
+        console.log(responseObj);
+
+        const { onDidAddResource, onDidChange } = this.props;
+        const path = responseObj.resourcePath;
+        const method = responseObj.operation;
+
+        this.setState(prevState => ({
+            ...prevState,
+            openApiJson: {
+                ...prevState.openApiJson,
+                paths: {
+                    ...prevState.openApiJson.paths,
+                    [path] : {
+                        ...prevState.openApiJson.paths[path],
+                        [method] : {
+                            ...prevState.openApiJson.paths[path][method],
+                            responses : {
+                                ...prevState.openApiJson.paths[path][method].responses,
+                                [responseObj.status] : {
+                                    description: responseObj.description
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }),()=>{
+
+            if (onDidAddResource) {
+                onDidAddResource(responseObj, this.state.openApiJson);
+            }
+
+            if (onDidChange) {
+                onDidChange(EVENTS.ADD_RESPONSE, responseObj, this.state.openApiJson);
+            }
+
+            debugger;
+            this.setState({
+                actionState: {
+                    state: 'success',
+                    message: 'Added operation to ' + path
+                }
+            })
+
+        });
     }
     onDidDeleteOperation() {
-
+       
+        
     }
 
     /**
@@ -259,6 +313,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
             onDidAddResource: this.onDidAddResource,
             onDidAddOperation: this.onDidAddOperation,
             onDidAddParameter: this.onDidAddParameter,
+            onDidAddResponse: this.onDidAddResponse,
             onDidDeleteOperation: this.onDidDeleteOperation
         }
 
