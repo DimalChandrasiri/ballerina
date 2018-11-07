@@ -209,8 +209,6 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
      * @param responseObj response object which is added
      */
     onDidAddResponse(responseObj: OpenApiResponse ) {
-        console.log(responseObj);
-
         const { onDidAddResource, onDidChange } = this.props;
         const path = responseObj.resourcePath;
         const method = responseObj.operation;
@@ -257,7 +255,6 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
     }
     onDidDeleteOperation() {
        
-        
     }
 
     /**

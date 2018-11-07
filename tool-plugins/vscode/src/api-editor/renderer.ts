@@ -65,6 +65,7 @@ export function apiEditorRender(context: ExtensionContext, langClient: ExtendedL
         }
 
         function onDidJsonChange(event, changedObj, oasJson) {
+            console.log(JSON.stringify(oasJson));
             webViewRPCHandler.invokeRemoteMethod('triggerSwaggerDefChange', [JSON.stringify(oasJson), docUri]);
         }
 
@@ -86,7 +87,7 @@ export function apiEditorRender(context: ExtensionContext, langClient: ExtendedL
             }
 
             vscode.postMessage({
-                command: 'astModified'
+                command: 'oasASTModified'
             })
             
         }

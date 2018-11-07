@@ -16,7 +16,7 @@
  * under the License.
  *
  */
-import { workspace, commands, window, ViewColumn, ExtensionContext, TextEditor, WebviewPanel, TextDocumentChangeEvent } from 'vscode';
+import { workspace, commands, window, ViewColumn, ExtensionContext, TextEditor, WebviewPanel, TextDocumentChangeEvent, Uri } from 'vscode';
 import { ExtendedLangClient } from '../core/extended-language-client';
 import * as _ from 'lodash';
 import { apiEditorRender } from './renderer';
@@ -27,16 +27,73 @@ const DEBOUNCE_WAIT = 500;
 
 let oasEditorPanel: WebviewPanel | undefined;
 let activeEditor: TextEditor | undefined;
+let preventAPIDesignerUpdate = false
+
+function updateOASWebView(docUri: Uri, resp: string, stale: boolean): void {
+	if (oasEditorPanel) {
+		oasEditorPanel.webview.postMessage({ 
+			command: 'update',
+			docUri: docUri.toString(),
+			json: resp,
+			stale
+		});
+	}
+}
 
 function showAPIEditorPanel(context: ExtensionContext, langClient: ExtendedLangClient) : any {
+
     workspace.onDidChangeTextDocument(
         _.debounce((e: TextDocumentChangeEvent) => {
+            if (activeEditor && (e.document === activeEditor.document) &&
+            e.document.fileName.endsWith('.bal')) {
+                if (preventAPIDesignerUpdate) {
+                    preventAPIDesignerUpdate = false;
+                    return;
+                }
 
+                const docUri = e.document.uri;
+                if(oasEditorPanel){
+                    langClient.getBallerinaOASDef(docUri, oasEditorPanel.title.split('-')[1].trim()).then((resp)=>{
+                        if(resp.ballerinaOASJson != undefined) {
+                            updateOASWebView(docUri, JSON.stringify(resp.ballerinaOASJson), false);
+                        }
+                    })
+                }
+            }
     }, DEBOUNCE_WAIT));
 
     window.onDidChangeActiveTextEditor(
         (activatedEditor: TextEditor | undefined) => {
+            if (window.activeTextEditor && activatedEditor 
+                && (activatedEditor.document === window.activeTextEditor.document) 
+                && activatedEditor.document.fileName.endsWith('.bal')
+                && activatedEditor !== activeEditor) {
+                    activeEditor = window.activeTextEditor;
 
+                    if(oasEditorPanel){
+                        langClient.getServiceListForActiveFile(activeEditor.document.uri).then((resp) => {
+                            if(resp.services && resp.services.length > 1) {
+                                window.showQuickPick(resp.services).then((selected) => {
+                                    if(selected && activeEditor){
+                                        const html = apiEditorRender(context, langClient, activeEditor.document.uri, selected);
+                                        if (oasEditorPanel && html) {
+                                            oasEditorPanel.webview.html = html;
+                                            oasEditorPanel.title ="Ballerina API Editor - " + selected;
+                                        }
+                                    }
+                                });
+                            } else {
+                                if(activeEditor){
+                                    const html = apiEditorRender(context, langClient, activeEditor.document.uri, resp.services[0]);
+                                    if (oasEditorPanel && html) {
+                                        oasEditorPanel.webview.html = html;
+                                        oasEditorPanel.title ="Ballerina API Editor - " + resp.services[0];
+                                    }
+                                }
+                            }
+                        })
+                    }
+            }
     });
     
     let selectedService : string;
@@ -99,6 +156,9 @@ function createAPIEditorPanel(selectedService: string, renderHtml: string,
     oasEditorPanel.webview.onDidReceiveMessage(message => {
         switch (message.command) {
             case 'oasASTModified' :
+                if(activeEditor && activeEditor.document.fileName.endsWith('.bal')) {
+                    preventAPIDesignerUpdate = true;
+                }
                 return;
         }
     }, undefined, context.subscriptions);
