@@ -249,7 +249,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
             this.setState({
                 actionState: {
                     state: 'success',
-                    message: 'Added operation to ' + path
+                    message: 'Successfully added response to ' + path + method
                 }
             })
 
