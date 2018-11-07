@@ -82,14 +82,16 @@ class OpenApiResourceList extends React.Component<OasResourceListProps, OpenApiR
         const { expandAll, showAddResource, activeIndex } = this.state;
         return (
             <div className='open-api-resource-list-container'>
-                <Button size='mini' icon labelPosition='left' onClick={this.showOpenApiAddResource}>
-                    <Icon name='plus' />
-                    Add Resource
-                </Button>
-                <Button size='mini' icon labelPosition='left' floated='right' onClick={this.expandAllResources}>
-                    <Icon name={expandAll ? 'compress' : 'expand'} />
-                    {expandAll ? 'Collapse All' : 'Expand All'}
-                </Button>
+                <div className='action-container'>
+                    <Button size='mini' icon labelPosition='left' onClick={this.showOpenApiAddResource}>
+                        <Icon name='plus' />
+                        Add Resource
+                    </Button>
+                    <Button size='mini' icon labelPosition='left' floated='right' onClick={this.expandAllResources}>
+                        <Icon name={expandAll ? 'compress' : 'expand'} />
+                        {expandAll ? 'Collapse All' : 'Expand All'}
+                    </Button>
+                </div>
                 {showAddResource &&
                     <OpenApiContextConsumer>
                         {(context: OpenApiContext) => {

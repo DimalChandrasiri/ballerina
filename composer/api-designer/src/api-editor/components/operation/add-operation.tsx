@@ -18,6 +18,7 @@
  */
 
 import * as React from 'react';
+import { Form, Button, Select } from 'semantic-ui-react';
 
 export interface OpenApiAddOperationProps {
     openApiJson: any,
@@ -47,6 +48,23 @@ export interface OpenApiOperationMethod {
 class OpenApiAddOperation extends React.Component<OpenApiAddOperationProps, OpenApiAddOperationState> {
     constructor(props: OpenApiAddOperationProps) {
         super(props);
+
+        this.state = {
+            operationObject: {
+                id: '',
+                name: '',
+                description: '',
+                method: '',
+                path: this.props.resourcePath,
+            },
+            operationMethods: []
+        }
+
+        
+    }
+
+    componentDidMount() {
+        this.populateOperationMethods();
     }
 
     populateOperationMethods() {
@@ -71,8 +89,43 @@ class OpenApiAddOperation extends React.Component<OpenApiAddOperationProps, Open
     }
 
     render() {
+        const { onAddOperation } = this.props;
+        const { operationMethods } = this.state;
+
         return (
-            <div></div>
+            <Form size='mini' className='add-operation'>
+                <Form.Field>
+                    <label>Name</label>
+                    <input placeholder='Short Summery' onChange={(e) => this.setState({ 
+                        operationObject: {
+                            ...this.state.operationObject,
+                            name: e.target.value,
+                            id: e.target.value.replace(' ','')
+                        }
+                    })} />
+                </Form.Field>
+                <Form.Field>
+                    <Form.Field control={Select} label='Method' options={operationMethods} placeholder='Method' onChange={(e: any, data: any) =>{
+                        this.setState({
+                            operationObject: {
+                                ...this.state.operationObject,
+                                method: data.value
+                            }
+                        })
+                    }} />
+                </Form.Field>
+                <Form.Field>
+                    <Form.TextArea label='Description' placeholder='Tell us more about...' onChange={(e) => this.setState({ 
+                        operationObject: {
+                            ...this.state.operationObject,
+                            description: e.currentTarget.value
+                        }
+                    })} />
+                </Form.Field>
+                <Button size='mini' onClick={() => {
+                    onAddOperation(this.state.operationObject)
+                }}>Save</Button>
+            </Form>
         )
     }
 }
