@@ -5,17 +5,21 @@
   "main": "lib/index.js",
   "scripts": {
     "test-coverage": "npm run test -- --coverage",
-    "build": "tsc -p ./",
+    "build": "npm run copy-less && npm run compile",
     "watch": "tsc -watch -p ./",
+    "compile": "tsc -p ./",
+    "copy-less": "copyfiles -f src/**/*.less lib/api-editor/components/style/",
     "test": "echo \"Error: no test specified\""
   },
   "author": "ballerina.io",
   "license": "Apache-2.0",
   "devDependencies": {
-    "autoprefixer-loader": "^3.2.0",
     "@types/node": "^10.11.7",
     "@types/react": "16.4.0",
     "@types/react-dom": "^16.0.9",
+    "autoprefixer-loader": "^3.2.0",
+    "awesome-typescript-loader": "^5.2.1",
+    "copyfiles": "^2.1.0",
     "css-loader": "^1.0.0",
     "eslint": "^5.4.0",
     "eslint-config-airbnb": "^17.1.0",
@@ -29,12 +33,11 @@
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
     "style-loader": "^0.23.0",
-    "webpack": "^4.17.1",
-    "webpack-cli": "^3.1.0",
-    "webpack-dev-server": "^3.1.6",
     "ts-loader": "^5.2.1",
     "typescript": "^2.7.2",
-    "awesome-typescript-loader": "^5.2.1"
+    "webpack": "^4.17.1",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "^3.1.6"
   },
   "dependencies": {
     "@types/swagger-parser": "^4.0.2",

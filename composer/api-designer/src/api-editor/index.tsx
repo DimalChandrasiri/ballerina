@@ -24,9 +24,13 @@ import { Message } from 'semantic-ui-react';
 import { OpenApiContextProvider, OpenApiContext } from './context/open-api-context';
 import OpenApiResourceList from './components/resource/resources';
 import { OpenApiResource } from './components/resource/add-resource';
+import { OpenApiOperation } from './components/operation/add-operation';
+import HideComponent from './util-components/hider'; 
 
 import 'semantic-ui-css/semantic.min.css';
 import './components/style/main.less';
+
+
 
 export interface OasProps {
     openApiJson: any,
@@ -44,13 +48,13 @@ export interface OpenApiState {
 }
 
 export interface OpenApiActionState {
-    state: Boolean,
+    state: string,
     message: string
 }
 
 export interface OpenApiError { 
-    status: Boolean,
-    inline: Boolean,
+    status: boolean,
+    inline: boolean,
     message: string
 }
 
@@ -74,11 +78,11 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
             openApiJson: {},
             isError: {
                 status: false,
-                inline: true,
+                inline: false,
                 message: ''
             },
             actionState: {
-                state: false,
+                state: '',
                 message: '',
             }
         }
@@ -86,6 +90,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
         this.onDidAddResource = this.onDidAddResource.bind(this);
         this.onDidAddOperation = this.onDidAddOperation.bind(this);
         this.onDidAddParameter = this.onDidAddParameter.bind(this);
+        this.onDidAddResponse = this.onDidAddResponse.bind(this);
         this.onDidDeleteOperation = this.onDidDeleteOperation.bind(this);
     }
     componentDidMount() {
@@ -112,7 +117,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
 
         this.setState(prevState => ({
             ...prevState,
-            oasJson: {
+            openApiJson: {
                 ...prevState.openApiJson,
                 paths: {
                     ...prevState.openApiJson.paths,
@@ -131,17 +136,70 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
 
                 this.setState({
                     actionState: {
-                        state: true,
-                        message: 'Added resource to the swagger.'
+                        state: 'success',
+                        message: 'Resource : ' + resourceName + ' added successfully to the definition.'
                     }
                 });
             }
         })
     }
-    onDidAddOperation() {
 
+    /**
+     * 
+     * Event which will get triggered when a resource is added.
+     * 
+     * @param operationsObj operations object which is added    
+     */
+    onDidAddOperation(operationsObj: OpenApiOperation) {
+        const { onDidAddOperation, onDidChange } = this.props;
+        const path = operationsObj.path;
+
+        debugger;
+        this.setState(prevState => ({
+            ...prevState,
+            openApiJson: {
+                ...prevState.openApiJson,
+                paths: {
+                    ...prevState.openApiJson.paths,
+                    [path] : {
+                        ...prevState.openApiJson.paths[path],
+                        [operationsObj.method] : {
+                            consumes : [],
+                            description: operationsObj.description,
+                            operationId: operationsObj.id,
+                            parameters: [],
+                            produces : ["application/xml", "application/json"],
+                            responses :{},
+                            security: [],
+                            summary: operationsObj.name,
+                            tags:[]
+                        }
+                    }
+                }
+            }
+        }),()=>{
+
+            if (onDidAddOperation) {
+                onDidAddOperation(operationsObj, this.state.openApiJson);
+            }
+
+            if (onDidChange) {
+                onDidChange(EVENTS.ADD_OPERATION, operationsObj, this.state.openApiJson);
+            }
+
+            this.setState({
+                actionState: {
+                    state: 'success',
+                    message: 'Added operation to ' + path
+                }
+            })
+
+        });
     }
     onDidAddParameter() {
+
+    }
+    onDidAddResponse() {
 
     }
     onDidDeleteOperation() {
@@ -155,7 +213,6 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
      * @param onvalidattion Function to be run as a callback after validation
      */
     validateOpenApiJson(json: string, onvalidattion?: Function) {
-        debugger;
         SwaggerParser.validate(JSON.parse(json)).then(validjson => {
             this.setState({
                 openApiJson: validjson
@@ -165,6 +222,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                 onvalidattion(validjson);
             };
         }).catch(error => {
+            debugger;
             this.setState({
                 openApiJson: json,
                 isError: {
@@ -183,6 +241,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
      */
     validateJsonProp(json: string) {
         if (!json) {
+            debugger;
             this.setState({
                 isError: {
                     status: true,
@@ -202,9 +261,12 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
             onDidAddParameter: this.onDidAddParameter,
             onDidDeleteOperation: this.onDidDeleteOperation
         }
+
         if (status && !inline) {
             return (
-                <Message error content={isError.message} />
+                <HideComponent hideOn={1000}>
+                    <Message error content={isError.message} />
+                </HideComponent>
             )
         }
 
@@ -225,15 +287,18 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                         {info.description && 
                             <div className='oas-details'>
                                 <p>{info.description}</p>
+                                <p></p>
                             </div>
                         }
                     </React.Fragment>
                 }
                 {(() => {
-                    if (actionState.state) {
+                    if (actionState.state === 'success') {
                         return <Message success content={actionState.message} />
-                    } else {
+                    } else if (actionState.state === 'error') {
                         return <Message error content={actionState.message} />
+                    } else {
+                        return '';
                     }
                 })()}
                 <OpenApiResourceList openApiResources={paths} />

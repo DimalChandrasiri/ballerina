@@ -15,14 +15,16 @@
  */
 package org.ballerinalang.langserver.extensions.ballerina.document;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minidev.json.JSONObject;
 import org.ballerinalang.ballerina.swagger.convertor.service.SwaggerConverterUtils;
 import org.ballerinalang.compiler.CompilerPhase;
 import org.ballerinalang.langserver.BallerinaLanguageServer;
 import org.ballerinalang.langserver.LSGlobalContext;
 import org.ballerinalang.langserver.LSGlobalContextKeys;
-import org.ballerinalang.langserver.SourceGen;
 import org.ballerinalang.langserver.common.utils.CommonUtil;
 import org.ballerinalang.langserver.compiler.LSCompiler;
 import org.ballerinalang.langserver.compiler.LSCompilerException;
@@ -32,6 +34,8 @@ import org.ballerinalang.langserver.compiler.format.JSONGenerationException;
 import org.ballerinalang.langserver.compiler.format.TextDocumentFormatUtil;
 import org.ballerinalang.langserver.compiler.workspace.WorkspaceDocumentException;
 import org.ballerinalang.langserver.compiler.workspace.WorkspaceDocumentManager;
+import org.ballerinalang.langserver.formatting.FormattingSourceGen;
+import org.ballerinalang.langserver.formatting.FormattingVisitorEntry;
 import org.ballerinalang.langserver.extensions.OASGenerationException;
 import org.ballerinalang.model.tree.AnnotatableNode;
 import org.ballerinalang.model.tree.AnnotationAttachmentNode;
@@ -55,17 +59,14 @@ import org.wso2.ballerinalang.compiler.tree.BLangCompilationUnit;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
 import org.wso2.ballerinalang.compiler.tree.expressions.BLangSimpleVarRef;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
@@ -103,7 +104,7 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
             String fileContent = documentManager.getFileContent(compilationPath);
             String swaggerDefinition = SwaggerConverterUtils
                 .generateOAS3Definitions(fileContent, request.getBallerinaService());
-            reply.setBallerinaOASJson(swaggerDefinition);
+            reply.setBallerinaOASJson(convertToJson(swaggerDefinition));
         } catch (Exception e) {
             reply.isIsError(true);
             logger.error("error: while processing service definition at converter service: " + e.getMessage(), e);
@@ -112,6 +113,14 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
         }
 
         return CompletableFuture.supplyAsync(() -> reply);
+    }
+
+    private static String convertToJson(String yamlString) throws IOException {
+        ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+        Object obj = yamlReader.readValue(yamlString, Object.class);
+
+        ObjectMapper jsonWriter = new ObjectMapper();
+        return jsonWriter.writeValueAsString(obj);
     }
 
     @Override
@@ -267,9 +276,12 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
 
             // generate source for the new ast.
             JsonObject ast = notification.getAst();
-            SourceGen sourceGen = new SourceGen(0);
-            sourceGen.build(ast, null, "CompilationUnit");
-            String textEditContent = sourceGen.getSourceOf(ast, false, false);
+            FormattingSourceGen.build(ast, null, "CompilationUnit");
+            // we are reformatting entire document upon each astChange
+            // until partial formatting is supported
+            FormattingVisitorEntry formattingUtil = new FormattingVisitorEntry();
+            formattingUtil.accept(ast);
+            String textEditContent = FormattingSourceGen.getSourceOf(ast);
 
             // create text edit
             TextEdit textEdit = new TextEdit(range, textEditContent);
@@ -311,7 +323,9 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
             BLangCompilationUnit compilationUnit = bLangPackage.get().getCompilationUnits().stream()
                     .findFirst()
                     .orElse(null);
-            return TextDocumentFormatUtil.generateJSON(compilationUnit, new HashMap<>());
+            JsonElement jsonAST = TextDocumentFormatUtil.generateJSON(compilationUnit, new HashMap<>());
+            FormattingSourceGen.build(jsonAST.getAsJsonObject(), null, "CompilationUnit");
+            return jsonAST;
         }
         return null;
     }
