@@ -8,7 +8,7 @@
     "build": "npm run copy-less && npm run compile",
     "watch": "tsc -watch -p ./",
     "compile": "tsc -p ./",
-    "copy-less": "copyfiles -f src/**/*.less lib/api-editor/components/style/",
+    "copy-less": "copyfiles -f src/**/*.less lib/api-designer/components/style/",
     "test": "echo \"Error: no test specified\""
   },
   "author": "ballerina.io",

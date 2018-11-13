@@ -16,7 +16,7 @@
  * under the License.
  *
 */
-import renderAPIEditor from './api-editor';
+import renderAPIEditor from './api-designer';
 
 export {
     renderAPIEditor
