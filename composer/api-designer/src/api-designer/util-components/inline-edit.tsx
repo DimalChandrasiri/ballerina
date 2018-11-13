@@ -28,8 +28,9 @@ export interface InlineEditProps {
 }
 
 export interface InlineEditState {
-    text: string
+    stateText: string
     isEditing: boolean
+    elementType: string
 }
 
 class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
@@ -37,30 +38,51 @@ class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
         super(props);
 
         this.state = {
-            text: '',
-            isEditing: false
+            stateText: this.props.text,
+            isEditing: false,
+            elementType: 'input'
         }
 
         this.enableEditing = this.enableEditing.bind(this);
+        this.handleFocusOut = this.handleFocusOut.bind(this);
+        this.handleTextChange = this.handleTextChange.bind(this);
     }
 
-    enableEditing() {
+    enableEditing(e : React.MouseEvent<HTMLSpanElement>) {
+        e.stopPropagation();
         this.setState({
             isEditing: true,
-            text: this.props.text
-        })
+        });
+    }
+
+    handleFocusOut() {
+        this.setState({
+            isEditing: false,
+            stateText: this.state.stateText
+        });
+    }
+
+    handleTextChange(e : React.ChangeEvent<HTMLInputElement>) {
+        this.setState({
+            stateText: e.target.value.trim()
+        });
     }
 
     render() {
-        const { text, isEditable } = this.props;
-        const { isEditing } = this.state; 
+        const { isEditable } = this.props;
+        const { isEditing, stateText } = this.state; 
 
         if (!isEditable) {
-            return <span className='inline-editor disabled'>{text}</span>
+            return <span className='inline-editor disabled'>{stateText}</span>
         } else if (!isEditing) {
-            return <span className='inline-editor non-editing' onClick={this.enableEditing}>{text}</span>
+            return <span className={this.props.customClass + ' inline-editor non-editing'} onClick={this.enableEditing}>{stateText}</span>
         } else {
-            return <input className='inline-editor editing' value={text} />
+            return <input 
+                className='inline-editor editing'
+                value={stateText} 
+                onBlur={this.handleFocusOut}
+                onChange={this.handleTextChange}
+            />
         }
     }
 }

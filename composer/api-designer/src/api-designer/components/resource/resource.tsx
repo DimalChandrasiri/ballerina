@@ -21,6 +21,7 @@ import * as React from 'react';
 import { Accordion, Icon, Button, AccordionTitleProps } from 'semantic-ui-react';
 
 import OpenApiOperationsList from '../operation/operations';
+import InlineEdit from '../../util-components/inline-edit';
 
 export interface OpenApiResourceProps {
     openApiResource: string,
@@ -65,7 +66,7 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
             <div className='resource'>
                 <Accordion.Title className='res-title' index={currentIndex} onClick={onExpandEvent}>
                     <Icon name={isExpandAll || activeIndex === currentIndex ? 'chevron down' : 'chevron right'}/>
-                    {openApiResource}
+                    <InlineEdit isEditable text={openApiResource} />
                     {isExpandAll || activeIndex === currentIndex ? 
                         <Button Title='Add operation to resource.' icon size='mini' circular className='add-operation-action' onClick={(e)=>{this.handleShowAddOperation(e)}}>
                             <Icon name='plus' />

@@ -23,6 +23,7 @@ import { Accordion, Icon, AccordionTitleProps } from 'semantic-ui-react';
 import OpenApiAddParameter from '../parameter/add-parameter';
 import OpenApiAddResponse from '../parameter/add-response';
 import OpenApiParameterList from '../parameter/parameters';
+import InlineEdit from '../../util-components/inline-edit';
 
 import { OpenApiContextConsumer, OpenApiContext } from '../../context/open-api-context';
 
@@ -90,8 +91,8 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
         return (
             <div className={'operation '  + operationType}>
                 <Accordion.Title className='op-title ' index={currIndex} onClick={handleExpand}>
-                    <span className='op-method'>{operationType}</span>
-                    <span className='op-summary'>{operationObject.summary}</span>
+                    <InlineEdit customClass='op-method' isEditable text={operationType} />
+                    <InlineEdit customClass='op-summary' isEditable text={operationObject.summary} />
                     <Icon
                         className='delete-op'
                         onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
