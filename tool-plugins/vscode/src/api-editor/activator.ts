@@ -56,6 +56,7 @@ function showAPIEditorPanel(context: ExtensionContext, langClient: ExtendedLangC
                     langClient.getBallerinaOASDef(docUri, oasEditorPanel.title.split('-')[1].trim()).then((resp)=>{
                         if(resp.ballerinaOASJson != undefined) {
                             updateOASWebView(docUri, JSON.stringify(resp.ballerinaOASJson), false);
+                            preventAPIDesignerUpdate = true;
                         }
                     })
                 }

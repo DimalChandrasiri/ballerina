@@ -19,7 +19,6 @@ package org.ballerinalang.ballerina.swagger.convertor.service;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.SwaggerDeserializationResult;
-import io.swagger.v3.core.util.Json;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.parser.converter.SwaggerConverter;
 import org.apache.commons.io.FileUtils;
@@ -122,7 +121,7 @@ public class SwaggerConverterUtils {
                 throw new SwaggerConverterException("Please check if input source is valid and complete");
             }
 
-            return Json.pretty(converter.convert(result).getOpenAPI());
+            return Yaml.pretty(converter.convert(result).getOpenAPI());
         } catch (LSCompilerException e) {
             return "Error";
         }

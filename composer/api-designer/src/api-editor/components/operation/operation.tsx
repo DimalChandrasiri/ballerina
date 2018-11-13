@@ -54,20 +54,31 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
         this.handleShowAddResponse = this.handleShowAddResponse.bind(this);
     }
 
-    handleShowAddParameter () {
+    handleShowAddParameter (show?: boolean) {
         const { showAddParameter } = this.state;
-        debugger;
-        this.setState({
-            showAddParameter: !showAddParameter,
-        });
+        if(show !== undefined && !show) {
+            this.setState({
+                showAddParameter: false,
+            });
+        } else {
+            this.setState({
+                showAddParameter: !showAddParameter,
+            });
+        }
+        
     }
 
-    handleShowAddResponse () {
+    handleShowAddResponse (show?: boolean) {
         const { showAddResponse } = this.state;
-        debugger;
-        this.setState({
-            showAddResponse: !showAddResponse,
-        });
+        if(show !== undefined && !show) {
+            this.setState({
+                showAddResponse: false,
+            });
+        } else {
+            this.setState({
+                showAddResponse: !showAddResponse,
+            });
+        }
     }
 
     render() {
@@ -75,7 +86,7 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
             resourcePath, operationType, operationObject, activeIndex, currIndex, handleExpand, onDeleteOperation
         } = this.props;
         const { showAddResponse, showAddParameter } = this.state;
-        debugger;
+
         return (
             <div className={'operation '  + operationType}>
                 <Accordion.Title className='op-title ' index={currIndex} onClick={handleExpand}>
@@ -100,10 +111,25 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
                     <div className='op-section'>
                         <div className='title'>
                             <p>Parameters</p>
-                            <a onClick={this.handleShowAddParameter} >Add Parameter</a>
+                            <a onClick={()=>{
+                                this.handleShowAddParameter()
+                            }} >Add Parameter</a>
                         </div>
                         {showAddParameter &&
-                            <OpenApiAddParameter/>
+                            <OpenApiContextConsumer>
+                                {(appContext: OpenApiContext) => {
+                                    return (
+                                        <OpenApiAddParameter
+                                            openApiJson={appContext.openApiJson}
+                                            onAddParameter={appContext.onDidAddParameter}
+                                            operation={operationType}
+                                            resourcePath={resourcePath}
+                                            handleClose={this.handleShowAddParameter}
+                                        />
+                                    )
+                                }}
+                            </OpenApiContextConsumer>
+                            
                         }
                         {operationObject.parameters && Object.keys(operationObject.parameters).length !== 0 &&
                             <OpenApiParameterList parameterType='parameter' parameterList={operationObject.parameters} />
@@ -113,7 +139,9 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
                     <div className='op-section '>
                         <div className='title'>
                             <p>Responses</p>
-                            <a onClick={this.handleShowAddResponse} >Add Response</a>
+                            <a onClick={()=>{
+                                this.handleShowAddResponse()
+                            }} >Add Response</a>
                         </div>
                         {showAddResponse && 
                             <OpenApiContextConsumer>
@@ -124,6 +152,7 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
                                             onAddResponse={appContext.onDidAddResponse}
                                             operation={operationType}
                                             resourcePath={resourcePath}
+                                            handleClose={this.handleShowAddResponse}
                                         />
                                     )
                                 }}

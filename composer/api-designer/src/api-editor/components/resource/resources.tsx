@@ -39,7 +39,7 @@ class OpenApiResourceList extends React.Component<OasResourceListProps, OpenApiR
         super(props);
 
         this.state = {
-            expandAll: false,
+            expandAll: true,
             showAddResource: false,
             activeIndex: -1
         }

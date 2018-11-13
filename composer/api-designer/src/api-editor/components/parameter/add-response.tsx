@@ -25,6 +25,7 @@ export interface OpenApiAddResponseProps {
     onAddResponse: Function
     operation: string
     resourcePath: string
+    handleClose: Function
 }
 
 export interface OpenApiAddResponseState { 
@@ -92,7 +93,7 @@ class OpenApiAddResponse extends React.Component<OpenApiAddResponseProps, OpenAp
     }
 
     render() {
-        const { onAddResponse } = this.props;
+        const { onAddResponse, handleClose } = this.props;
 
         return (
             <Form size='mini' className='add-operation'>
@@ -116,6 +117,7 @@ class OpenApiAddResponse extends React.Component<OpenApiAddResponseProps, OpenAp
                 </Form.Field>
                 <Button size='mini' onClick={() => {
                     onAddResponse(this.state.responseObject);
+                    handleClose(true)
                 }}>Save</Button>
             </Form>
         )
