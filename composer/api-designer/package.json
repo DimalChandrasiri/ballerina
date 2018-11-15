@@ -1,7 +1,7 @@
 {
   "name": "@ballerina/api-designer",
-  "version": "0.982.1-SNAPSHOT",
-  "description": "Provides a react component to visualize a given Open API Sepcification",
+  "version": "0.983.1-SNAPSHOT",
+  "description": "",
   "main": "lib/index.js",
   "scripts": {
     "test-coverage": "npm run test -- --coverage",
