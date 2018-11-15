@@ -1,5 +1,6 @@
 @import './operation.less';
 @import './resource.less';
+@import './inline-edit.less';
 @import url('https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i');
 
 html, body {
@@ -21,7 +22,7 @@ html, body {
 }
 
 .oas-header {
-    padding: 1em 0;
+    padding: 1em 0 0 0;
     color: #fff;
 }
 
@@ -56,7 +57,17 @@ html, body {
 }
 
 .oas-details {
-    padding: 1em 0;
+    padding: 1em 0 3em 0;
+}
+
+.oas-details::after {
+    content: '';
+    display: block;
+    clear: both;
+}
+
+.oas-details .description {
+    margin-bottom: 1em;
 }
 
 .oas-details p{
