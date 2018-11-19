@@ -445,30 +445,27 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                                 <span>{openApiJson.host}{openApiJson.basePath}</span>
                             </h1>
                             <span className='version'>{info.version}</span>
-                        </div> 
-                        {info.description && 
-                            <div className='oas-details'>
-                                <div className='des'>
-                                    <InlineEdit isEditable text={info.description} />
-                                </div>
-                                <div className='license'>
-                                    {info.license &&
-                                        <a href={info.license.url} target='_blank'>{info.license.name}</a>
-                                    }
-                                </div>
-                                <div className='contact'>
-                                    {info.contact &&
-                                        <React.Fragment>
-                                            <p>email : {info.contact.email}</p>,
-                                            <a href={info.contact.url} target='_blank'>{info.contact.name}</a>
-                                        </React.Fragment>
-                                    }
-                                </div>
-                                {info.termsOfService && 
-                                    <a href={info.termsOfService} target='_blank'>{info.termsOfService}</a>
-                                }
+                        </div>
+                        <div className='oas-details'>
+                            <div className='description'>
+                                <InlineEdit isEditable isTextArea text={info.description} placeholderText='Add a description' />
                             </div>
-                        }
+                            {info.termsOfService && 
+                                <div>
+                                    <a href={info.termsOfService} target='_blank'>Terms of Service</a>
+                                </div>
+                            }
+                            {info.license &&
+                                <div>
+                                    <a href={info.license.url} target='_blank'>{info.license.name}</a>
+                                </div>
+                            }
+                            {info.contact &&
+                                <div>
+                                    <a href={info.contact.url} target='_blank'>{info.contact.name}</a>
+                                </div>
+                            }
+                        </div>
                     </React.Fragment>
                 }
                 {(() => {

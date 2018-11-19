@@ -25,6 +25,8 @@ export interface InlineEditProps {
     customClass?: string
     activeStateClass?: string
     isEditable: boolean
+    placeholderText?: string
+    isTextArea?: boolean
 }
 
 export interface InlineEditState {
@@ -64,25 +66,60 @@ class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
 
     handleTextChange(e : React.ChangeEvent<HTMLInputElement>) {
         this.setState({
-            stateText: e.target.value.trim()
+            stateText: e.target.value
         });
     }
 
     render() {
-        const { isEditable } = this.props;
-        const { isEditing, stateText } = this.state; 
+        const { isEditable, placeholderText, customClass, isTextArea } = this.props;
+        const { isEditing, stateText } = this.state;
 
-        if (!isEditable) {
+        debugger;
+        if(!isEditable) {
             return <span className='inline-editor disabled'>{stateText}</span>
-        } else if (!isEditing) {
-            return <span className={this.props.customClass + ' inline-editor non-editing'} onClick={this.enableEditing}>{stateText}</span>
+        } else if (!isEditing && stateText !== undefined && stateText !== '') {
+            return (
+                <div className={'inline-editor non-editing ' + customClass} onClick={this.enableEditing}>
+                    <span>
+                        {stateText}
+                    </span>
+                </div>
+            ) 
+        } else if (!isEditing && (stateText === undefined || stateText == '')) {
+            return (
+                <span className={customClass + ' inline-editor no-text'} onClick={this.enableEditing}>
+                    {placeholderText}
+                </span>
+            ) 
         } else {
-            return <input 
-                className='inline-editor editing'
-                value={stateText} 
-                onBlur={this.handleFocusOut}
-                onChange={this.handleTextChange}
-            />
+            if (isTextArea) {
+                return (
+                    <div className={'inline-editor editing ' + customClass}>
+                        <textarea 
+                            autoFocus
+                            onBlur={this.handleFocusOut}
+                            placeholder={placeholderText}
+                        >
+                            {stateText}
+                        </textarea>
+                    </div>
+                )
+            } else { 
+                return (
+                    <div className={'inline-editor editing ' + customClass}>
+                        <input
+                            autoFocus
+                            value={stateText} 
+                            onBlur={this.handleFocusOut}
+                            onChange={this.handleTextChange}
+                            placeholder={placeholderText}
+                            onClick={(e)=>{
+                                e.stopPropagation();
+                            }}
+                        />
+                    </div>
+                )
+            }
         }
     }
 }
