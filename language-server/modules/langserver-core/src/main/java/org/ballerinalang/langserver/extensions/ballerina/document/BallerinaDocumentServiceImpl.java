@@ -17,6 +17,7 @@ package org.ballerinalang.langserver.extensions.ballerina.document;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.ballerinalang.ballerina.swagger.convertor.service.SwaggerConverterUtils;
@@ -24,7 +25,6 @@ import org.ballerinalang.compiler.CompilerPhase;
 import org.ballerinalang.langserver.BallerinaLanguageServer;
 import org.ballerinalang.langserver.LSGlobalContext;
 import org.ballerinalang.langserver.LSGlobalContextKeys;
-import org.ballerinalang.langserver.SourceGen;
 import org.ballerinalang.langserver.common.utils.CommonUtil;
 import org.ballerinalang.langserver.compiler.LSCompiler;
 import org.ballerinalang.langserver.compiler.LSCompilerException;
@@ -34,14 +34,9 @@ import org.ballerinalang.langserver.compiler.format.JSONGenerationException;
 import org.ballerinalang.langserver.compiler.format.TextDocumentFormatUtil;
 import org.ballerinalang.langserver.compiler.workspace.WorkspaceDocumentException;
 import org.ballerinalang.langserver.compiler.workspace.WorkspaceDocumentManager;
+import org.ballerinalang.langserver.extensions.OASGenerationException;
 import org.ballerinalang.langserver.formatting.FormattingSourceGen;
 import org.ballerinalang.langserver.formatting.FormattingVisitorEntry;
-import org.ballerinalang.langserver.extensions.OASGenerationException;
-import org.ballerinalang.model.tree.AnnotatableNode;
-import org.ballerinalang.model.tree.AnnotationAttachmentNode;
-import org.ballerinalang.model.tree.IdentifierNode;
-import org.ballerinalang.model.tree.ImportPackageNode;
-import org.ballerinalang.model.tree.ResourceNode;
 import org.ballerinalang.model.tree.ServiceNode;
 import org.ballerinalang.model.tree.TopLevelNode;
 import org.ballerinalang.swagger.CodeGenerator;
@@ -57,15 +52,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.ballerinalang.compiler.tree.BLangCompilationUnit;
 import org.wso2.ballerinalang.compiler.tree.BLangPackage;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangRecordLiteral;
-import org.wso2.ballerinalang.compiler.tree.expressions.BLangSimpleVarRef;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
@@ -102,7 +99,7 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
         try {
             String fileContent = documentManager.getFileContent(compilationPath);
             String swaggerDefinition = SwaggerConverterUtils
-                .generateOAS3Definitions(fileContent, request.getBallerinaService());
+                    .generateOAS3Definitions(fileContent, request.getBallerinaService());
             reply.setBallerinaOASJson(convertToJson(swaggerDefinition));
         } catch (Exception e) {
             reply.isIsError(true);
@@ -139,7 +136,7 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
                     .filter(genSrcFile -> genSrcFile.getType().equals(GenSrcFile.GenFileType.GEN_SRC)).findAny();
 
             if (!oasServiceFile.isPresent()) {
-               throw new OASGenerationException("OAS Service file is empty.");
+                throw new OASGenerationException("OAS Service file is empty.");
             }
 
             //Generate ballerina file to get services
@@ -164,18 +161,20 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
                 Optional<BLangCompilationUnit> oasCompilationUnit = oasFilePackage.get().getCompilationUnits()
                         .stream().findFirst();
 
-                if (!oasCompilationUnit.isPresent() || !compilationUnit.isPresent() ) {
+                if (!oasCompilationUnit.isPresent() || !compilationUnit.isPresent()) {
                     return;
                 }
 
-                mergeAst(compilationUnit.get(), oasCompilationUnit.get());
+                JsonObject targetAST = TextDocumentFormatUtil.generateJSON(compilationUnit.get(), new HashMap<>())
+                        .getAsJsonObject();
+                FormattingSourceGen.build(targetAST, "CompilationUnit");
+                JsonObject generatedAST = TextDocumentFormatUtil.generateJSON(oasCompilationUnit.get(), new HashMap<>())
+                        .getAsJsonObject();
+                FormattingSourceGen.build(generatedAST, "CompilationUnit");
+                mergeAst(targetAST, generatedAST);
 
                 // generate source for the new ast.
-                JsonObject ast = TextDocumentFormatUtil.generateJSON(compilationUnit.get(), new HashMap<>())
-                        .getAsJsonObject();
-                SourceGen sourceGen = new SourceGen(0);
-                sourceGen.build(ast, null, "CompilationUnit");
-                String textEditContent = sourceGen.getSourceOf(ast, false, false);
+                String textEditContent = FormattingSourceGen.getSourceOf(targetAST);
 
                 // create text edit
                 TextEdit textEdit = new TextEdit(range, textEditContent);
@@ -188,7 +187,6 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
 
                 ballerinaLanguageServer.getClient().applyEdit(applyWorkspaceEditParams);
             }
-
         } catch (Exception ex) {
             logger.error("error: while processing service definition at converter service: " + ex.getMessage(), ex);
         } finally {
@@ -215,11 +213,11 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
                 BLangCompilationUnit compilationUnit = bLangPackage.get().getCompilationUnits().stream()
                         .findFirst()
                         .orElse(null);
-                
+
                 List<TopLevelNode> servicePkgs = new ArrayList<>();
                 servicePkgs.addAll(compilationUnit.getTopLevelNodes().stream()
-                            .filter(topLevelNode -> topLevelNode instanceof ServiceNode)
-                            .collect(Collectors.toList()));
+                        .filter(topLevelNode -> topLevelNode instanceof ServiceNode)
+                        .collect(Collectors.toList()));
 
                 servicePkgs.forEach(servicepkg -> {
                     if (servicepkg instanceof ServiceNode) {
@@ -229,7 +227,7 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
                 });
             }
             reply.setServices(services.toArray(new String[0]));
-        } catch (LSCompilerException | WorkspaceDocumentException  e) {
+        } catch (LSCompilerException | WorkspaceDocumentException e) {
             logger.error("error: while processing service definition at converter service: " + e.getMessage());
         } finally {
             lock.ifPresent(Lock::unlock);
@@ -249,7 +247,7 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
             String fileContent = documentManager.getFileContent(compilationPath);
             reply.setAst(getTreeForContent(fileContent));
             reply.setParseSuccess(true);
-        } catch (LSCompilerException | JSONGenerationException | WorkspaceDocumentException  e) {
+        } catch (LSCompilerException | JSONGenerationException | WorkspaceDocumentException e) {
             reply.setParseSuccess(false);
         } finally {
             lock.ifPresent(Lock::unlock);
@@ -275,7 +273,7 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
 
             // generate source for the new ast.
             JsonObject ast = notification.getAst();
-            FormattingSourceGen.build(ast, null, "CompilationUnit");
+            FormattingSourceGen.build(ast, "CompilationUnit");
             // we are reformatting entire document upon each astChange
             // until partial formatting is supported
             FormattingVisitorEntry formattingUtil = new FormattingVisitorEntry();
@@ -323,7 +321,7 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
                     .findFirst()
                     .orElse(null);
             JsonElement jsonAST = TextDocumentFormatUtil.generateJSON(compilationUnit, new HashMap<>());
-            FormattingSourceGen.build(jsonAST.getAsJsonObject(), null, "CompilationUnit");
+            FormattingSourceGen.build(jsonAST.getAsJsonObject(), "CompilationUnit");
             return jsonAST;
         }
         return null;
@@ -347,33 +345,33 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
     /**
      * Util method to merge updated compilation unit to the current compilation unit.
      *
-     * @param targetCompUnit target compilation unit
+     * @param targetCompUnit    target compilation unit
      * @param generatedCompUnit generated compilation unit which needs to be merged
      */
-    private void mergeAst(BLangCompilationUnit targetCompUnit, BLangCompilationUnit generatedCompUnit) {
-        generatedCompUnit.getTopLevelNodes().forEach(topLevelNode -> {
-
-            if (topLevelNode instanceof ImportPackageNode) {
-                if (!hasImport(targetCompUnit, (ImportPackageNode) topLevelNode)) {
-                    //TODO add new imports to last of imports
-                    targetCompUnit.getTopLevelNodes().add(0,topLevelNode);
+    private void mergeAst(JsonObject targetCompUnit, JsonObject generatedCompUnit) {
+        generatedCompUnit.getAsJsonArray("topLevelNodes").forEach(item -> {
+            JsonObject topLevelNode = item.getAsJsonObject();
+            if (topLevelNode.get("kind").getAsString().equals("Import")) {
+                if (!hasImport(targetCompUnit, topLevelNode)) {
+                    int startPosition = FormattingSourceGen.getStartPosition(targetCompUnit, "imports", -1);
+                    FormattingSourceGen.reconcileWS(topLevelNode,
+                            targetCompUnit.getAsJsonArray("topLevelNodes"), targetCompUnit, startPosition);
+                    targetCompUnit.getAsJsonArray("topLevelNodes").add(topLevelNode);
                 }
             }
 
-            if (topLevelNode instanceof ServiceNode) {
-                ServiceNode swaggerService = (ServiceNode) topLevelNode;
-                for (TopLevelNode astNode : targetCompUnit.getTopLevelNodes()) {
-                    if (astNode instanceof ServiceNode) {
-                        ServiceNode astService = (ServiceNode) astNode;
-                        if (astService.getName().getValue().equals(swaggerService.getName().getValue())) {
-                            mergeServices(astService, swaggerService);
+            if (topLevelNode.get("kind").getAsString().equals("Service")) {
+                for (JsonElement astNode : targetCompUnit.getAsJsonArray("topLevelNodes")) {
+                    JsonObject targetNode = astNode.getAsJsonObject();
+                    if (targetNode.get("kind").getAsString().equals("Service")) {
+                        if (targetNode.get("name").getAsJsonObject().get("value")
+                                .equals(topLevelNode.get("name").getAsJsonObject().get("value"))) {
+                            mergeServices(targetNode, topLevelNode, targetCompUnit);
                         }
                     }
                 }
             }
-
         });
-
     }
 
     /**
@@ -382,26 +380,33 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
      * @param originService Origin service
      * @param targetService Target service which will get merged to origin service
      */
-    private void mergeServices(ServiceNode originService, ServiceNode targetService) {
-        mergeAnnotations(originService, targetService);
-        List<ResourceNode> targetServices = new ArrayList<>();
+    private void mergeServices(JsonObject originService, JsonObject targetService, JsonObject tree) {
+        mergeAnnotations(originService, targetService, tree);
+        List<JsonObject> targetServices = new ArrayList<>();
 
-        for (ResourceNode targetResource : targetService.getResources()) {
+        for (JsonElement targetItem : targetService.getAsJsonArray("resources")) {
+            JsonObject targetResource = targetItem.getAsJsonObject();
             boolean matched = false;
-            for (ResourceNode originResource : originService.getResources()) {
+            for (JsonElement originItem : originService.getAsJsonArray("resources")) {
+                JsonObject originResource = originItem.getAsJsonObject();
                 if (matchResource(originResource, targetResource)) {
                     matched = true;
-                    mergeAnnotations(originResource, targetResource);
+                    mergeAnnotations(originResource, targetResource, tree);
                 }
             }
 
             if (!matched) {
-                targetResource.getBody().getStatements().clear();
+                targetResource.getAsJsonObject("body").add("statements", new JsonArray());
                 targetServices.add(targetResource);
             }
         }
 
-        targetServices.forEach(originService::addResource);
+        targetServices.forEach(resource -> {
+            int startIndex = FormattingSourceGen.getStartPosition(originService, "resources", -1);
+            FormattingSourceGen.reconcileWS(resource, originService.getAsJsonArray("resources"), tree,
+                    startIndex);
+            originService.getAsJsonArray("resources").add(resource);
+        });
     }
 
     /**
@@ -410,29 +415,38 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
      * @param targetNode target node
      * @param sourceNode source node which will get merged to target node
      */
-    private void mergeAnnotations(AnnotatableNode targetNode, AnnotatableNode sourceNode) {
-        for (AnnotationAttachmentNode sourceNodeAttachment : sourceNode.getAnnotationAttachments()) {
+    private void mergeAnnotations(JsonObject targetNode, JsonObject sourceNode, JsonObject tree) {
+        JsonArray annotationAttachments = sourceNode.has("annotationAttachments")
+                ? sourceNode.getAsJsonArray("annotationAttachments")
+                : sourceNode.getAsJsonArray("annAttachments");
+        for (JsonElement item : annotationAttachments) {
+            JsonObject sourceNodeAttachment = item.getAsJsonObject();
 
-            AnnotationAttachmentNode matchedTargetNode = findAttachmentNode(targetNode, sourceNodeAttachment);
+            JsonObject matchedTargetNode = findAttachmentNode(targetNode, sourceNodeAttachment);
 
             if (matchedTargetNode != null) {
-                if (sourceNodeAttachment.getExpression() instanceof BLangRecordLiteral &&
-                        matchedTargetNode.getExpression() instanceof BLangRecordLiteral) {
+                if (sourceNodeAttachment.getAsJsonObject("expression").get("kind").getAsString()
+                        .equals("RecordLiteralExpr") && matchedTargetNode.getAsJsonObject("expression").get("kind")
+                        .getAsString().equals("RecordLiteralExpr")) {
 
-                    BLangRecordLiteral sourceRecord = (BLangRecordLiteral) sourceNodeAttachment.getExpression();
-                    BLangRecordLiteral matchedTargetRecord = (BLangRecordLiteral) matchedTargetNode.getExpression();
+                    JsonObject sourceRecord = sourceNodeAttachment.getAsJsonObject("expression");
+                    JsonObject matchedTargetRecord = matchedTargetNode.getAsJsonObject("expression");
 
-                    for (BLangRecordLiteral.BLangRecordKeyValue sourceKeyValue : sourceRecord.getKeyValuePairs()) {
+                    for (JsonElement keyValueItem : sourceRecord.getAsJsonArray("keyValuePairs")) {
+                        JsonObject sourceKeyValue = keyValueItem.getAsJsonObject();
                         int matchedKeyValuePairIndex = 0;
-                        BLangRecordLiteral.BLangRecordKeyValue matchedObj = null;
+                        JsonObject matchedObj = null;
 
-                        for (BLangRecordLiteral.BLangRecordKeyValue matchedKeyValue :
-                                matchedTargetRecord.getKeyValuePairs()) {
-                            if ((matchedKeyValue.key != null &&
-                                    matchedKeyValue.key.expr instanceof BLangSimpleVarRef)) {
-                                BLangSimpleVarRef matchedKey = (BLangSimpleVarRef) matchedKeyValue.key.expr;
-                                BLangSimpleVarRef sourceKey = (BLangSimpleVarRef) sourceKeyValue.key.expr;
-                                if (matchedKey.variableName.getValue().equals(sourceKey.variableName.getValue())) {
+                        for (JsonElement matchedKeyValueItem :
+                                matchedTargetRecord.getAsJsonArray("keyValuePairs")) {
+                            JsonObject matchedKeyValue = matchedKeyValueItem.getAsJsonObject();
+                            if ((matchedKeyValue.has("key") &&
+                                    matchedKeyValue.getAsJsonObject("key").get("kind").getAsString()
+                                            .equals("SimpleVariableRef"))) {
+                                JsonObject matchedKey = matchedKeyValue.getAsJsonObject("key");
+                                JsonObject sourceKey = sourceKeyValue.getAsJsonObject("key");
+                                if (matchedKey.getAsJsonObject("variableName").get("value").getAsString()
+                                        .equals(sourceKey.getAsJsonObject("variableName").get("value").getAsString())) {
                                     matchedObj = matchedKeyValue;
                                     break;
                                 }
@@ -440,28 +454,45 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
                             matchedKeyValuePairIndex++;
                         }
 
-                        if(matchedObj != null) {
-                            matchedTargetRecord.getKeyValuePairs().set(matchedKeyValuePairIndex,sourceKeyValue);
+                        if (matchedObj != null) {
+                            List<JsonObject> matchedObjWS = FormattingSourceGen.extractWS(matchedObj);
+                            int firstTokenIndex = matchedObjWS.get(0).get("i").getAsInt();
+                            matchedTargetRecord.getAsJsonArray("keyValuePairs")
+                                    .remove(matchedKeyValuePairIndex);
+                            FormattingSourceGen.reconcileWS(sourceKeyValue, matchedTargetRecord
+                                    .getAsJsonArray("keyValuePairs"), tree, firstTokenIndex);
+                            matchedTargetRecord.getAsJsonArray("keyValuePairs").add(sourceKeyValue);
                         } else {
-                            ((BLangRecordLiteral) matchedTargetNode.getExpression()).keyValuePairs.add(sourceKeyValue);
+                            FormattingSourceGen.reconcileWS(sourceKeyValue, matchedTargetRecord
+                                    .getAsJsonArray("keyValuePairs"), tree, -1);
+                            matchedTargetRecord.getAsJsonArray("keyValuePairs").add(sourceKeyValue);
                         }
-
                     }
                 }
             } else {
-                targetNode.addAnnotationAttachment(sourceNodeAttachment);
+                int startIndex = FormattingSourceGen.getStartPosition(targetNode, "annAttachments", -1);
+                JsonArray targetAnnAttachments = targetNode.has("annotationAttachments")
+                        ? targetNode.getAsJsonArray("annotationAttachments")
+                        : targetNode.getAsJsonArray("annAttachments");
+                FormattingSourceGen.reconcileWS(sourceNodeAttachment, targetAnnAttachments, tree, startIndex);
+                targetAnnAttachments.add(sourceNodeAttachment);
             }
 
         }
     }
 
-    private AnnotationAttachmentNode findAttachmentNode(AnnotatableNode targetNode,
-                                                        AnnotationAttachmentNode sourceNodeAttachment) {
-        AnnotationAttachmentNode matchedNode = null;
-        for (AnnotationAttachmentNode attachmentNode : targetNode.getAnnotationAttachments()) {
-            if (sourceNodeAttachment.getAnnotationName().getValue().equals(
-                    attachmentNode.getAnnotationName().getValue()) && sourceNodeAttachment.getPackageAlias()
-                    .getValue().equals(attachmentNode.getPackageAlias().getValue())) {
+    private JsonObject findAttachmentNode(JsonObject targetNode,
+                                          JsonObject sourceNodeAttachment) {
+        JsonObject matchedNode = null;
+        JsonArray annotationAttachments = targetNode.has("annotationAttachments")
+                ? targetNode.getAsJsonArray("annotationAttachments")
+                : targetNode.getAsJsonArray("annAttachments");
+        for (JsonElement item : annotationAttachments) {
+            JsonObject attachmentNode = item.getAsJsonObject();
+            if (sourceNodeAttachment.getAsJsonObject("annotationName").get("value").getAsString()
+                    .equals(attachmentNode.getAsJsonObject("annotationName").get("value").getAsString())
+                    && sourceNodeAttachment.getAsJsonObject("packageAlias").get("value").getAsString()
+                    .equals(attachmentNode.getAsJsonObject("packageAlias").get("value").getAsString())) {
                 matchedNode = attachmentNode;
                 break;
             }
@@ -471,41 +502,46 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
 
     /**
      * Util method to match given resource in a service node.
-     * @param astResource service node
+     *
+     * @param astResource     service node
      * @param swaggerResource resource which needs to be checked
      * @return true if matched else false
      */
-    private boolean matchResource(ResourceNode astResource, ResourceNode swaggerResource) {
-        return astResource.getName().getValue().equals(swaggerResource.getName().getValue());
+    private boolean matchResource(JsonObject astResource, JsonObject swaggerResource) {
+        return astResource.getAsJsonObject("name").get("value").getAsString()
+                .equals(swaggerResource.getAsJsonObject("name").get("value").getAsString());
     }
 
     /**
-     *
      * Util method to check if given node is an existing import in current AST model.
-     * @param originAst - current AST model
+     *
+     * @param originAst    - current AST model
      * @param mergePackage - Import Node
      * @return - boolean status
      */
-    private boolean hasImport(BLangCompilationUnit originAst, ImportPackageNode mergePackage) {
+    private boolean hasImport(JsonObject originAst, JsonObject mergePackage) {
         boolean importFound = false;
 
-        for (TopLevelNode originNode : originAst.getTopLevelNodes()) {
-            if (originNode instanceof ImportPackageNode) {
-                ImportPackageNode originPackage = (ImportPackageNode) originNode;
-
-                if (originPackage.getOrgName().getValue().equals(mergePackage.getOrgName().getValue())) {
-                    if (originPackage.getPackageName().size() == mergePackage.getPackageName().size()) {
-                        List<IdentifierNode> packageNameList = originPackage.getPackageName().stream()
-                                .filter(pkgName -> mergePackage.getPackageName().contains(pkgName))
-                                .collect(Collectors.toList());
-                        if (packageNameList.size() > 0 &&
-                                packageNameList.size() == mergePackage.getPackageName().size()) {
-                            importFound = true;
-                        }
+        for (JsonElement node : originAst.getAsJsonArray("topLevelNodes")) {
+            JsonObject originNode = node.getAsJsonObject();
+            if (importFound) {
+                break;
+            } else if (originNode.get("kind").getAsString().equals("Import")
+                    && originNode.get("orgName").getAsJsonObject().get("value").getAsString()
+                    .equals(mergePackage.get("orgName").getAsJsonObject().get("value").getAsString())
+                    && originNode.getAsJsonArray("packageName").size() == mergePackage
+                    .getAsJsonArray("packageName").size()) {
+                JsonArray packageName = originNode.getAsJsonArray("packageName");
+                for (int i = 0; i < packageName.size(); i++) {
+                    JsonArray mergePackageName = mergePackage.getAsJsonArray("packageName");
+                    if (mergePackageName.get(i).getAsJsonObject().get("value").getAsString()
+                            .equals(packageName.get(i).getAsJsonObject().get("value").getAsString())) {
+                        importFound = true;
+                    } else {
+                        importFound = false;
+                        break;
                     }
                 }
-            } else {
-                break;
             }
         }
 
