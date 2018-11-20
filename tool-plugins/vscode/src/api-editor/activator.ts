@@ -79,7 +79,7 @@ function showAPIEditorPanel(context: ExtensionContext, langClient: ExtendedLangC
                                         const html = apiEditorRender(context, langClient, activeEditor.document.uri, selected);
                                         if (oasEditorPanel && html) {
                                             oasEditorPanel.webview.html = html;
-                                            oasEditorPanel.title ="Ballerina API Editor - " + selected;
+                                            oasEditorPanel.title ="Ballerina API Designer - " + selected;
                                         }
                                     }
                                 });
@@ -88,7 +88,7 @@ function showAPIEditorPanel(context: ExtensionContext, langClient: ExtendedLangC
                                     const html = apiEditorRender(context, langClient, activeEditor.document.uri, resp.services[0]);
                                     if (oasEditorPanel && html) {
                                         oasEditorPanel.webview.html = html;
-                                        oasEditorPanel.title ="Ballerina API Editor - " + resp.services[0];
+                                        oasEditorPanel.title ="Ballerina API Designer - " + resp.services[0];
                                     }
                                 }
                             }
@@ -131,7 +131,7 @@ function createAPIEditorPanel(selectedService: string, renderHtml: string,
     if (!oasEditorPanel) {
         oasEditorPanel = window.createWebviewPanel(
             'ballerinaOASEditor',
-            'Ballerina API Editor - ' + selectedService,
+            'Ballerina API Designer - ' + selectedService,
             { viewColumn: ViewColumn.Two, preserveFocus: true } ,
             {
                 enableScripts: true,

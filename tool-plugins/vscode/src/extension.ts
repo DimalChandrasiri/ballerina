@@ -40,6 +40,6 @@ export function activate(context: ExtensionContext): void {
 	activateTestRunner(ballerinaExtInstance);
   	// Enable API Docs Live Preview
 	activateDocs(ballerinaExtInstance);
-	// Enable Ballerina API Editor
+	// Enable Ballerina API Designer
 	activateAPIEditor(ballerinaExtInstance);
 }
