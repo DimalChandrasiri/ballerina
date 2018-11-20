@@ -107,7 +107,7 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
                     />
                 </Accordion.Title>
                 <Accordion.Content active={activeIndex === currIndex}>
-                    <p>{operationObject.description}</p>
+                    <InlineEdit isEditable text={operationObject.description} placeholderText='Add a description' />
                     
                     <div className='op-section'>
                         <div className='title'>

@@ -67,6 +67,10 @@ class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
     handleTextChange(e : React.ChangeEvent<HTMLInputElement>) {
         this.setState({
             stateText: e.target.value
+        },()=>{
+            if (this.props.onChange) {
+                this.props.onChange()
+            }
         });
     }
 
@@ -87,9 +91,11 @@ class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
             ) 
         } else if (!isEditing && (stateText === undefined || stateText == '')) {
             return (
-                <span className={customClass + ' inline-editor no-text'} onClick={this.enableEditing}>
-                    {placeholderText}
-                </span>
+                <div className={'inline-editor no-text ' + customClass} onClick={this.enableEditing}>
+                    <span>
+                        {placeholderText}
+                    </span>
+                </div>
             ) 
         } else {
             if (isTextArea) {

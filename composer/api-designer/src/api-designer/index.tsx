@@ -426,7 +426,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
 
         if (status && !inline) {
             return (
-                <HideComponent hideOn={1000}>
+                <HideComponent hideOn={5000}>
                     <Message error content={isError.message} />
                 </HideComponent>
             )
@@ -435,7 +435,9 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
         return (
             <OpenApiContextProvider value={appContext}>
                 {isError.status && isError.inline &&
-                    <Message error content={isError.message} />
+                    <HideComponent hideOn={5000}>
+                        <Message error content={isError.message} />
+                    </HideComponent>
                 }
                 {info && 
                     <React.Fragment>
@@ -470,9 +472,17 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                 }
                 {(() => {
                     if (actionState.state === 'success') {
-                        return <Message success content={actionState.message} />
+                        return (
+                            <HideComponent hideOn={5000}>
+                                <Message success content={actionState.message} />
+                            </HideComponent>
+                        )
                     } else if (actionState.state === 'error') {
-                        return <Message error content={actionState.message} />
+                        return (
+                            <HideComponent hideOn={5000}>
+                                <Message error content={actionState.message} />
+                            </HideComponent>
+                        )
                     } else {
                         return '';
                     }
