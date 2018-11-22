@@ -35,7 +35,7 @@ export interface OpenApiOperation {
     id: string,
     name: string,
     description: string,
-    method: string,
+    method: string[],
     path: string,
 }
 
@@ -54,7 +54,7 @@ class OpenApiAddOperation extends React.Component<OpenApiAddOperationProps, Open
                 id: '',
                 name: '',
                 description: '',
-                method: '',
+                method: [],
                 path: this.props.resourcePath,
             },
             operationMethods: []
@@ -92,6 +92,14 @@ class OpenApiAddOperation extends React.Component<OpenApiAddOperationProps, Open
         const { onAddOperation } = this.props;
         const { operationMethods } = this.state;
 
+        if(operationMethods.length == 0) {
+            return (
+                <Form size='mini' className='add-operation'>
+                    <p>The selected resource contains all the method implementations.</p>
+                </Form>
+            )
+        }
+
         return (
             <Form size='mini' className='add-operation'>
                 <Form.Field>
@@ -104,16 +112,28 @@ class OpenApiAddOperation extends React.Component<OpenApiAddOperationProps, Open
                         }
                     })} />
                 </Form.Field>
-                <Form.Field>
-                    <Form.Field control={Select} label='Method' options={operationMethods} placeholder='Method' onChange={(e: any, data: any) =>{
-                        this.setState({
-                            operationObject: {
-                                ...this.state.operationObject,
-                                method: data.value
-                            }
-                        })
-                    }} />
-                </Form.Field>
+                <Form.Group inline>
+                    <label>Methods</label>
+                    {operationMethods.map((method)=>{
+                        return (
+                            <Form.Checkbox
+                                size='mini'
+                                label={method.text}
+                                value={method.value}
+                                onChange={(e: React.SyntheticEvent, data: any) => {
+                                    if(data.checked) {
+                                        this.setState({
+                                            operationObject: {
+                                                ...this.state.operationObject,
+                                                method:  [...this.state.operationObject.method, data.label],
+                                            }
+                                        })
+                                    }
+                                }}
+                            />
+                        )
+                    })}
+                </Form.Group>
                 <Form.Field>
                     <Form.TextArea label='Description' placeholder='Tell us more about...' onChange={(e) => this.setState({ 
                         operationObject: {

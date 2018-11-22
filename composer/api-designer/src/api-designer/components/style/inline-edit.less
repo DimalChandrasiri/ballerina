@@ -1,5 +1,5 @@
 .inline-editor {
-    display: inline-flex;
+    display: initial;
     cursor: pointer;
 }
 .inline-editor span {
@@ -13,14 +13,31 @@
     border: 1px solid rgba(204, 204, 204, 0.23);
 }
 .inline-editor .ui.form {
-    border-bottom: 1px solid #727272;
-    padding: 0 0 .1em 0;
+    display: inherit;
+}
+.inline-editor .ui.form input {
+    border-bottom: 1px solid #676767 !important;
+    padding-bottom: .2em !important;
+}
+.inline-editor.editing .ui.form button {
+    outline: none;
+    box-shadow: none !important;
+    background-color: #3e3e3e;
+    padding: .5em 1em .4em 1em;
 }
 .inline-editor.editing textarea {
     width: 100%;
     height: 10em;
-    background: none;
+    background: transparent !important;
     border: none;
     color: #fff;
     border-bottom: 1px solid;
+}
+.inline-editor.url .activate-edit {
+    display: none;
+}
+.inline-editor.url:hover .activate-edit {
+    display: inline;
+    padding: 0 1em;
+    outline: none;
 }

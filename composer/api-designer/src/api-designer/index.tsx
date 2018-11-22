@@ -159,6 +159,21 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
     onDidAddOperation(operationsObj: OpenApiOperation) {
         const { onDidAddOperation, onDidChange } = this.props;
         const path = operationsObj.path;
+        const operations = this.state.openApiJson.paths[path];
+
+        operationsObj.method.forEach((method) => {
+            operations[method.toLowerCase()] = {
+                consumes : [],
+                description: operationsObj.description,
+                operationId: operationsObj.id,
+                parameters: [],
+                produces : ["application/xml", "application/json"],
+                responses :{},
+                security: [],
+                summary: operationsObj.name,
+                tags:[]
+            }
+        })
 
         this.setState(prevState => ({
             ...prevState,
@@ -166,20 +181,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                 ...prevState.openApiJson,
                 paths: {
                     ...prevState.openApiJson.paths,
-                    [path] : {
-                        ...prevState.openApiJson.paths[path],
-                        [operationsObj.method] : {
-                            consumes : [],
-                            description: operationsObj.description,
-                            operationId: operationsObj.id,
-                            parameters: [],
-                            produces : ["application/xml", "application/json"],
-                            responses :{},
-                            security: [],
-                            summary: operationsObj.name,
-                            tags:[]
-                        }
-                    }
+                    [path] : operations
                 }
             }
         }),()=>{
@@ -189,16 +191,10 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
             }
 
             if (onDidChange) {
-                onDidChange(EVENTS.ADD_OPERATION, operationsObj, this.state.openApiJson);
+                //onDidChange(EVENTS.ADD_OPERATION, operationsObj, this.state.openApiJson);
             }
 
             const { openApiJson } = this.state;
-
-            Object.keys(openApiJson.paths).forEach(function(t){
-                if(Object.keys(openApiJson.paths[t]).includes("x-MULTI")){
-                    delete openApiJson.paths[t]['x-MULTI']
-                }
-            });
 
             this.setState({
                 actionState: {
@@ -465,20 +461,46 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                                     attribute='description' 
                                     isEditable 
                                     isUrl
-                                    text={info.termsOfService} 
+                                    urlLink={info.termsOfService}
+                                    text='' 
                                     placeholderText='Add terms of service link.' 
                                 />
                             </div>
-                            {info.license &&
-                                <div>
-                                    <a href={info.license.url} target='_blank'>{info.license.name}</a>
-                                </div>
-                            }
-                            {info.contact &&
-                                <div>
-                                    <a href={info.contact.url} target='_blank'>{info.contact.name}</a>
-                                </div>
-                            }
+                            <div>
+                                {info.license ? 
+                                    <InlineEdit 
+                                        model={openApiJson} 
+                                        attribute='description' 
+                                        isEditable 
+                                        isUrl
+                                        text={info.license.name}
+                                        urlLink={info.license.url}
+                                        placeholderText='Add license link.' 
+                                    />
+                                :
+                                    <InlineEdit 
+                                        model={openApiJson} 
+                                        attribute='description' 
+                                        isEditable 
+                                        isUrl
+                                        text=''
+                                        urlLink=''
+                                        placeholderText='Add license link.' 
+                                    />
+                                }
+                                
+                            </div>
+                            <div>
+                                <InlineEdit 
+                                    model={openApiJson} 
+                                    attribute='description' 
+                                    isEditable 
+                                    isUrl
+                                    text={info.contact.name}
+                                    urlLink={info.contact.url}
+                                    placeholderText='Add license link.' 
+                                />
+                            </div>
                         </div>
                     </React.Fragment>
                 }

@@ -18,7 +18,7 @@
  */
 
 import * as React from 'react';
-import { Input, Form, Label } from 'semantic-ui-react'
+import { Input, Form, Icon } from 'semantic-ui-react'
 
 export interface InlineEditProps {
     text: string
@@ -28,6 +28,7 @@ export interface InlineEditProps {
     placeholderText?: string
     isTextArea?: boolean
     isUrl?: boolean
+    urlLink?: string
     model: any
     attribute: string
 }
@@ -36,6 +37,7 @@ export interface InlineEditState {
     stateText: string
     isEditing: boolean
     elementType: string
+    urlLinkState?: string
 }
 
 class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
@@ -44,6 +46,7 @@ class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
 
         this.state = {
             stateText: this.props.text,
+            urlLinkState: this.props.urlLink,
             isEditing: false,
             elementType: 'input'
         }
@@ -80,46 +83,103 @@ class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
 
     }
 
+    validateURL(url: string): boolean {
+        return /^(ftp|http|https):\/\/[^ "]+$/.test(url);
+    }
+
     render() {
-        const { isEditable, placeholderText, customClass, isTextArea, isUrl } = this.props;
-        const { isEditing, stateText } = this.state;
+        const { isEditable, placeholderText, customClass, isTextArea, isUrl, urlLink } = this.props;
+        const { isEditing, stateText, urlLinkState } = this.state;
 
         debugger;
+
         if(!isEditable) {
-            return <span className='inline-editor disabled'>{stateText}</span>
+            if(isUrl && urlLink && this.validateURL(urlLink)) {
+                return <a href={urlLink} target='_blank'>{stateText}</a>
+            } else { 
+                return <span className='inline-editor disabled'>{stateText}</span>
+            }
         } else if (!isEditing && stateText !== undefined && stateText !== '') {
-            return (
-                <div className={'inline-editor non-editing ' + customClass} onClick={this.enableEditing}>
-                    <span>
-                        {stateText}
-                    </span>
-                </div>
-            ) 
+            if(isUrl && urlLink && this.validateURL(urlLink)) {
+                if(stateText !== '') {
+                    return (
+                        <div className={'inline-editor url ' + customClass}>
+                            <span onClick={this.enableEditing}>{stateText}</span>
+                            <a className='activate-edit' href={urlLink} target='_blank'>
+                                <Icon name='linkify' />
+                            </a>
+                        </div>
+                    )
+                } else {
+                    return (
+                        <div className={'inline-editor url ' + customClass}>
+                            <span onClick={this.enableEditing}>{urlLink}</span>
+                            <a className='activate-edit' href={urlLink} target='_blank'>
+                                <Icon name='linkify' />
+                            </a>
+                        </div>
+                    )
+                }
+            } else {
+                return (
+                    <div className={'inline-editor non-editing ' + customClass} onClick={this.enableEditing}>
+                        <span>
+                            {stateText}
+                        </span>
+                    </div>
+                ) 
+            }
         } else if (!isEditing && (stateText === undefined || stateText == '')) {
-            return (
-                <div className={'inline-editor no-text ' + customClass} onClick={this.enableEditing}>
-                    <span>
-                        {placeholderText}
-                    </span>
-                </div>
-            ) 
+            if(isUrl && urlLink && this.validateURL(urlLink)) {
+                if(stateText !== '') {
+                    return (
+                        <div className={'inline-editor url ' + customClass}>
+                            <span onClick={this.enableEditing}>{stateText}</span>
+                            <a className='activate-edit' href={urlLink} target='_blank'>
+                                <Icon name='linkify' />
+                            </a>
+                        </div>
+                    )
+                } else {
+                    return (
+                        <div className={'inline-editor url ' + customClass}>
+                            <span onClick={this.enableEditing}>{urlLink}</span>
+                            <a className='activate-edit' href={urlLink} target='_blank'>
+                                <Icon name='linkify' />
+                            </a>
+                        </div>
+                    )
+                }
+            } else { 
+                return (
+                    <div className={'inline-editor no-text ' + customClass} onClick={this.enableEditing}>
+                        <span>
+                            {placeholderText}
+                        </span>
+                    </div>
+                ) 
+            }
         } else {
             if (isTextArea) {
                 return (
                     <div className={'inline-editor editing ' + customClass}>
-                        <Form size='mini' key='mini'>
+                        <Form >
                             <Form.TextArea autoFocus onBlur={this.handleFocusOut} placeholder={placeholderText} >{stateText}</Form.TextArea>
                         </Form>
                     </div>
                 )
             } else if (isUrl) { 
                 return (
-                    <Form size='mini' key='mini'>
-                        <Form.Group widths='equal' inline>
-                            <Form.Input transparent fluid placeholder={placeholderText} />
-                            <Form.Input transparent fluid placeholder='Write a link name' />
-                        </Form.Group>
-                    </Form>
+                    <div className={'inline-editor editing ' + customClass}>
+                        <Form>
+                            <Form.Group widths='5' inline>
+                                <Form.Input transparent fluid placeholder={placeholderText} onBlur={this.handleFocusOut} value={urlLinkState} />
+                                <Form.Input transparent fluid placeholder='Write a link name' onBlur={this.handleFocusOut} value={stateText} />
+                                <Form.Button width={1} inverted color='black' icon='check' />
+                                <Form.Button width={1} inverted color='black' icon='close' onClick={this.handleFocusOut}/>
+                            </Form.Group>
+                        </Form>
+                    </div>
                 )
             } else { 
                 return (
