@@ -18,15 +18,18 @@
  */
 
 import * as React from 'react';
+import { Input, Form, Label } from 'semantic-ui-react'
 
 export interface InlineEditProps {
     text: string
-    onChange?: Function
     customClass?: string
     activeStateClass?: string
     isEditable: boolean
     placeholderText?: string
     isTextArea?: boolean
+    isUrl?: boolean
+    model: any
+    attribute: string
 }
 
 export interface InlineEditState {
@@ -68,14 +71,17 @@ class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
         this.setState({
             stateText: e.target.value
         },()=>{
-            if (this.props.onChange) {
-                this.props.onChange()
-            }
+            const { model, attribute } = this.props;
+            this.handleChangeEvent(model, attribute)
         });
     }
 
+    handleChangeEvent(model: any, attribute: string) {
+
+    }
+
     render() {
-        const { isEditable, placeholderText, customClass, isTextArea } = this.props;
+        const { isEditable, placeholderText, customClass, isTextArea, isUrl } = this.props;
         const { isEditing, stateText } = this.state;
 
         debugger;
@@ -101,28 +107,34 @@ class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
             if (isTextArea) {
                 return (
                     <div className={'inline-editor editing ' + customClass}>
-                        <textarea 
-                            autoFocus
-                            onBlur={this.handleFocusOut}
-                            placeholder={placeholderText}
-                        >
-                            {stateText}
-                        </textarea>
+                        <Form size='mini' key='mini'>
+                            <Form.TextArea autoFocus onBlur={this.handleFocusOut} placeholder={placeholderText} >{stateText}</Form.TextArea>
+                        </Form>
                     </div>
+                )
+            } else if (isUrl) { 
+                return (
+                    <Form size='mini' key='mini'>
+                        <Form.Group widths='equal' inline>
+                            <Form.Input transparent fluid placeholder={placeholderText} />
+                            <Form.Input transparent fluid placeholder='Write a link name' />
+                        </Form.Group>
+                    </Form>
                 )
             } else { 
                 return (
                     <div className={'inline-editor editing ' + customClass}>
-                        <input
-                            autoFocus
-                            value={stateText} 
-                            onBlur={this.handleFocusOut}
-                            onChange={this.handleTextChange}
-                            placeholder={placeholderText}
-                            onClick={(e)=>{
-                                e.stopPropagation();
-                            }}
-                        />
+                        <Form>
+                            <Input
+                                transparent
+                                autoFocus
+                                placeholder={placeholderText}
+                                value={stateText}
+                                onBlur={this.handleFocusOut}
+                                onChange={this.handleTextChange}
+                                onClick={(e :any )=>{e.stopPropagation(); }} 
+                            />
+                        </Form>
                     </div>
                 )
             }

@@ -3,23 +3,18 @@
     cursor: pointer;
 }
 .inline-editor span {
-    padding: .2em;
     border: 1px solid rgba(204, 204, 204, 0);
+}
+.inline-editor.no-text span {
+    opacity: .2;
 }
 .inline-editor span:hover {
     background-color: rgba(204, 204, 204, 0.07);
     border: 1px solid rgba(204, 204, 204, 0.23);
 }
-.inline-editor.editing input {
-    display: flex;
-    flex: 0 1 auto;
-    border: none;
-    background: inherit;
-    border-bottom: 1px solid #fff;
-    padding: 0.3em 0;
-    text-indent: .4em;
-    outline: none;
-    color: #fff;
+.inline-editor .ui.form {
+    border-bottom: 1px solid #727272;
+    padding: 0 0 .1em 0;
 }
 .inline-editor.editing textarea {
     width: 100%;

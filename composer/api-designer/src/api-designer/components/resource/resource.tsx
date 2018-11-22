@@ -66,11 +66,9 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
             <div className='resource'>
                 <Accordion.Title className='res-title' index={currentIndex} onClick={onExpandEvent}>
                     <Icon name={isExpandAll || activeIndex === currentIndex ? 'chevron down' : 'chevron right'}/>
-                    <InlineEdit isEditable text={openApiResource} placeholderText='Add a description' />
+                    <InlineEdit model={openApiOperations} attribute={openApiResource} isEditable text={openApiResource} placeholderText='Add a description' />
                     {isExpandAll || activeIndex === currentIndex ? 
-                        <Button Title='Add operation to resource.' icon size='mini' circular className='add-operation-action' onClick={(e)=>{this.handleShowAddOperation(e)}}>
-                            <Icon name='plus' />
-                        </Button> : ''
+                        <Button title='Add operation to resource.' size='mini' compact className='add-operation-action' circular icon='plus' onClick={(e)=>{this.handleShowAddOperation(e)}} /> : ''
                     }
                 </Accordion.Title>
                 <Accordion.Content className='resource-content' active={isExpandAll || activeIndex === currentIndex}>

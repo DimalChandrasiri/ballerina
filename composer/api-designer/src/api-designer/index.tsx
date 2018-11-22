@@ -450,13 +450,25 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                         </div>
                         <div className='oas-details'>
                             <div className='description'>
-                                <InlineEdit isEditable isTextArea text={info.description} placeholderText='Add a description' />
+                                <InlineEdit 
+                                    model={openApiJson} 
+                                    attribute='description' 
+                                    isEditable 
+                                    isTextArea 
+                                    text={info.description} 
+                                    placeholderText='Add a description' 
+                                />
                             </div>
-                            {info.termsOfService && 
-                                <div>
-                                    <a href={info.termsOfService} target='_blank'>Terms of Service</a>
-                                </div>
-                            }
+                            <div>
+                                <InlineEdit 
+                                    model={openApiJson} 
+                                    attribute='description' 
+                                    isEditable 
+                                    isUrl
+                                    text={info.termsOfService} 
+                                    placeholderText='Add terms of service link.' 
+                                />
+                            </div>
                             {info.license &&
                                 <div>
                                     <a href={info.license.url} target='_blank'>{info.license.name}</a>
