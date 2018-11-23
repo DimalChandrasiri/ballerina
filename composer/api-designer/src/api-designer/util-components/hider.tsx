@@ -26,6 +26,7 @@ export interface HideComponentProps {
 export interface HideComponentState {
     visible: boolean,
     defaultTime: number,
+    timer: any
 }
 
 /**
@@ -39,6 +40,7 @@ class HideComponent extends React.Component<HideComponentProps, HideComponentSta
         this.state = {
             visible: false,
             defaultTime: 1000,
+            timer: null
         }
     }
 
@@ -56,6 +58,20 @@ class HideComponent extends React.Component<HideComponentProps, HideComponentSta
     }
 
     setHideTimer() {
+        if (this.state.timer != null) {
+            clearTimeout(this.state.timer)
+        }
+
+        const timeObj = setTimeout(()=>{
+            this.setState({
+                visible: false,
+                timer: null
+            });
+        }, this.props.hideOn)
+
+        this.setState({
+            timer: timeObj
+        })
     }
 
     render() {

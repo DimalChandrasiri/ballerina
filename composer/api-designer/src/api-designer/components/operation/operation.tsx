@@ -91,8 +91,8 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
         return (
             <div className={'operation '  + operationType}>
                 <Accordion.Title className='op-title ' index={currIndex} onClick={handleExpand}>
-                    <InlineEdit customClass='op-method' isEditable text={operationType} />
-                    <InlineEdit customClass='op-summary' isEditable text={operationObject.summary} placeholderText='Add a summary' />
+                    <span className='op-method'>{operationType}</span>
+                    <InlineEdit model={operationObject} attribute={operationType} customClass='op-summary' isEditable text={operationObject.summary} placeholderText='Add a summary' />
                     <Icon
                         className='delete-op'
                         onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
@@ -107,7 +107,7 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
                     />
                 </Accordion.Title>
                 <Accordion.Content active={activeIndex === currIndex}>
-                    <p>{operationObject.description}</p>
+                    <InlineEdit model={operationObject} attribute={operationType} isEditable text={operationObject.description} placeholderText='Add a description' />
                     
                     <div className='op-section'>
                         <div className='title'>

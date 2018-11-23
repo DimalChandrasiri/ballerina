@@ -177,12 +177,12 @@
             },
             {
                 "command": "ballerina.showAPIEditor",
-                "title": "Show API Editor",
+                "title": "Show API Designer",
                 "category": "Ballerina"
             },
             {
                 "command": "ballerina.showAPIEditor",
-                "title": "Show API Editor",
+                "title": "Show API Designer",
                 "category": "Ballerina"
             }
         ],
