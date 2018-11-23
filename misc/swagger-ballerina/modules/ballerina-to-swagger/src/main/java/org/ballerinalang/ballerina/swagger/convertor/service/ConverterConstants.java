@@ -46,4 +46,5 @@ public class ConverterConstants {
 
     // annotation keys
     public static final String ANNON_RES_INFO = "ResourceInfo";
+    public static final String ANNON_MULTI_RES_INFO = "MultiResourceInfo";
 }
