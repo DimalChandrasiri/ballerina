@@ -56,6 +56,13 @@ class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
         this.handleTextChange = this.handleTextChange.bind(this);
     }
 
+    componentWillReceiveProps(nextProps: InlineEditProps) {
+        this.setState({
+            stateText: nextProps.text,
+            urlLinkState: nextProps.urlLink,
+        });
+    }
+
     enableEditing(e : React.MouseEvent<HTMLSpanElement>) {
         e.stopPropagation();
         this.setState({
@@ -90,8 +97,6 @@ class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
     render() {
         const { isEditable, placeholderText, customClass, isTextArea, isUrl, urlLink } = this.props;
         const { isEditing, stateText, urlLinkState } = this.state;
-
-        debugger;
 
         if(!isEditable) {
             if(isUrl && urlLink && this.validateURL(urlLink)) {

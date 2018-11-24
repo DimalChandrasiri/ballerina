@@ -18,7 +18,7 @@
  */
 
 import * as React from 'react';
-import { Form, Button, Select } from 'semantic-ui-react';
+import { Form, Button } from 'semantic-ui-react';
 
 export interface OpenApiAddOperationProps {
     openApiJson: any,
