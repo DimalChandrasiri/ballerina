@@ -46,7 +46,7 @@ export function apiEditorRender(context: ExtensionContext, langClient: ExtendedL
 
         // Handle the message inside the webview
         window.addEventListener('message', event => {
-            const message = event.data; // The JSON data our extension sent
+            let message = event.data; // The JSON data our extension sent
             switch (message.command) {
                 case 'update':
                     docUri = message.docUri;
@@ -73,24 +73,22 @@ export function apiEditorRender(context: ExtensionContext, langClient: ExtendedL
 
         function drawAPIEditor() {
             if(updatedJSON === '') {
+                console.log('------------- redraw -----------')
                 getSwaggerJson(docUri, selectedService).then((response)=>{
                     try {
                         let width = window.innerWidth - 6;
                         let height = window.innerHeight;
                         debugger;
-                        ballerinaComposer.renderAPIEditor(document.getElementById("api-visualizer"), JSON.stringify(response.ballerinaOASJson), onDidJsonChange);
+                        ballerinaComposer.renderAPIEditor(document.getElementById("api-visualizer"), response.ballerinaOASJson, onDidJsonChange, false);
                     } catch (e) {
                         console.log(e.stack);
                     }
                 })
             } else {
+                console.log('------------ update ------------')
                 console.log(updatedJSON);
-                ballerinaComposer.renderAPIEditor(document.getElementById("api-visualizer"), updatedJSON, onDidJsonChange);
+                ballerinaComposer.renderAPIEditor(document.getElementById("api-visualizer"), updatedJSON, onDidJsonChange, true);
             }
-
-            vscode.postMessage({
-                command: 'oasASTModified'
-            })
             
         }
 

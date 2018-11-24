@@ -19,6 +19,7 @@
 
 import * as React from 'react';
 import * as SwaggerParser from 'swagger-parser';
+import { Spec as Swagger } from 'swagger-schema-official';
 import { Message } from 'semantic-ui-react';
 
 import { OpenApiContextProvider, OpenApiContext } from './context/open-api-context';
@@ -37,7 +38,7 @@ import './components/style/main.less';
 
 
 export interface OasProps {
-    openApiJson: any,
+    openApiJson: Swagger,
     onDidAddResource?: Function,
     onDidAddOperation?: Function,
     onDidAddParameter?: Function,
@@ -99,14 +100,24 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
         this.onDidAddResponse = this.onDidAddResponse.bind(this);
         this.onDidDeleteOperation = this.onDidDeleteOperation.bind(this);
     }
+    
     componentDidMount() {
         const { openApiJson } = this.props;
+
+        this.setState({
+            openApiJson: openApiJson
+        });
 
         this.validateJsonProp(openApiJson);
         this.validateOpenApiJson(openApiJson);
     }
+
     componentWillReceiveProps(nextProps: OasProps) {
         const { openApiJson } = nextProps;
+
+        this.setState({
+            openApiJson: openApiJson
+        });
 
         this.validateJsonProp(openApiJson);
         this.validateOpenApiJson(openApiJson);
@@ -191,7 +202,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
             }
 
             if (onDidChange) {
-                //onDidChange(EVENTS.ADD_OPERATION, operationsObj, this.state.openApiJson);
+                onDidChange(EVENTS.ADD_OPERATION, operationsObj, this.state.openApiJson);
             }
 
             const { openApiJson } = this.state;
@@ -247,7 +258,6 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                     onDidAddParameter(parameterObj, this.state.openApiJson);
                 }
     
-                debugger;
                 if (onDidChange) {
                     onDidChange(EVENTS.ADD_PARAMETER, parameterObj, this.state.openApiJson);
                 }
@@ -293,7 +303,6 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                     onDidAddParameter(parameterObj, this.state.openApiJson);
                 }
     
-                debugger;
                 if (onDidChange) {
                     onDidChange(EVENTS.ADD_PARAMETER, parameterObj, this.state.openApiJson);
                 }
@@ -370,18 +379,13 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
      * @param json Open API JSON that needs to be validated
      * @param onvalidattion Function to be run as a callback after validation
      */
-    validateOpenApiJson(json: string, onvalidattion?: Function) {
-        SwaggerParser.validate(JSON.parse(json)).then(validjson => {
-            this.setState({
-                openApiJson: validjson
-            });
-
+    validateOpenApiJson(json: Swagger , onvalidattion?: Function) {
+        SwaggerParser.validate(json).then(validjson => {
             if (onvalidattion) {
                 onvalidattion(validjson);
             };
         }).catch(error => {
             this.setState({
-                openApiJson: json,
                 isError: {
                     status: true,
                     inline: true,
@@ -396,7 +400,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
      * 
      * @param json JSON String which needs to be checked for undefined
      */
-    validateJsonProp(json: string) {
+    validateJsonProp(json: Swagger) {
         if (!json) {
             this.setState({
                 isError: {
@@ -418,7 +422,6 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
             onDidAddResponse: this.onDidAddResponse,
             onDidDeleteOperation: this.onDidDeleteOperation
         };
-        debugger
 
         if (status && !inline) {
             return (
@@ -488,18 +491,30 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                                         placeholderText='Add license link.' 
                                     />
                                 }
-                                
                             </div>
                             <div>
-                                <InlineEdit 
-                                    model={openApiJson} 
-                                    attribute='description' 
-                                    isEditable 
-                                    isUrl
-                                    text={info.contact.name}
-                                    urlLink={info.contact.url}
-                                    placeholderText='Add license link.' 
-                                />
+                                {info.contact ? 
+                                    <InlineEdit 
+                                        model={openApiJson} 
+                                        attribute='description' 
+                                        isEditable 
+                                        isUrl
+                                        text={info.contact.name}
+                                        urlLink={info.contact.url}
+                                        placeholderText='Add contact information' 
+                                    />
+                                :
+                                    <InlineEdit 
+                                        model={openApiJson} 
+                                        attribute='description' 
+                                        isEditable 
+                                        isUrl
+                                        text=''
+                                        urlLink=''
+                                        placeholderText='Add contact information' 
+                                    />
+                                }
+                                
                             </div>
                         </div>
                     </React.Fragment>
