@@ -21,6 +21,7 @@ import * as React from 'react';
 import * as SwaggerParser from 'swagger-parser';
 import { Spec as Swagger } from 'swagger-schema-official';
 import { Message } from 'semantic-ui-react';
+import uniqid from 'uniqid';
 
 import { OpenApiContextProvider, OpenApiContext } from './context/open-api-context';
 import OpenApiResourceList from './components/resource/resources';
@@ -99,6 +100,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
         this.onDidAddParameter = this.onDidAddParameter.bind(this);
         this.onDidAddResponse = this.onDidAddResponse.bind(this);
         this.onDidDeleteOperation = this.onDidDeleteOperation.bind(this);
+        this.handleMessageHide = this.handleMessageHide.bind(this);
     }
     
     componentDidMount() {
@@ -131,6 +133,24 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
     onDidAddResource(addedResource: OpenApiResource) {
         const { onDidAddResource, onDidChange } = this.props;
         const resourceName = addedResource.name.replace(' ','');
+        const operations = {};
+        
+        addedResource.methods.forEach((method) => {
+            operations[method.toLowerCase()] = {
+                description: '',
+                operationId: 'method_' + uniqid(),
+                parameters: [],
+                responses : {
+					"200": {
+						"description": "OK"
+					}
+				},
+                security: [],
+                summary: '',
+                tags:[]
+            }
+        })
+
 
         this.setState(prevState => ({
             ...prevState,
@@ -138,7 +158,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                 ...prevState.openApiJson,
                 paths: {
                     ...prevState.openApiJson.paths,
-                    ['/' + resourceName]: {}
+                    ['/' + resourceName]: operations
                 }
             }
         }), () => {
@@ -147,6 +167,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                     onDidAddResource(resourceName, this.state.openApiJson);
                 }
 
+                debugger;
                 if (onDidChange) {
                     onDidChange(EVENTS.ADD_RESOURCE, resourceName, this.state.openApiJson);
                 }
@@ -174,14 +195,16 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
 
         operationsObj.method.forEach((method) => {
             operations[method.toLowerCase()] = {
-                consumes : [],
-                description: operationsObj.description,
-                operationId: operationsObj.id,
+                description: '',
+                operationId: 'method_' + uniqid(),
                 parameters: [],
-                produces : ["application/xml", "application/json"],
-                responses :{},
+                responses : {
+					"200": {
+						"description": "OK"
+					}
+				},
                 security: [],
-                summary: operationsObj.name,
+                summary: '',
                 tags:[]
             }
         })
@@ -411,6 +434,20 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
             })
         }
     }
+
+    handleMessageHide() {
+        this.setState({
+            isError: {
+                status: false,
+                inline: false,
+                message: ''
+            },
+            actionState: {
+                state: '',
+                message: '',
+            }
+        })
+    }
     
     render() {
         const { isError: { status, inline }, isError, openApiJson, openApiJson: { paths, info }, actionState } = this.state;
@@ -425,7 +462,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
 
         if (status && !inline) {
             return (
-                <HideComponent hideOn={5000}>
+                <HideComponent hideOn={5000} callback={this.handleMessageHide}>
                     <Message error content={isError.message} />
                 </HideComponent>
             )
@@ -434,7 +471,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
         return (
             <OpenApiContextProvider value={appContext}>
                 {isError.status && isError.inline &&
-                    <HideComponent hideOn={5000}>
+                    <HideComponent hideOn={5000} callback={this.handleMessageHide}>
                         <Message error content={isError.message} />
                     </HideComponent>
                 }
@@ -522,13 +559,13 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                 {(() => {
                     if (actionState.state === 'success') {
                         return (
-                            <HideComponent hideOn={5000}>
+                            <HideComponent hideOn={5000} callback={this.handleMessageHide}>
                                 <Message success content={actionState.message} />
                             </HideComponent>
                         )
                     } else if (actionState.state === 'error') {
                         return (
-                            <HideComponent hideOn={5000}>
+                            <HideComponent hideOn={5000} callback={this.handleMessageHide}>
                                 <Message error content={actionState.message} />
                             </HideComponent>
                         )

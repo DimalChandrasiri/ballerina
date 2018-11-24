@@ -65,9 +65,6 @@ export function apiEditorRender(context: ExtensionContext, langClient: ExtendedL
         }
 
         function onDidJsonChange(event, changedObj, oasJson) {
-            if(event === "add_resource"){
-                return false;
-            }
             webViewRPCHandler.invokeRemoteMethod('triggerSwaggerDefChange', [JSON.stringify(oasJson), docUri]);
         }
 

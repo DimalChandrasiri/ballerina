@@ -21,6 +21,7 @@ import * as React from 'react';
 
 export interface HideComponentProps {
     hideOn?: number
+    callback: Function
 }
 
 export interface HideComponentState {
@@ -67,6 +68,7 @@ class HideComponent extends React.Component<HideComponentProps, HideComponentSta
                 visible: false,
                 timer: null
             });
+            this.props.callback();
         }, this.props.hideOn)
 
         this.setState({

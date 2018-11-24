@@ -25,20 +25,57 @@ export interface OpenApiAddResourceProps {
 }
 
 export interface OpenApiAddResourceState {
-    openApiResourceObj: OpenApiResource
+    openApiResourceObj: OpenApiResource,
+    operationMethods: Array<OpenApiOperationMethod>
 }
 
 export interface OpenApiResource {
     name: string
+    methods: string[]
+}
+
+export interface OpenApiOperationMethod {
+    text: string,
+    value: string
 }
 
 class OpenApiAddResource extends React.Component<OpenApiAddResourceProps, OpenApiAddResourceState> {
     constructor(props: OpenApiAddResourceProps) {
         super(props);
+
+        this.state = {
+            openApiResourceObj: {
+                name: '',
+                methods: []
+            },
+            operationMethods: []
+        }
+    }
+
+    componentDidMount() {
+        this.populateOperationMethods();
+    }
+
+    populateOperationMethods() {
+        let methodOpts: Array<OpenApiOperationMethod> = [];
+
+        let availableMethods = ['GET','POST','PUT','DELETE','PATCH','HEAD','OPTIONS'];
+
+        availableMethods.forEach((method)=>{
+            methodOpts.push({
+                text: method,
+                value: method.toLowerCase(),
+            })
+        });
+
+        this.setState({
+            operationMethods: methodOpts,
+        })
     }
 
     render() {
         const { onDidAddResource } = this.props;
+        const { operationMethods } = this.state;
 
         return (
             <Form size='mini' className='add-resource'>
@@ -46,10 +83,33 @@ class OpenApiAddResource extends React.Component<OpenApiAddResourceProps, OpenAp
                     <label>Resource Name</label>
                     <input placeholder='Example: /users/{userId}' onChange={(e) => this.setState({ 
                         openApiResourceObj: {
+                            ...this.state.openApiResourceObj,
                             name: e.target.value
                         }
                     })} />
                 </Form.Field>
+                <Form.Group inline>
+                    <label>Methods</label>
+                    {operationMethods.map((method)=>{
+                        return (
+                            <Form.Checkbox
+                                size='mini'
+                                label={method.text}
+                                value={method.value}
+                                onChange={(e: React.SyntheticEvent, data: any) => {
+                                    if(data.checked) {
+                                        this.setState({
+                                            openApiResourceObj: {
+                                                ...this.state.openApiResourceObj,
+                                                methods:  [...this.state.openApiResourceObj.methods, data.label],
+                                            }
+                                        })
+                                    }
+                                }}
+                            />
+                        )
+                    })}
+                </Form.Group>
                 <Button size='tiny' onClick={() => {
                     onDidAddResource(this.state.openApiResourceObj);
                 }}>Save Resource</Button>

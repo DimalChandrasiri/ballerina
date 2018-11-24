@@ -40,7 +40,6 @@ export interface OpenApiOperation {
 }
 
 export interface OpenApiOperationMethod {
-    key: string,
     text: string,
     value: string
 }
@@ -77,7 +76,6 @@ class OpenApiAddOperation extends React.Component<OpenApiAddOperationProps, Open
 
         availableMethods.forEach((method)=>{
             methodOpts.push({
-                key: method.toLowerCase(),
                 text: method,
                 value: method.toLowerCase(),
             })
@@ -101,17 +99,7 @@ class OpenApiAddOperation extends React.Component<OpenApiAddOperationProps, Open
         }
 
         return (
-            <Form size='mini' className='add-operation'>
-                <Form.Field>
-                    <label>Name</label>
-                    <input placeholder='Short Summery' onChange={(e) => this.setState({ 
-                        operationObject: {
-                            ...this.state.operationObject,
-                            name: e.target.value,
-                            id: e.target.value.replace(' ','')
-                        }
-                    })} />
-                </Form.Field>
+            <Form className='add-operation'>
                 <Form.Group inline>
                     <label>Methods</label>
                     {operationMethods.map((method)=>{
@@ -134,14 +122,6 @@ class OpenApiAddOperation extends React.Component<OpenApiAddOperationProps, Open
                         )
                     })}
                 </Form.Group>
-                <Form.Field>
-                    <Form.TextArea label='Description' placeholder='Tell us more about...' onChange={(e) => this.setState({ 
-                        operationObject: {
-                            ...this.state.operationObject,
-                            description: e.currentTarget.value
-                        }
-                    })} />
-                </Form.Field>
                 <Button size='mini' onClick={() => {
                     onAddOperation(this.state.operationObject)
                 }}>Save</Button>
