@@ -26,10 +26,11 @@ import InlineEdit from '../../util-components/inline-edit';
 export interface OpenApiResourceProps {
     openApiResource: string,
     openApiOperations: any,
-    activeIndex: number,
+    activeIndex?: number,
     currentIndex: number,
     onExpandEvent: (event: React.MouseEvent<HTMLDivElement>, data: AccordionTitleProps) => void,
     isExpandAll: boolean
+    active: boolean
 }
 
 export interface OpenApiResourceState {
@@ -41,7 +42,7 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
         super(props);
 
         this.state = {
-            showAddOperation: false
+            showAddOperation: false,
         }
 
         this.handleShowAddOperation = this.handleShowAddOperation.bind(this);
@@ -57,22 +58,39 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
 
     render() {
         const {
-            openApiResource, openApiOperations, activeIndex, currentIndex, onExpandEvent, isExpandAll
+            openApiResource, openApiOperations, activeIndex, currentIndex, onExpandEvent, isExpandAll, active
         } = this.props;
 
-        const { showAddOperation } = this.state; 
+        const { showAddOperation } = this.state;
 
         return (
             <div className='resource'>
-                <Accordion.Title className='res-title' index={currentIndex} onClick={onExpandEvent}>
-                    <Icon name={isExpandAll || activeIndex === currentIndex ? 'chevron down' : 'chevron right'}/>
-                    <InlineEdit model={openApiOperations} attribute={openApiResource} isEditable text={openApiResource} placeholderText='Add a description' />
-                    {isExpandAll || activeIndex === currentIndex ? 
-                        <Button title='Add operation to resource.' size='mini' compact className='add-operation-action' circular icon='plus' onClick={(e)=>{this.handleShowAddOperation(e)}} /> : ''
-                    }
+                <Accordion.Title index={currentIndex} className='res-title' active={isExpandAll || active} onClick={onExpandEvent} >
+                    <Icon name={isExpandAll || active ? 'chevron down' : 'chevron right'}></Icon>
+                    <InlineEdit 
+                        model={openApiOperations} 
+                        attribute={openApiResource} 
+                        isEditable 
+                        text={openApiResource}
+                        placeholderText='Add a description'
+                    />
+                    <Button
+                        title='Add operation to resource.' 
+                        size='mini' 
+                        compact 
+                        className='add-operation-action' 
+                        circular 
+                        icon='plus'
+                        onClick={(e)=>{
+                            this.handleShowAddOperation(e)}
+                        } />
                 </Accordion.Title>
-                <Accordion.Content className='resource-content' active={isExpandAll || activeIndex === currentIndex}>
-                    <OpenApiOperationsList openApiOperations={openApiOperations} resourcePath={openApiResource} showAddOperation={showAddOperation} />
+                <Accordion.Content className='resource-content' active={isExpandAll || active} >
+                    <OpenApiOperationsList 
+                        openApiOperations={openApiOperations} 
+                        resourcePath={openApiResource} 
+                        showAddOperation={showAddOperation}
+                    />
                 </Accordion.Content>
             </div>
         )

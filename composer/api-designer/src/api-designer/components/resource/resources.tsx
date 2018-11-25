@@ -29,9 +29,10 @@ export interface OasResourceListProps {
 }
 
 export interface OpenApiResourceListState {
-    expandAll: boolean,
-    showAddResource: boolean,
-    activeIndex: number
+    expandAll: boolean
+    showAddResource: boolean
+    activeIndex: number[]
+    collapseOnExpandAll: number[]
 }
 
 class OpenApiResourceList extends React.Component<OasResourceListProps, OpenApiResourceListState> {
@@ -39,9 +40,10 @@ class OpenApiResourceList extends React.Component<OasResourceListProps, OpenApiR
         super(props);
 
         this.state = {
-            expandAll: true,
+            expandAll: false,
             showAddResource: false,
-            activeIndex: -1
+            activeIndex: [],
+            collapseOnExpandAll: []
         }
 
         this.showOpenApiAddResource = this.showOpenApiAddResource.bind(this)
@@ -58,28 +60,58 @@ class OpenApiResourceList extends React.Component<OasResourceListProps, OpenApiR
 
     expandAllResources() {
         const { expandAll } = this.state;
-        this.setState({
-            expandAll: !expandAll
-        })
+
+        if (expandAll) {
+            this.setState({
+                expandAll: false,
+                collapseOnExpandAll: [],
+                activeIndex: []
+            })
+        } else {
+            this.setState({
+                expandAll: true
+            })
+        }
+        
     }
 
     expandResource(event: React.MouseEvent<HTMLDivElement>, data: AccordionTitleProps): void {
-        const { index } = data;
-        const { activeIndex } = this.state;
-        let newIndex: number;
+        const { expandAll, activeIndex, collapseOnExpandAll } = this.state;
+        const openApiResourcesLength = Object.keys(this.props.openApiResources).length;
 
-        if(this.state.expandAll) {
-            newIndex = -1;
+        if (expandAll) {
+            debugger;
+            if(!collapseOnExpandAll.includes(Number(data.index))) {
+                this.setState({
+                    collapseOnExpandAll: [...this.state.collapseOnExpandAll, Number(data.index)];
+                })
+            } else {
+                this.setState(prevState => ({ collapseOnExpandAll: prevState.collapseOnExpandAll.filter(index => index !==  Number(data.index)) }));
+            }
         } else {
-            newIndex = activeIndex === Number(index) ? -1 : Number(index);
+            if(!activeIndex.includes(Number(data.index))) {
+                const indexArray = [...this.state.activeIndex, Number(data.index)];
+                this.setState({
+                    activeIndex: indexArray,
+                    expandAll: indexArray.length === openApiResourcesLength
+                })
+            } else {
+                this.setState(prevState => ({ 
+                    activeIndex: prevState.activeIndex.filter(index => index !==  Number(data.index)) 
+                }));
+            }
+            
         }
-
-        this.setState({ activeIndex: newIndex });
     }
 
     render() {
         const { openApiResources } = this.props;
-        const { expandAll, showAddResource, activeIndex } = this.state;
+        const { expandAll, showAddResource, activeIndex, collapseOnExpandAll } = this.state;
+
+        if (!openApiResources) {
+            return '';
+        }
+
         return (
             <div className='open-api-resource-list-container'>
                 <div className='action-container'>
@@ -89,7 +121,7 @@ class OpenApiResourceList extends React.Component<OasResourceListProps, OpenApiR
                     </Button>
                     <Button size='mini' icon labelPosition='left' floated='right' onClick={this.expandAllResources}>
                         <Icon name={expandAll ? 'compress' : 'expand'} />
-                        {expandAll ? 'Collapse All' : 'Expand All'}
+                        {expandAll || activeIndex.length === Object.keys(openApiResources).length ? 'Collapse All' : 'Expand All' }
                     </Button>
                 </div>
                 {showAddResource &&
@@ -102,16 +134,16 @@ class OpenApiResourceList extends React.Component<OasResourceListProps, OpenApiR
                     </OpenApiContextConsumer>
                 }
                 {openApiResources && Object.keys(openApiResources).length > 0 &&
-                    <Accordion className='open-api-resource-list'>
+                    <Accordion exclusive={false} className='open-api-resource-list'>
                         {Object.keys(openApiResources).map((openApiResource, index) => {
                             return (
                                 <OpenApiResource 
                                     openApiResource = { openApiResource }
                                     openApiOperations = { openApiResources[openApiResource] }
-                                    activeIndex = { activeIndex }
                                     currentIndex = { index }
                                     onExpandEvent = { this.expandResource }
-                                    isExpandAll = { expandAll }
+                                    isExpandAll = { !collapseOnExpandAll.includes(index) && expandAll ? true : false }
+                                    active={ activeIndex.includes(index) }
                                 />
                             )
                         })}
