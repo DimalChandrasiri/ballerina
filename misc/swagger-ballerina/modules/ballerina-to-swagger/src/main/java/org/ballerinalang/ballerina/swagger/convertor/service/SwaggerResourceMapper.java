@@ -336,7 +336,6 @@ public class SwaggerResourceMapper {
                 operationAdaptor.getOperation().addParameter(messageParameter);
             }
         }
-
     }
 
     /**

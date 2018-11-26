@@ -52,7 +52,7 @@ function testOrderBy() {
 function startOrderBy() returns (Employee[]) {
 
     int index = 0;
-    Teacher[] teachers;
+    Teacher[] teachers = [];
     testOrderBy();
 
     teachers[0] = {name:"Raja", age:71, status:"single", batch:"LK2014", school:"Hindu College"};
@@ -72,7 +72,7 @@ function startOrderBy() returns (Employee[]) {
         teacherStream.publish(teacher);
     }
 
-    while (lengthof globalEmployeeArray != 10 || index < 20) {
+    while (globalEmployeeArray.length() != 10 || index < 20) {
         index += 1;
         runtime:sleep(500);
     }
@@ -81,7 +81,7 @@ function startOrderBy() returns (Employee[]) {
 }
 
 function printEmployeeNumber(Employee e) {
-   addToGlobalEmployeeArray(e);
+    addToGlobalEmployeeArray(e);
 }
 
 function addToGlobalEmployeeArray(Employee e) {
@@ -112,7 +112,7 @@ function testOrderBy2() {
 function startOrderBy2() returns (Employee[]) {
 
     int index = 0;
-    Teacher[] teachers;
+    Teacher[] teachers = [];
     testOrderBy2();
 
     teachers[0] = {name:"Raja", age:71, status:"single", batch:"LK2014", school:"Hindu College"};
@@ -132,7 +132,7 @@ function startOrderBy2() returns (Employee[]) {
         teacherStream2.publish(teacher);
     }
 
-    while (lengthof globalEmployeeArray2 != 10 || index < 20) {
+    while (globalEmployeeArray2.length() != 10 || index < 20) {
         index += 1;
         runtime:sleep(500);
     }
@@ -171,7 +171,7 @@ function testOrderBy3() {
 function startOrderBy3() returns (Employee[]) {
 
     int index = 0;
-    Teacher[] teachers;
+    Teacher[] teachers = [];
     testOrderBy3();
 
     teachers[0] = {name:"Raja", age:71, status:"single", batch:"LK2014", school:"Hindu College"};
@@ -191,7 +191,7 @@ function startOrderBy3() returns (Employee[]) {
         teacherStream3.publish(teacher);
     }
 
-    while (lengthof globalEmployeeArray3 != 10 || index < 20) {
+    while (globalEmployeeArray3.length() != 10 || index < 20) {
         index += 1;
         runtime:sleep(500);
     }
@@ -230,7 +230,7 @@ function testOrderBy4() {
 function startOrderBy4() returns (Employee[]) {
 
     int index = 0;
-    Teacher[] teachers;
+    Teacher[] teachers = [];
     testOrderBy4();
 
     teachers[0] = {name:"Raja", age:71, status:"single", batch:"LK2014", school:"Hindu College"};
@@ -250,7 +250,7 @@ function startOrderBy4() returns (Employee[]) {
         teacherStream4.publish(teacher);
     }
 
-    while (lengthof globalEmployeeArray4 != 10 || index < 20) {
+    while (globalEmployeeArray4.length() != 10 || index < 20) {
         index += 1;
         runtime:sleep(500);
     }
@@ -289,7 +289,7 @@ function testOrderBy5() {
 function startOrderBy5() returns (Employee[]) {
 
     int index = 0;
-    Teacher[] teachers;
+    Teacher[] teachers = [];
     testOrderBy5();
 
     teachers[0] = {name:"Raja", age:71, status:"single", batch:"LK2014", school:"Hindu College"};
@@ -309,7 +309,7 @@ function startOrderBy5() returns (Employee[]) {
         teacherStream5.publish(teacher);
     }
 
-    while (lengthof globalEmployeeArray5 != 10 || index < 20) {
+    while (globalEmployeeArray5.length() != 10 || index < 20) {
         index += 1;
         runtime:sleep(500);
     }
