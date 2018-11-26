@@ -17,20 +17,21 @@
  *
  */
 
-import { createElement } from 'react';
-import { render } from 'react-dom';
-import OpenApiVisualizer from './api-designer/index'
+import { createElement } from "react";
+import { render } from "react-dom";
+import OpenApiVisualizer from "./api-designer/index";
 
-export default function renderAPIEditor(renderTarget: HTMLElement, oasJson: string, onOASChange: Function, updateView: boolean) {
-    let openApiJson = JSON.parse(oasJson)
+export default function renderAPIEditor(renderTarget: HTMLElement,
+                                        oasJson: string, onOASChange: () => void , updateView: boolean) {
+    let openApiJson = JSON.parse(oasJson);
 
-    if(updateView) {
+    if (updateView) {
         openApiJson = JSON.parse(openApiJson);
     }
 
     const oasVisualizer = createElement(OpenApiVisualizer, {
-        openApiJson: openApiJson,
-        onDidChange: onOASChange
+        onDidChange: onOASChange,
+        openApiJson
     });
     render(oasVisualizer, renderTarget);
 }

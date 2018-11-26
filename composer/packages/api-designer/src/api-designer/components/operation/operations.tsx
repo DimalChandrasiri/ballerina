@@ -17,21 +17,21 @@
  *
  */
 
-import * as React from 'react';
-import { AccordionTitleProps, Accordion } from 'semantic-ui-react';
+import * as React from "react";
+import { Accordion, AccordionTitleProps } from "semantic-ui-react";
 
-import { OpenApiContextConsumer, OpenApiContext } from '../../context/open-api-context';
-import OpenApiAddOperation from './add-operation';
-import OpenApiOperation from './operation';
+import { OpenApiContext, OpenApiContextConsumer } from "../../context/open-api-context";
+import OpenApiAddOperation from "./add-operation";
+import OpenApiOperation from "./operation";
 
 export interface OasOperationsListProps {
-    openApiOperations: any,
-    resourcePath: string,
-    showAddOperation: boolean
+    openApiOperations: any;
+    resourcePath: string;
+    showAddOperation: boolean;
 }
 
 export interface OasOperationsListState {
-    activeIndex: number
+    activeIndex: number;
 }
 
 class OpenApiOperationsList extends React.Component<OasOperationsListProps, OasOperationsListState> {
@@ -40,12 +40,12 @@ class OpenApiOperationsList extends React.Component<OasOperationsListProps, OasO
 
         this.state = {
             activeIndex: -1
-        }
+        };
 
-        this.expandOperation = this.expandOperation.bind(this)
+        this.expandOperation = this.expandOperation.bind(this);
     }
 
-    expandOperation(event: React.MouseEvent<HTMLDivElement>, titleProps: AccordionTitleProps) {
+    public expandOperation(event: React.MouseEvent<HTMLDivElement>, titleProps: AccordionTitleProps) {
         const { index } = titleProps;
         const { activeIndex } = this.state;
         const newIndex = activeIndex === Number(index) ? -1 : Number(index);
@@ -53,31 +53,31 @@ class OpenApiOperationsList extends React.Component<OasOperationsListProps, OasO
         this.setState({ activeIndex: newIndex });
     }
 
-    render() {
+    public render() {
         const { openApiOperations, resourcePath, showAddOperation } = this.props;
         const { activeIndex } = this.state;
 
         return (
             <React.Fragment>
-                {showAddOperation && 
+                {showAddOperation &&
                     <OpenApiContextConsumer>
-                        {(appContext: OpenApiContext) => {
+                        {(appContext: OpenApiContext | null) => {
                             return (
                                 <OpenApiAddOperation
-                                    onAddOperation={appContext.onDidAddOperation}
-                                    openApiJson={appContext.openApiJson}
+                                    onAddOperation={appContext!.onDidAddOperation}
+                                    openApiJson={appContext!.openApiJson}
                                     resourcePath={resourcePath}
                                 />
                             );
                         }}
                     </OpenApiContextConsumer>
                 }
-                {openApiOperations && Object.keys(openApiOperations).length > 0 && 
+                {openApiOperations && Object.keys(openApiOperations).length > 0 &&
                     <Accordion fluid>
                         {Object.keys(openApiOperations).map((operation, index) => {
                             return (
                                 <OpenApiContextConsumer>
-                                    {(appContext: OpenApiContext) => {
+                                    {(appContext: OpenApiContext | null) => {
                                         return (
                                             <OpenApiOperation
                                                 resourcePath={resourcePath}
@@ -86,7 +86,6 @@ class OpenApiOperationsList extends React.Component<OasOperationsListProps, OasO
                                                 activeIndex={activeIndex}
                                                 currIndex={index}
                                                 handleExpand={this.expandOperation}
-                                                onDeleteOperation={appContext.onDidDeleteOperation}
                                             />
                                         );
                                     }}
@@ -96,8 +95,8 @@ class OpenApiOperationsList extends React.Component<OasOperationsListProps, OasO
                     </Accordion>
                 }
             </React.Fragment>
-        )
+        );
     }
 }
 
-export default OpenApiOperationsList
+export default OpenApiOperationsList;

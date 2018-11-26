@@ -17,33 +17,35 @@
  *
  */
 
-import * as React from 'react';
-import { Form, Button, Select } from 'semantic-ui-react';
+import * as React from "react";
+import { Button, Form, Select } from "semantic-ui-react";
+
+import { OpenApiResponse } from "../../components/parameter/add-response";
 
 export interface OpenApiAddResponseProps {
-    openApiJson: any
-    onAddResponse: Function
-    operation: string
-    resourcePath: string
-    handleClose: Function
+    openApiJson: any;
+    onAddResponse: (response: OpenApiResponse) => void;
+    operation: string;
+    resourcePath: string;
+    handleClose: (isClose: boolean) => void;
 }
 
-export interface OpenApiAddResponseState { 
-    responseStatus: Array<OpenApiResponseCode>
-    responseObject: OpenApiResponse
+export interface OpenApiAddResponseState {
+    responseStatus: OpenApiResponseCode[];
+    responseObject: OpenApiResponse;
 }
 
 export interface OpenApiResponse {
-    status: string
-    description: string
-    resourcePath: string
-    operation: string
+    status: string;
+    description: string;
+    resourcePath: string;
+    operation: string;
 }
 
 export interface OpenApiResponseCode {
-    key: string
-    text: string
-    value: string
+    key: string;
+    text: string;
+    value: string;
 }
 
 class OpenApiAddResponse extends React.Component<OpenApiAddResponseProps, OpenApiAddResponseState> {
@@ -51,76 +53,95 @@ class OpenApiAddResponse extends React.Component<OpenApiAddResponseProps, OpenAp
         super(props);
 
         this.state = {
-            responseStatus: [],
             responseObject: {
-                status: '',
-                description: '',
+                description: "",
+                operation: this.props.operation,
                 resourcePath: this.props.resourcePath,
-                operation: this.props.operation
-            }
-        }
+                status: "",
+            },
+            responseStatus: [],
+        };
     }
 
-    componentDidMount() {
+    public componentDidMount() {
         this.generateResponseStatusCodes();
     }
 
-    generateResponseStatusCodes() {
-        const responseCodes = ["100 - Continue","101 - Switching Protocols", "102 - Processing", "200 - OK", "201 - Created", "202 - Accepted",
-        "203 - Non-Authoritative Information", "204 - No Content", "205 - Reset Content", "206 - Partial Content", "207 - Multi-Status",
-        "208 - Already Reported", "226 - IM Used", "300 - Multiple Choices", "301 - Moved Permanently", "302 - Found", "303 - See Other",
-        "304 - Not Modified", "305 - Use Proxy", "307 - Temporary Redirect", "308 - Permanent Redirect", "400 - Bad Request", "401 - Unauthorized",
-        "402 - Payment Required", "403 - Forbidden", "404 - Not Found", "405 - Method Not Allowed", "406 - Not Acceptable", "407 - Proxy Authentication Required",
-        "408 - Request Timeout", "409 - Conflict", "410 - Gone", "411 - Length Required", "412 - Precondition Failed", "413 - Payload Too Large", "414 - URI Too Long",
-        "415 - Unsupported Media Type", "416 - Range Not Satisfiable", "417 - Expectation Failed", "421 - Misdirected Request", "422 - Unprocessable Entity",
-        "423 - Locked", "424 - Failed Dependency", "426 - Upgrade Required", "428 - Precondition Required", "429 - Too Many Requests", "431 - Request Header Fields Too Large",
-        "500 - Internal Server Error", "501 - Not Implemented", "502 - Bad Gateway", "503 - Service Unavailable", "504 - Gateway Timeout", "505 - HTTP Version Not Supported",
-        "506 - Variant Also Negotiates", "507 - Insufficient Storage", "508 - Loop Detected", "510 - Not Extended", "511 - Network Authentication Required"];
-        let responseCodeList: Array<OpenApiResponseCode> = [];
+    public generateResponseStatusCodes() {
+        const responseCodes = ["100 - Continue", "101 - Switching Protocols",
+        "102 - Processing", "200 - OK", "201 - Created", "202 - Accepted",
+        "203 - Non-Authoritative Information", "204 - No Content", "205 - Reset Content",
+        "206 - Partial Content", "207 - Multi-Status",
+        "208 - Already Reported", "226 - IM Used", "300 - Multiple Choices",
+        "301 - Moved Permanently", "302 - Found", "303 - See Other",
+        "304 - Not Modified", "305 - Use Proxy", "307 - Temporary Redirect",
+        "308 - Permanent Redirect", "400 - Bad Request", "401 - Unauthorized",
+        "402 - Payment Required", "403 - Forbidden", "404 - Not Found", "405 - Method Not Allowed",
+        "406 - Not Acceptable", "407 - Proxy Authentication Required",
+        "408 - Request Timeout", "409 - Conflict", "410 - Gone", "411 - Length Required",
+        "412 - Precondition Failed", "413 - Payload Too Large", "414 - URI Too Long",
+        "415 - Unsupported Media Type", "416 - Range Not Satisfiable", "417 - Expectation Failed",
+        "421 - Misdirected Request", "422 - Unprocessable Entity",
+        "423 - Locked", "424 - Failed Dependency", "426 - Upgrade Required", "428 - Precondition Required",
+        "429 - Too Many Requests", "431 - Request Header Fields Too Large",
+        "500 - Internal Server Error", "501 - Not Implemented", "502 - Bad Gateway", "503 - Service Unavailable",
+        "504 - Gateway Timeout", "505 - HTTP Version Not Supported",
+        "506 - Variant Also Negotiates", "507 - Insufficient Storage", "508 - Loop Detected",
+        "510 - Not Extended", "511 - Network Authentication Required"];
+        const responseCodeList: OpenApiResponseCode[] = [];
 
         responseCodes.forEach((response) => {
             responseCodeList.push({
-                key: response.trim().split(' - ')[0],
+                key: response.trim().split(" - ")[0],
                 text: response,
-                value: response.trim().split(' - ')[0]
-            })
+                value: response.trim().split(" - ")[0]
+            });
         });
 
         this.setState({
             responseStatus: responseCodeList,
-        })
+        });
 
     }
 
-    render() {
+    public render() {
         const { onAddResponse, handleClose } = this.props;
 
         return (
-            <Form size='mini' className='add-operation'>
+            <Form size="mini" className="add-operation">
                 <Form.Field>
-                    <Form.Field control={Select} label='Response Status' options={this.state.responseStatus} placeholder='Method' onChange={(e: any, data: any) =>{
+                    <Form.Field
+                        control={Select}
+                        label="Response Status"
+                        options={this.state.responseStatus}
+                        placeholder="Method"
+                        onChange={(e: any, data: any) => {
                         this.setState({
                             responseObject: {
                                 ...this.state.responseObject,
                                 status: data.value
                             }
-                        })
+                        });
                     }}/>
                 </Form.Field>
                 <Form.Field>
-                    <Form.TextArea label='Description' placeholder='Tell us more about...' onChange={(e) => this.setState({ 
-                        responseObject: {
-                            ...this.state.responseObject,
-                            description: e.currentTarget.value
-                        }
-                    })} />
+                    <Form.TextArea
+                        label="Description"
+                        placeholder="Tell us more about..."
+                        onChange={(e) => this.setState({
+                            responseObject: {
+                                ...this.state.responseObject,
+                                description: e.currentTarget.value
+                            }
+                        })}
+                    />
                 </Form.Field>
-                <Button size='mini' onClick={() => {
+                <Button size="mini" onClick={() => {
                     onAddResponse(this.state.responseObject);
-                    handleClose(true)
+                    handleClose(true);
                 }}>Save</Button>
             </Form>
-        )
+        );
     }
 }
 

@@ -17,31 +17,32 @@
  *
  */
 
-import * as React from 'react';
-import { Form, Button } from 'semantic-ui-react';
+import * as React from "react";
+import { Button, Form } from "semantic-ui-react";
+import { OpenApiOperation } from "../../components/operation/add-operation";
 
 export interface OpenApiAddOperationProps {
-    openApiJson: any,
-    onAddOperation: Function,
-    resourcePath: string
+    openApiJson: any;
+    onAddOperation: (operation: OpenApiOperation) => void ;
+    resourcePath: string;
 }
 
 export interface OpenApiAddOperationState {
-    operationObject: OpenApiOperation,
-    operationMethods: Array<OpenApiOperationMethod>,
+    operationObject: OpenApiOperation;
+    operationMethods: OpenApiOperationMethod[];
 }
 
 export interface OpenApiOperation {
-    id: string,
-    name: string,
-    description: string,
-    method: string[],
-    path: string,
+    id: string;
+    name: string;
+    description: string;
+    method: string[];
+    path: string;
 }
 
 export interface OpenApiOperationMethod {
-    text: string,
-    value: string
+    text: string;
+    value: string;
 }
 
 class OpenApiAddOperation extends React.Component<OpenApiAddOperationProps, OpenApiAddOperationState> {
@@ -49,84 +50,83 @@ class OpenApiAddOperation extends React.Component<OpenApiAddOperationProps, Open
         super(props);
 
         this.state = {
+            operationMethods: [],
             operationObject: {
-                id: '',
-                name: '',
-                description: '',
+                description: "",
+                id: "",
                 method: [],
+                name: "",
                 path: this.props.resourcePath,
-            },
-            operationMethods: []
-        }
+            }
+        };
 
-        
     }
 
-    componentDidMount() {
+    public componentDidMount() {
         this.populateOperationMethods();
     }
 
-    populateOperationMethods() {
+    public populateOperationMethods() {
         const { resourcePath, openApiJson } = this.props;
-        let methodOpts: Array<OpenApiOperationMethod> = [];
+        const methodOpts: OpenApiOperationMethod[] = [];
 
-        let availableMethods = ['GET','POST','PUT','DELETE','PATCH','HEAD','OPTIONS'].filter(method => {
-            return !Object.keys(openApiJson.paths[resourcePath]).includes(method.toLowerCase())
-        })
+        const availableMethods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"].filter((method) => {
+            return !Object.keys(openApiJson.paths[resourcePath]).includes(method.toLowerCase());
+        });
 
-        availableMethods.forEach((method)=>{
+        availableMethods.forEach((method) => {
             methodOpts.push({
                 text: method,
                 value: method.toLowerCase(),
-            })
+            });
         });
 
         this.setState({
             operationMethods: methodOpts,
-        })
+        });
     }
 
-    render() {
+    public render() {
         const { onAddOperation } = this.props;
         const { operationMethods } = this.state;
 
-        if(operationMethods.length == 0) {
+        if (operationMethods.length === 0) {
             return (
-                <Form size='mini' className='add-operation'>
+                <Form size="mini" className="add-operation">
                     <p>The selected resource contains all the method implementations.</p>
                 </Form>
-            )
+            );
         }
 
         return (
-            <Form className='add-operation'>
+            <Form className="add-operation">
                 <Form.Group inline>
                     <label>Methods</label>
-                    {operationMethods.map((method)=>{
+                    {operationMethods.map((method) => {
                         return (
                             <Form.Checkbox
-                                size='mini'
+                                size="mini"
                                 label={method.text}
                                 value={method.value}
                                 onChange={(e: React.SyntheticEvent, data: any) => {
-                                    if(data.checked) {
+                                    if (data.checked) {
                                         this.setState({
                                             operationObject: {
                                                 ...this.state.operationObject,
                                                 method:  [...this.state.operationObject.method, data.label],
                                             }
-                                        })
+                                        });
                                     }
                                 }}
                             />
-                        )
+                        );
                     })}
                 </Form.Group>
-                <Button size='mini' onClick={() => {
-                    onAddOperation(this.state.operationObject)
+                <Button size="mini" onClick={() => {
+                    onAddOperation(this.state.operationObject);
                 }}>Save</Button>
             </Form>
-        )
+        );
     }
 }
 

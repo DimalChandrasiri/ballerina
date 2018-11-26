@@ -17,18 +17,22 @@
  *
  */
 
-import * as React from 'react';
+import * as React from "react";
+
+import { OpenApiOperation } from "../components/operation/add-operation";
+import { OpenApiParameter } from "../components/parameter/add-parameter";
+import { OpenApiResponse } from "../components/parameter/add-response";
+import { OpenApiResource } from "../components/resource/add-resource";
 
 export interface OpenApiContext {
-    openApiJson: any,
-    onDidAddResource: Function,
-    onDidAddOperation: Function,
-    onDidAddParameter: Function,
-    onDidAddResponse: Function,
-    onDidDeleteOperation: Function,
+    openApiJson: any;
+    onDidAddResource: (resource: OpenApiResource) => void;
+    onDidAddOperation: (operation: OpenApiOperation) => void;
+    onDidAddParameter: (operation: OpenApiParameter) => void;
+    onDidAddResponse: (response: OpenApiResponse) => void;
 }
 
-const context = React.createContext<OpenApiContext | null>(null);;
+const context = React.createContext<OpenApiContext | null>(null);
 
 export const OpenApiContextProvider = context.Provider;
 export const OpenApiContextConsumer = context.Consumer;

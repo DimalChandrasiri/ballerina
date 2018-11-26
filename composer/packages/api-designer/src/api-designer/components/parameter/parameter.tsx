@@ -17,12 +17,12 @@
  *
  */
 
-import * as React from 'react';
-import { Table } from 'semantic-ui-react';
+import * as React from "react";
+import { Table } from "semantic-ui-react";
 
 export interface OpenApiParameterProps {
-    parameterObject: any,
-    responseCode: string
+    parameterObject: any;
+    responseCode: string;
 }
 
 class OpenApiParameter extends React.Component<OpenApiParameterProps, any> {
@@ -30,30 +30,30 @@ class OpenApiParameter extends React.Component<OpenApiParameterProps, any> {
         super(props);
     }
 
-    render() {
+    public render() {
         const { parameterObject, responseCode } = this.props;
-        
+
         return (
             <Table.Row>
-                <Table.Cell className='parameter-name-cell'>
-                    <div className='parameter__name required'>
-                        {responseCode === '' ? parameterObject.name : responseCode }
+                <Table.Cell className="parameter-name-cell">
+                    <div className="parameter__name required">
+                        {responseCode === "" ? parameterObject.name : responseCode }
                     </div>
-                    <div className='parameter__type'>
+                    <div className="parameter__type">
                         <strong>{parameterObject.schema && parameterObject.schema.type}</strong>
                         {parameterObject.in &&
                             <p><em>({parameterObject.in})</em></p>
                         }
                     </div>
                 </Table.Cell>
-                <Table.Cell className='parameter-desc-cell'>
-                    <div className='markdown'>
+                <Table.Cell className="parameter-desc-cell">
+                    <div className="markdown">
                         {parameterObject.description}
                     </div>
                 </Table.Cell>
             </Table.Row>
-        )
+        );
     }
 }
 
-export default OpenApiParameter
+export default OpenApiParameter;

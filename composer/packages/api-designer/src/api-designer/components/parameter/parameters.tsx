@@ -17,26 +17,22 @@
  *
  */
 
-import * as React from 'react';
-import { Table } from 'semantic-ui-react';
+import * as React from "react";
+import { Table } from "semantic-ui-react";
 
-import OpenApiParameter from './parameter';
+import OpenApiParameter from "./parameter";
 
 export interface OpenApiParameterListProps {
-    parameterType: string,
-    parameterList: any
+    parameterType: string;
+    parameterList: any;
 }
 
-export interface OpenApiParameterState {
-
-}
-
-class OpenApiParameterList extends React.Component<OpenApiParameterListProps, OpenApiParameterState> {
+class OpenApiParameterList extends React.Component<OpenApiParameterListProps, any> {
     constructor(props: OpenApiParameterListProps) {
         super(props);
     }
 
-    render() {
+    public render() {
         const { parameterList, parameterType } = this.props;
 
         return (
@@ -48,14 +44,17 @@ class OpenApiParameterList extends React.Component<OpenApiParameterListProps, Op
                 </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    {parameterList && Object.keys(parameterList).map((param)=>{
+                    {parameterList && Object.keys(parameterList).map((param) => {
                         return (
-                            <OpenApiParameter responseCode={parameterType === 'response' ? param : ''} parameterObject={parameterList[param]} />
-                        )  
+                            <OpenApiParameter
+                                responseCode={parameterType === "response" ? param : ""}
+                                parameterObject={parameterList[param]}
+                            />
+                        );
                     })}
                 </Table.Body>
             </Table>
-        )
+        );
     }
 }
 

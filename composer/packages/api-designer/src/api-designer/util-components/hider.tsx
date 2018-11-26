@@ -17,17 +17,17 @@
  *
  */
 
-import * as React from 'react';
+import * as React from "react";
 
 export interface HideComponentProps {
-    hideOn?: number
-    callback: Function
+    hideOn?: number;
+    callback: () => void;
 }
 
 export interface HideComponentState {
-    visible: boolean,
-    defaultTime: number,
-    timer: any
+    visible: boolean;
+    defaultTime: number;
+    timer: any;
 }
 
 /**
@@ -39,14 +39,14 @@ class HideComponent extends React.Component<HideComponentProps, HideComponentSta
         super(props);
 
         this.state = {
-            visible: false,
             defaultTime: 1000,
-            timer: null
-        }
+            timer: null,
+            visible: false
+        };
     }
 
-    componentWillReceiveProps(nextProps: any) {
-        if(nextProps.children !== this.props.children){ 
+    public componentWillReceiveProps(nextProps: any) {
+        if (nextProps.children !== this.props.children) {
             this.setHideTimer();
             this.setState({
                 visible: true
@@ -54,37 +54,37 @@ class HideComponent extends React.Component<HideComponentProps, HideComponentSta
         }
     }
 
-    componentDidMount() {
+    public componentDidMount() {
         this.setHideTimer();
     }
 
-    setHideTimer() {
+    public setHideTimer() {
         if (this.state.timer != null) {
-            clearTimeout(this.state.timer)
+            clearTimeout(this.state.timer);
         }
 
-        const timeObj = setTimeout(()=>{
+        const timeObj = setTimeout(() => {
             this.setState({
-                visible: false,
-                timer: null
+                timer: null,
+                visible: false
             });
             this.props.callback();
-        }, this.props.hideOn)
+        }, this.props.hideOn);
 
         this.setState({
             timer: timeObj
-        })
+        });
     }
 
-    render() {
+    public render() {
         const { visible } = this.state;
         return (
             <React.Fragment>
                 {visible &&
-                    <div className='hide-component'>{this.props.children}</div>
+                    <div className="hide-component">{this.props.children}</div>
                 }
             </React.Fragment>
-        )
+        );
     }
 }
 

@@ -17,24 +17,24 @@
  *
  */
 
-import * as React from 'react';
-import { Accordion, Icon, Button, AccordionTitleProps } from 'semantic-ui-react';
+import * as React from "react";
+import { Accordion, AccordionTitleProps, Button, Icon } from "semantic-ui-react";
 
-import OpenApiOperationsList from '../operation/operations';
-import InlineEdit from '../../util-components/inline-edit';
+import InlineEdit from "../../util-components/inline-edit";
+import OpenApiOperationsList from "../operation/operations";
 
 export interface OpenApiResourceProps {
-    openApiResource: string,
-    openApiOperations: any,
-    activeIndex?: number,
-    currentIndex: number,
-    onExpandEvent: (event: React.MouseEvent<HTMLDivElement>, data: AccordionTitleProps) => void,
-    isExpandAll: boolean
-    active: boolean
+    openApiResource: string;
+    openApiOperations: any;
+    activeIndex?: number;
+    currentIndex: number;
+    onExpandEvent: (event: React.MouseEvent<HTMLDivElement>, data: AccordionTitleProps) => void;
+    isExpandAll: boolean;
+    active: boolean;
 }
 
 export interface OpenApiResourceState {
-    showAddOperation: boolean
+    showAddOperation: boolean;
 }
 
 class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResourceState> {
@@ -43,12 +43,12 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
 
         this.state = {
             showAddOperation: false,
-        }
+        };
 
         this.handleShowAddOperation = this.handleShowAddOperation.bind(this);
     }
 
-    handleShowAddOperation(event: React.MouseEvent<HTMLButtonElement>) {
+    public handleShowAddOperation(event: React.MouseEvent<HTMLButtonElement>) {
         event.stopPropagation();
         const { showAddOperation } = this.state;
         this.setState({
@@ -56,44 +56,48 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
         });
     }
 
-    render() {
+    public render() {
         const {
-            openApiResource, openApiOperations, activeIndex, currentIndex, onExpandEvent, isExpandAll, active
+            openApiResource, openApiOperations, currentIndex, onExpandEvent, isExpandAll, active
         } = this.props;
 
         const { showAddOperation } = this.state;
 
         return (
-            <div className='resource'>
-                <Accordion.Title index={currentIndex} className='res-title' active={isExpandAll || active} onClick={onExpandEvent} >
-                    <Icon name={isExpandAll || active ? 'chevron down' : 'chevron right'}></Icon>
-                    <InlineEdit 
-                        model={openApiOperations} 
-                        attribute={openApiResource} 
-                        isEditable 
+            <div className="resource">
+                <Accordion.Title
+                    index={currentIndex}
+                    className="res-title"
+                    active={isExpandAll || active}
+                    onClick={onExpandEvent} >
+                    <Icon name={isExpandAll || active ? "chevron down" : "chevron right"}></Icon>
+                    <InlineEdit
+                        model={openApiOperations}
+                        attribute={openApiResource}
+                        isEditable
                         text={openApiResource}
-                        placeholderText='Add a description'
+                        placeholderText="Add a description"
                     />
                     <Button
-                        title='Add operation to resource.' 
-                        size='mini' 
-                        compact 
-                        className='add-operation-action' 
-                        circular 
-                        icon='plus'
-                        onClick={(e)=>{
-                            this.handleShowAddOperation(e)}
+                        title="Add operation to resource."
+                        size="mini"
+                        compact
+                        className="add-operation-action"
+                        circular
+                        icon="plus"
+                        onClick={(e) => {
+                            this.handleShowAddOperation(e); }
                         } />
                 </Accordion.Title>
-                <Accordion.Content className='resource-content' active={isExpandAll || active} >
-                    <OpenApiOperationsList 
-                        openApiOperations={openApiOperations} 
-                        resourcePath={openApiResource} 
+                <Accordion.Content className="resource-content" active={isExpandAll || active} >
+                    <OpenApiOperationsList
+                        openApiOperations={openApiOperations}
+                        resourcePath={openApiResource}
                         showAddOperation={showAddOperation}
                     />
                 </Accordion.Content>
             </div>
-        )
+        );
     }
 }
 

@@ -17,114 +17,116 @@
  *
  */
 
-import * as React from 'react';
-import { Form, Button, Select, Checkbox } from 'semantic-ui-react';
+import * as React from "react";
+import { Button, Checkbox, Form, Select } from "semantic-ui-react";
+
+import { OpenApiParameter } from "../../components/parameter/add-parameter";
 
 export interface OpenApiAddParameterProps {
-    openApiJson: any
-    onAddParameter: Function
-    operation: string
-    resourcePath: string
-    handleClose: Function
+    openApiJson: any;
+    onAddParameter: (parameter: OpenApiParameter) => void;
+    operation: string;
+    resourcePath: string;
+    handleClose: (isClose: boolean) => void;
 }
 
 export interface OpenApiAddParameterState {
-    parameterIn: Array<OpenApiParameterIn>
-    parameterType: Array<OpenApiParameterType>
-    parameterObj: OpenApiParameter
+    parameterIn: OpenApiParameterIn[];
+    parameterType: OpenApiParameterType[];
+    parameterObj: OpenApiParameter;
 }
 
 export interface OpenApiParameter {
-    name: string
-    parameterIn: string
-    description: string
-    isRequired: boolean
-    allowedEmptyValues: boolean
-    resourcePath: string
-    operation: string
-    type: string
+    name: string;
+    parameterIn: string;
+    description: string;
+    isRequired: boolean;
+    allowedEmptyValues: boolean;
+    resourcePath: string;
+    operation: string;
+    type: string;
 }
 
 export interface OpenApiParameterIn {
-    key: string
-    text: string
-    value: string
+    key: string;
+    text: string;
+    value: string;
 }
 
 export interface OpenApiParameterType {
-    key: string
-    text: string
-    value: string
+    key: string;
+    text: string;
+    value: string;
 }
 
 class OpenApiAddParameter extends React.Component<OpenApiAddParameterProps, OpenApiAddParameterState> {
     constructor(props: OpenApiAddParameterProps) {
-        super(props)
+        super(props);
 
         this.state = {
             parameterIn: [],
-            parameterType: [],
             parameterObj: {
-                name: '',
-                parameterIn: '',
-                description: '',
-                isRequired: false,
                 allowedEmptyValues: false,
-                type: '',
+                description: "",
+                isRequired: false,
+                name: "",
+                operation: this.props.operation,
+                parameterIn: "",
                 resourcePath: this.props.resourcePath,
-                operation: this.props.operation
-            }
-        }
+                type: ""
+            },
+            parameterType: []
+        };
     }
 
-    componentDidMount() {
+    public componentDidMount() {
         this.populateParameterInField();
         this.populateParamTypeField();
     }
 
-    populateParameterInField() {
-        const paramInDefaults = ['Header','Path','Query','Cookie'];
-        let paramInList: Array<OpenApiParameterIn> = [];
+    public populateParameterInField() {
+        const paramInDefaults = ["Header", "Path", "Query", "Cookie"];
+        const paramInList: OpenApiParameterIn[] = [];
 
         paramInDefaults.forEach((response) => {
             paramInList.push({
                 key: response.toLowerCase(),
                 text: response,
                 value: response.toLowerCase(),
-            })
-        })
+            });
+        });
 
         this.setState({
             parameterIn: paramInList
-        })
+        });
     }
 
-    populateParamTypeField() {
-        const typeInDefaults = ['String','Number','Boolean'];
-        let typeList: Array<OpenApiParameterType> = [];
+    public populateParamTypeField() {
+        const typeInDefaults = ["String", "Number", "Boolean"];
+        const typeList: OpenApiParameterType[] = [];
 
         typeInDefaults.forEach((response) => {
             typeList.push({
                 key: response.toLowerCase(),
                 text: response,
                 value: response.toLowerCase(),
-            })
-        })
+            });
+        });
 
         this.setState({
             parameterType: typeList
-        })
+        });
     }
 
-    render() {
+    public render() {
         const { parameterIn, parameterType } = this.state;
         const { onAddParameter, handleClose } = this.props;
 
         return (
-            <Form size='mini' className='add-operation'>
+            <Form size="mini" className="add-operation">
                 <Form.Field>
                     <label>Name</label>
-                    <input placeholder='Parameter Name' onChange={(e) => this.setState({ 
+                    <input placeholder="Parameter Name" onChange={(e) => this.setState({
                         parameterObj: {
                             ...this.state.parameterObj,
                             name: e.target.value
@@ -132,27 +134,39 @@ class OpenApiAddParameter extends React.Component<OpenApiAddParameterProps, Open
                     })} />
                 </Form.Field>
                 <Form.Field>
-                    <Form.Field control={Select} label='Parameter In' options={parameterIn} placeholder='Where parameter appears' onChange={(e: any, data: any) =>{
+                    <Form.Field
+                        control={Select}
+                        label="Parameter In"
+                        options={parameterIn}
+                        placeholder="Where parameter appears"
+                        onChange={(e: any, data: any) => {
                         this.setState({
                             parameterObj: {
                                 ...this.state.parameterObj,
                                 parameterIn: data.value
                             }
-                        })
+                        });
                     }}/>
                 </Form.Field>
                 <Form.Field>
-                    <Form.Field control={Select} label='Parameter Type' options={parameterType} onChange={(e: any, data: any) =>{
+                    <Form.Field
+                        control={Select}
+                        label="Parameter Type"
+                        options={parameterType}
+                        onChange={(e: any, data: any) => {
                         this.setState({
                             parameterObj: {
                                 ...this.state.parameterObj,
                                 type: data.value
                             }
-                        })
+                        });
                     }}/>
                 </Form.Field>
                 <Form.Field>
-                    <Form.TextArea label='Description' placeholder='Tell us more about...' onChange={(e) => this.setState({ 
+                    <Form.TextArea
+                        label="Description"
+                        placeholder="Tell us more about..."
+                        onChange={(e) => this.setState({
                         parameterObj: {
                             ...this.state.parameterObj,
                             description: e.currentTarget.value
@@ -160,7 +174,7 @@ class OpenApiAddParameter extends React.Component<OpenApiAddParameterProps, Open
                     })}/>
                 </Form.Field>
                 <Form.Field>
-                    <Checkbox label='Property is required' onChange={(e, { checked }) => this.setState({ 
+                    <Checkbox label="Property is required" onChange={(e, { checked }) => this.setState({
                         parameterObj: {
                             ...this.state.parameterObj,
                             isRequired: checked ? true : false
@@ -168,20 +182,20 @@ class OpenApiAddParameter extends React.Component<OpenApiAddParameterProps, Open
                     })} />
                 </Form.Field>
                 <Form.Field>
-                    <Checkbox label='Allowed empty values' onChange={(e, { checked }) => this.setState({ 
+                    <Checkbox label="Allowed empty values" onChange={(e, { checked }) => this.setState({
                         parameterObj: {
                             ...this.state.parameterObj,
                             allowedEmptyValues: checked ? true : false
                         }
                     })} />
                 </Form.Field>
-                <Button size='mini' onClick={() => {
+                <Button size="mini" onClick={() => {
                     onAddParameter(this.state.parameterObj);
                     handleClose(true);
                 }}>Save</Button>
             </Form>
-        )
+        );
     }
 }
 
-export default OpenApiAddParameter
+export default OpenApiAddParameter;

@@ -17,62 +17,58 @@
  *
  */
 
-import * as React from 'react';
-import * as SwaggerParser from 'swagger-parser';
-import { Spec as Swagger } from 'swagger-schema-official';
-import { Message } from 'semantic-ui-react';
-import uniqid from 'uniqid';
+import * as React from "react";
+import { Message } from "semantic-ui-react";
+import * as SwaggerParser from "swagger-parser";
+import * as Swagger from "swagger-schema-official";
+import uniqid from "uniqid";
 
-import { OpenApiContextProvider, OpenApiContext } from './context/open-api-context';
-import OpenApiResourceList from './components/resource/resources';
-import { OpenApiResource } from './components/resource/add-resource';
-import { OpenApiOperation } from './components/operation/add-operation';
-import { OpenApiResponse } from './components/parameter/add-response';
-import { OpenApiParameter } from './components/parameter/add-parameter';
+import { OpenApiOperation } from "./components/operation/add-operation";
+import { OpenApiParameter } from "./components/parameter/add-parameter";
+import { OpenApiResponse } from "./components/parameter/add-response";
+import { OpenApiResource } from "./components/resource/add-resource";
+import OpenApiResourceList from "./components/resource/resources";
+import { OpenApiContext, OpenApiContextProvider } from "./context/open-api-context";
 
-import HideComponent from './util-components/hider'; 
-import InlineEdit from './util-components/inline-edit';
+import HideComponent from "./util-components/hider";
+import InlineEdit from "./util-components/inline-edit";
 
-import 'semantic-ui-css/semantic.min.css';
-import './components/style/main.less';
-
-
+import "./components/style/main.less";
 
 export interface OasProps {
-    openApiJson: Swagger,
-    onDidAddResource?: Function,
-    onDidAddOperation?: Function,
-    onDidAddParameter?: Function,
-    onDidDeleteOperation?: Function,
-    onDidChange?: Function
+    openApiJson: Swagger.Spec;
+    onDidAddResource?: (resourse: OpenApiResponse | string, swagger: Swagger.Spec) => void;
+    onDidAddOperation?: (operation: OpenApiOperation, swagger: Swagger.Spec) => void;
+    onDidAddParameter?: (parameter: OpenApiParameter, swagger: Swagger.Spec) => void;
+    onDidChange?: (event: string, element: any, swaggerJson: Swagger.Spec) => void;
 }
 
 export interface OpenApiState {
-    openApiJson: any,
-    isError: OpenApiError,
-    actionState: OpenApiActionState
+    openApiJson: any;
+    isError: OpenApiError;
+    actionState: OpenApiActionState;
 }
 
 export interface OpenApiActionState {
-    state: string,
-    message: string
+    state: string;
+    message: string;
 }
 
-export interface OpenApiError { 
-    status: boolean,
-    inline: boolean,
-    message: string
+export interface OpenApiError {
+    status: boolean;
+    inline: boolean;
+    message: string;
 }
 
 enum EVENTS {
-    ADD_RESOURCE = 'add_resource',
-    ADD_OPERATION  = 'add_operation',
-    ADD_PARAMETER  = 'add_parameter',
-    ADD_RESPONSE  = 'add_response',
-    DELETE_OPERATION  = 'del_operation',
-    DELETE_RESOURCE  = 'del_resource',
-    DELETE_PARAMETER  = 'del_parameter',
-    DELETE_RESPONSE  = 'del_response'
+    ADD_RESOURCE = "add_resource",
+    ADD_OPERATION  = "add_operation",
+    ADD_PARAMETER  = "add_parameter",
+    ADD_RESPONSE  = "add_response",
+    DELETE_OPERATION  = "del_operation",
+    DELETE_RESOURCE  = "del_resource",
+    DELETE_PARAMETER  = "del_parameter",
+    DELETE_RESPONSE  = "del_response"
 }
 
 /**
@@ -83,42 +79,41 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
     constructor(props: OasProps) {
         super(props);
         this.state = {
-            openApiJson: {},
-            isError: {
-                status: false,
-                inline: false,
-                message: ''
-            },
             actionState: {
-                state: '',
-                message: '',
-            }
-        }
+                message: "",
+                state: ""
+            },
+            isError: {
+                inline: false,
+                message: "",
+                status: false
+            },
+            openApiJson: {}
+        };
 
         this.onDidAddResource = this.onDidAddResource.bind(this);
         this.onDidAddOperation = this.onDidAddOperation.bind(this);
         this.onDidAddParameter = this.onDidAddParameter.bind(this);
         this.onDidAddResponse = this.onDidAddResponse.bind(this);
-        this.onDidDeleteOperation = this.onDidDeleteOperation.bind(this);
         this.handleMessageHide = this.handleMessageHide.bind(this);
     }
-    
-    componentDidMount() {
+
+    public componentDidMount() {
         const { openApiJson } = this.props;
 
         this.setState({
-            openApiJson: openApiJson
+            openApiJson
         });
 
         this.validateJsonProp(openApiJson);
         this.validateOpenApiJson(openApiJson);
     }
 
-    componentWillReceiveProps(nextProps: OasProps) {
+    public componentWillReceiveProps(nextProps: OasProps) {
         const { openApiJson } = nextProps;
 
         this.setState({
-            openApiJson: openApiJson
+            openApiJson
         });
 
         this.validateJsonProp(openApiJson);
@@ -127,89 +122,87 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
 
     /**
      * Event which will get triggered when a resource is added.
-     * 
+     *
      * @param addedResource Resource object which is added
      */
-    onDidAddResource(addedResource: OpenApiResource) {
+    public onDidAddResource(addedResource: OpenApiResource) {
         const { onDidAddResource, onDidChange } = this.props;
-        const resourceName = addedResource.name.replace(' ','');
-        const operations = {};
-        
+        const resourceName = addedResource.name.replace(" ", "");
+        const operations: { [index: string]: Swagger.Operation } = {};
+
         addedResource.methods.forEach((method) => {
             operations[method.toLowerCase()] = {
-                description: '',
-                operationId: 'method_' + uniqid(),
+                description: "",
+                operationId: "method_" + uniqid(),
                 parameters: [],
                 responses : {
-					"200": {
-						"description": "OK"
-					}
-				},
+                        200: {
+                            description: "OK"
+                        }
+                    },
                 security: [],
-                summary: '',
-                tags:[]
-            }
-        })
+                summary: "",
+                tags: []
+            };
+        });
 
-
-        this.setState(prevState => ({
+        this.setState((prevState) => ({
             ...prevState,
             openApiJson: {
                 ...prevState.openApiJson,
                 paths: {
                     ...prevState.openApiJson.paths,
-                    ['/' + resourceName]: operations
+                    ["/" + resourceName]: operations
                 }
             }
         }), () => {
-            if (this.state.openApiJson.paths['/' + resourceName]) {
+            if (this.state.openApiJson.paths["/" + resourceName]) {
                 if (onDidAddResource) {
                     onDidAddResource(resourceName, this.state.openApiJson);
                 }
 
-                debugger;
                 if (onDidChange) {
                     onDidChange(EVENTS.ADD_RESOURCE, resourceName, this.state.openApiJson);
                 }
 
                 this.setState({
                     actionState: {
-                        state: 'success',
-                        message: 'Resource : ' + resourceName + ' added successfully to the definition.'
+                        message: "Resource : " + resourceName + " added successfully to the definition.",
+                        state: "success"
                     }
                 });
             }
-        })
+        });
     }
 
     /**
-     * 
+     *
      * Event which will get triggered when a resource is added.
-     * 
-     * @param operationsObj operations object which is added    
+     *
+     * @param operationsObj operations object which is added
      */
-    onDidAddOperation(operationsObj: OpenApiOperation) {
+    public onDidAddOperation(operationsObj: OpenApiOperation) {
         const { onDidAddOperation, onDidChange } = this.props;
         const path = operationsObj.path;
         const operations = this.state.openApiJson.paths[path];
 
         operationsObj.method.forEach((method) => {
             operations[method.toLowerCase()] = {
-                description: '',
-                operationId: 'method_' + uniqid(),
+                description: "",
+                operationId: "method_" + uniqid(),
                 parameters: [],
                 responses : {
-					"200": {
-						"description": "OK"
-					}
-				},
+                        200: {
+                            description: "OK"
+                        }
+                    },
                 security: [],
-                summary: '',
-                tags:[]
-            }
-        })
+                summary: "",
+                tags: []
+            };
+        });
 
-        this.setState(prevState => ({
+        this.setState((prevState) => ({
             ...prevState,
             openApiJson: {
                 ...prevState.openApiJson,
@@ -218,7 +211,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                     [path] : operations
                 }
             }
-        }),()=>{
+        }), () => {
 
             if (onDidAddOperation) {
                 onDidAddOperation(operationsObj, this.state.openApiJson);
@@ -232,23 +225,23 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
 
             this.setState({
                 actionState: {
-                    state: 'success',
-                    message: 'Added operation to ' + path
+                    message: "Added operation to " + path,
+                    state: "success"
                 },
-                openApiJson: openApiJson
-            })
+                openApiJson
+            });
 
         });
     }
 
-    onDidAddParameter(parameterObj: OpenApiParameter) {
+    public onDidAddParameter(parameterObj: OpenApiParameter) {
         const { onDidAddParameter, onDidChange } = this.props;
         const { openApiJson } = this.state;
         const path = parameterObj.resourcePath;
         const method = parameterObj.operation;
 
-        if(openApiJson.paths[path][method].parameters) {
-            this.setState(prevState => ({
+        if (openApiJson.paths[path][method].parameters) {
+            this.setState((prevState) => ({
                 ...prevState,
                 openApiJson: {
                     ...prevState.openApiJson,
@@ -261,11 +254,11 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                                 parameters : [
                                     ...prevState.openApiJson.paths[path][method].parameters,
                                     {
-                                        name: parameterObj.name,
-                                        in: parameterObj.parameterIn,
-                                        description: parameterObj.description,
                                         allowEmptyValue: parameterObj.allowedEmptyValues,
+                                        description: parameterObj.description,
+                                        in: parameterObj.parameterIn,
                                         isRequired: parameterObj.isRequired,
+                                        name: parameterObj.name,
                                         schema: {
                                             type: parameterObj.type
                                         }
@@ -275,26 +268,26 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                         }
                     }
                 }
-            }),()=>{
-    
+            }), () => {
+
                 if (onDidAddParameter) {
                     onDidAddParameter(parameterObj, this.state.openApiJson);
                 }
-    
+
                 if (onDidChange) {
                     onDidChange(EVENTS.ADD_PARAMETER, parameterObj, this.state.openApiJson);
                 }
-    
+
                 this.setState({
                     actionState: {
-                        state: 'success',
-                        message: 'Successfully added parameter to ' + path + method
+                        message: "Successfully added parameter to " + path + method,
+                        state: "success"
                     }
-                })
-    
+                });
+
             });
         } else {
-            this.setState(prevState => ({
+            this.setState((prevState) => ({
                 ...prevState,
                 openApiJson: {
                     ...prevState.openApiJson,
@@ -306,11 +299,11 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                                 ...prevState.openApiJson.paths[path][method],
                                 parameters : [
                                     {
-                                        name: parameterObj.name,
-                                        in: parameterObj.parameterIn,
-                                        description: parameterObj.description,
                                         allowEmptyValue: parameterObj.allowedEmptyValues,
+                                        description: parameterObj.description,
+                                        in: parameterObj.parameterIn,
                                         isRequired: parameterObj.isRequired,
+                                        name: parameterObj.name,
                                         schema: {
                                             type: parameterObj.type
                                         }
@@ -320,40 +313,39 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                         }
                     }
                 }
-            }),()=>{
-    
+            }), () => {
+
                 if (onDidAddParameter) {
                     onDidAddParameter(parameterObj, this.state.openApiJson);
                 }
-    
+
                 if (onDidChange) {
                     onDidChange(EVENTS.ADD_PARAMETER, parameterObj, this.state.openApiJson);
                 }
-    
+
                 this.setState({
                     actionState: {
-                        state: 'success',
-                        message: 'Successfully added parameter to ' + path + method
+                        message: "Successfully added parameter to " + path + method,
+                        state: "success"
                     }
-                })
-    
+                });
+
             });
         }
 
-       
     }
 
     /**
      * Event which will get triggerred when a new response is added
-     * 
+     *
      * @param responseObj response object which is added
      */
-    onDidAddResponse(responseObj: OpenApiResponse ) {
+    public onDidAddResponse(responseObj: OpenApiResponse) {
         const { onDidAddResource, onDidChange } = this.props;
         const path = responseObj.resourcePath;
         const method = responseObj.operation;
 
-        this.setState(prevState => ({
+        this.setState((prevState) => ({
             ...prevState,
             openApiJson: {
                 ...prevState.openApiJson,
@@ -373,7 +365,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                     }
                 }
             }
-        }),()=>{
+        }), () => {
 
             if (onDidAddResource) {
                 onDidAddResource(responseObj, this.state.openApiJson);
@@ -385,79 +377,76 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
 
             this.setState({
                 actionState: {
-                    state: 'success',
-                    message: 'Successfully added response to ' + path + method
+                    message: "Successfully added response to " + path + method,
+                    state: "success"
                 }
-            })
+            });
 
         });
-    }
-    onDidDeleteOperation() {
-       
     }
 
     /**
      * Util method to validate Open API JSON.
-     * 
+     *
      * @param json Open API JSON that needs to be validated
      * @param onvalidattion Function to be run as a callback after validation
      */
-    validateOpenApiJson(json: Swagger , onvalidattion?: Function) {
-        SwaggerParser.validate(json).then(validjson => {
+    public validateOpenApiJson(json: Swagger.Spec , onvalidattion?: (validJson: any) => void) {
+        SwaggerParser.validate(json).then((validjson) => {
             if (onvalidattion) {
                 onvalidattion(validjson);
-            };
-        }).catch(error => {
+            }
+        }).catch((error) => {
             this.setState({
                 isError: {
-                    status: true,
                     inline: true,
-                    message: error.message
+                    message: error.message,
+                    status: true
                 }
-            })
-        })
+            });
+        });
     }
 
     /**
      * Util method to check the prop contains a json to be processed.
-     * 
+     *
      * @param json JSON String which needs to be checked for undefined
      */
-    validateJsonProp(json: Swagger) {
+    public validateJsonProp(json: Swagger.Spec) {
         if (!json) {
             this.setState({
                 isError: {
-                    status: true,
                     inline: false,
-                    message: 'Open API Specification complient JSON String is required.'
+                    message: "Open API Specification complient JSON String is required.",
+                    status: true,
                 }
-            })
+            });
         }
     }
 
-    handleMessageHide() {
+    public handleMessageHide() {
         this.setState({
-            isError: {
-                status: false,
-                inline: false,
-                message: ''
-            },
             actionState: {
-                state: '',
-                message: '',
+                message: "",
+                state: ""
+            },
+            isError: {
+                inline: false,
+                message: "",
+                status: false
             }
-        })
+        });
     }
-    
-    render() {
-        const { isError: { status, inline }, isError, openApiJson, openApiJson: { paths, info }, actionState } = this.state;
+
+    public render() {
+        const { isError: { status, inline }, isError, openApiJson,
+                openApiJson: { paths, info }, actionState } = this.state;
         const appContext: OpenApiContext = {
-            openApiJson,
-            onDidAddResource: this.onDidAddResource,
             onDidAddOperation: this.onDidAddOperation,
             onDidAddParameter: this.onDidAddParameter,
+            onDidAddResource: this.onDidAddResource,
             onDidAddResponse: this.onDidAddResponse,
-            onDidDeleteOperation: this.onDidDeleteOperation
+            openApiJson,
         };
 
         if (status && !inline) {
@@ -465,7 +454,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                 <HideComponent hideOn={5000} callback={this.handleMessageHide}>
                     <Message error content={isError.message} />
                 </HideComponent>
-            )
+            );
         }
 
         return (
@@ -475,102 +464,102 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                         <Message error content={isError.message} />
                     </HideComponent>
                 }
-                {info && 
+                {info &&
                     <React.Fragment>
-                        <div className='oas-header'>
+                        <div className="oas-header">
                             <h1>
                                 {info.title}
                                 <span>{openApiJson.host}{openApiJson.basePath}</span>
                             </h1>
-                            <span className='version'>{info.version}</span>
+                            <span className="version">{info.version}</span>
                         </div>
-                        <div className='oas-details'>
-                            <div className='description'>
-                                <InlineEdit 
-                                    model={openApiJson} 
-                                    attribute='description' 
-                                    isEditable 
-                                    isTextArea 
-                                    text={info.description} 
-                                    placeholderText='Add a description' 
+                        <div className="oas-details">
+                            <div className="description">
+                                <InlineEdit
+                                    model={openApiJson}
+                                    attribute="description"
+                                    isEditable
+                                    isTextArea
+                                    text={info.description}
+                                    placeholderText="Add a description"
                                 />
                             </div>
                             <div>
-                                <InlineEdit 
-                                    model={openApiJson} 
-                                    attribute='description' 
-                                    isEditable 
+                                <InlineEdit
+                                    model={openApiJson}
+                                    attribute="description"
+                                    isEditable
                                     isUrl
                                     urlLink={info.termsOfService}
-                                    text='' 
-                                    placeholderText='Add terms of service link.' 
+                                    text=""
+                                    placeholderText="Add terms of service link."
                                 />
                             </div>
                             <div>
-                                {info.license ? 
-                                    <InlineEdit 
-                                        model={openApiJson} 
-                                        attribute='description' 
-                                        isEditable 
+                                {info.license ?
+                                    <InlineEdit
+                                        model={openApiJson}
+                                        attribute="description"
+                                        isEditable
                                         isUrl
                                         text={info.license.name}
                                         urlLink={info.license.url}
-                                        placeholderText='Add license link.' 
+                                        placeholderText="Add license link."
                                     />
                                 :
-                                    <InlineEdit 
-                                        model={openApiJson} 
-                                        attribute='description' 
-                                        isEditable 
+                                    <InlineEdit
+                                        model={openApiJson}
+                                        attribute="description"
+                                        isEditable
                                         isUrl
-                                        text=''
-                                        urlLink=''
-                                        placeholderText='Add license link.' 
+                                        text=""
+                                        urlLink=""
+                                        placeholderText="Add license link."
                                     />
                                 }
                             </div>
                             <div>
-                                {info.contact ? 
-                                    <InlineEdit 
-                                        model={openApiJson} 
-                                        attribute='description' 
-                                        isEditable 
+                                {info.contact ?
+                                    <InlineEdit
+                                        model={openApiJson}
+                                        attribute="description"
+                                        isEditable
                                         isUrl
                                         text={info.contact.name}
                                         urlLink={info.contact.url}
-                                        placeholderText='Add contact information' 
+                                        placeholderText="Add contact information"
                                     />
                                 :
-                                    <InlineEdit 
-                                        model={openApiJson} 
-                                        attribute='description' 
-                                        isEditable 
+                                    <InlineEdit
+                                        model={openApiJson}
+                                        attribute="description"
+                                        isEditable
                                         isUrl
-                                        text=''
-                                        urlLink=''
-                                        placeholderText='Add contact information' 
+                                        text=""
+                                        urlLink=""
+                                        placeholderText="Add contact information"
                                     />
                                 }
-                                
+
                             </div>
                         </div>
                     </React.Fragment>
                 }
                 {(() => {
-                    if (actionState.state === 'success') {
+                    if (actionState.state === "success") {
                         return (
                             <HideComponent hideOn={5000} callback={this.handleMessageHide}>
                                 <Message success content={actionState.message} />
                             </HideComponent>
-                        )
-                    } else if (actionState.state === 'error') {
+                        );
+                    } else if (actionState.state === "error") {
                         return (
                             <HideComponent hideOn={5000} callback={this.handleMessageHide}>
                                 <Message error content={actionState.message} />
                             </HideComponent>
-                        )
+                        );
                     } else {
-                        return '';
+                        return "";
                     }
                 })()}
                 <OpenApiResourceList openApiResources={paths} />

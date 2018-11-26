@@ -17,29 +17,28 @@
  *
  */
 
-import * as React from 'react';
-import { Accordion, Icon, AccordionTitleProps } from 'semantic-ui-react';
+import * as React from "react";
+import { Accordion, AccordionTitleProps, Icon } from "semantic-ui-react";
 
-import OpenApiAddParameter from '../parameter/add-parameter';
-import OpenApiAddResponse from '../parameter/add-response';
-import OpenApiParameterList from '../parameter/parameters';
-import InlineEdit from '../../util-components/inline-edit';
+import InlineEdit from "../../util-components/inline-edit";
+import OpenApiAddParameter from "../parameter/add-parameter";
+import OpenApiAddResponse from "../parameter/add-response";
+import OpenApiParameterList from "../parameter/parameters";
 
-import { OpenApiContextConsumer, OpenApiContext } from '../../context/open-api-context';
+import { OpenApiContext, OpenApiContextConsumer } from "../../context/open-api-context";
 
 export interface OpenApiResourceProps {
-    resourcePath: string,
-    operationType: string,
-    operationObject: any,
-    activeIndex: number,
-    currIndex: number,
-    handleExpand: (event: React.MouseEvent<HTMLDivElement>, data: AccordionTitleProps) => void,
-    onDeleteOperation: Function
+    resourcePath: string;
+    operationType: string;
+    operationObject: any;
+    activeIndex: number;
+    currIndex: number;
+    handleExpand: (event: React.MouseEvent<HTMLDivElement>, data: AccordionTitleProps) => void;
 }
 
 export interface OpenApiResourceState {
-    showAddResponse: boolean,
-    showAddParameter: boolean
+    showAddResponse: boolean;
+    showAddParameter: boolean;
 }
 
 class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResourceState> {
@@ -49,15 +48,15 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
         this.state = {
             showAddParameter: false,
             showAddResponse: false
-        }
+        };
 
         this.handleShowAddParameter = this.handleShowAddParameter.bind(this);
         this.handleShowAddResponse = this.handleShowAddResponse.bind(this);
     }
 
-    handleShowAddParameter (show?: boolean) {
+    public handleShowAddParameter(show?: boolean) {
         const { showAddParameter } = this.state;
-        if(show !== undefined && !show) {
+        if (show !== undefined && !show) {
             this.setState({
                 showAddParameter: false,
             });
@@ -66,12 +65,12 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
                 showAddParameter: !showAddParameter,
             });
         }
-        
+
     }
 
-    handleShowAddResponse (show?: boolean) {
+    public handleShowAddResponse(show?: boolean) {
         const { showAddResponse } = this.state;
-        if(show !== undefined && !show) {
+        if (show !== undefined && !show) {
             this.setState({
                 showAddResponse: false,
             });
@@ -82,91 +81,96 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
         }
     }
 
-    render() {
+    public render() {
         const {
-            resourcePath, operationType, operationObject, activeIndex, currIndex, handleExpand, onDeleteOperation
+            resourcePath, operationType, operationObject, activeIndex, currIndex, handleExpand
         } = this.props;
         const { showAddResponse, showAddParameter } = this.state;
 
         return (
-            <div className={'operation '  + operationType}>
-                <Accordion.Title className='op-title ' index={currIndex} onClick={handleExpand}>
-                    <span className='op-method'>{operationType}</span>
-                    <InlineEdit model={operationObject} attribute={operationType} customClass='op-summary' isEditable text={operationObject.summary} placeholderText='Add a summary' />
+            <div className={"operation "  + operationType}>
+                <Accordion.Title className="op-title " index={currIndex} onClick={handleExpand}>
+                    <span className="op-method">{operationType}</span>
+                    <InlineEdit
+                        model={operationObject}
+                        attribute={operationType}
+                        customClass="op-summary"
+                        isEditable
+                        text={operationObject.summary}
+                        placeholderText="Add a summary" />
                     <Icon
-                        className='delete-op'
-                        onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-                            event.stopPropagation();
-                            onDeleteOperation({
-                                operation: operationType,
-                                path: resourcePath,
-                                operationObj: operationObject
-                            })
-                        }}
-                        name='trash alternate'
+                        className="delete-op"
+                        name="trash alternate"
                     />
                 </Accordion.Title>
                 <Accordion.Content active={activeIndex === currIndex}>
-                    <InlineEdit model={operationObject} attribute={operationType} isEditable text={operationObject.description} placeholderText='Add a description' />
-                    
-                    <div className='op-section'>
-                        <div className='title'>
+                    <InlineEdit
+                        model={operationObject}
+                        attribute={operationType}
+                        isEditable
+                        text={operationObject.description}
+                        placeholderText="Add a description" />
+
+                    <div className="op-section">
+                        <div className="title">
                             <p>Parameters</p>
-                            <a onClick={()=>{
-                                this.handleShowAddParameter()
+                            <a onClick={() => {
+                                this.handleShowAddParameter();
                             }} >Add Parameter</a>
                         </div>
                         {showAddParameter &&
                             <OpenApiContextConsumer>
-                                {(appContext: OpenApiContext) => {
+                                {(appContext: OpenApiContext | null) => {
                                     return (
                                         <OpenApiAddParameter
-                                            openApiJson={appContext.openApiJson}
-                                            onAddParameter={appContext.onDidAddParameter}
+                                            openApiJson={appContext!.openApiJson}
+                                            onAddParameter={appContext!.onDidAddParameter}
                                             operation={operationType}
                                             resourcePath={resourcePath}
                                             handleClose={this.handleShowAddParameter}
                                         />
-                                    )
+                                    );
                                 }}
                             </OpenApiContextConsumer>
-                            
+
                         }
                         {operationObject.parameters && Object.keys(operationObject.parameters).length !== 0 &&
-                            <OpenApiParameterList parameterType='parameter' parameterList={operationObject.parameters} />
+                            <OpenApiParameterList
+                                parameterType="parameter"
+                                parameterList={operationObject.parameters} />
                         }
                     </div>
-                    
-                    <div className='op-section '>
-                        <div className='title'>
+
+                    <div className="op-section ">
+                        <div className="title">
                             <p>Responses</p>
-                            <a onClick={()=>{
-                                this.handleShowAddResponse()
+                            <a onClick={() => {
+                                this.handleShowAddResponse();
                             }} >Add Response</a>
                         </div>
-                        {showAddResponse && 
+                        {showAddResponse && OpenApiContextConsumer &&
                             <OpenApiContextConsumer>
-                                {(appContext: OpenApiContext) => {
+                                {(appContext: OpenApiContext | null) => {
                                     return (
                                         <OpenApiAddResponse
-                                            openApiJson={appContext.openApiJson}
-                                            onAddResponse={appContext.onDidAddResponse}
+                                            openApiJson={appContext!.openApiJson}
+                                            onAddResponse={appContext!.onDidAddResponse}
                                             operation={operationType}
                                             resourcePath={resourcePath}
                                             handleClose={this.handleShowAddResponse}
                                         />
-                                    )
+                                    );
                                 }}
                             </OpenApiContextConsumer>
                         }
                         {operationObject.responses && Object.keys(operationObject.responses).length !== 0 &&
-                            <OpenApiParameterList parameterType='response' parameterList={operationObject.responses} />
-                        }   
+                            <OpenApiParameterList parameterType="response" parameterList={operationObject.responses} />
+                        }
                     </div>
-                   
+
                 </Accordion.Content>
             </div>
-        )
+        );
     }
 }
 
