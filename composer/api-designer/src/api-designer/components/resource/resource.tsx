@@ -58,7 +58,7 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
 
     render() {
         const {
-            openApiResource, openApiOperations, activeIndex, currentIndex, onExpandEvent, isExpandAll, active
+            openApiResource, openApiOperations, currentIndex, onExpandEvent, isExpandAll, active
         } = this.props;
 
         const { showAddOperation } = this.state;
