@@ -40,60 +40,58 @@ export function apiEditorRender(context: ExtensionContext, langClient: ExtendedL
     `;
 
     const script = `
-        let docUri = ${JSON.stringify(docUri.toString())};
-        let updatedJSON = '';
-        let selectedService = ${JSON.stringify(selectedService.toString())};
+        function loadedScript() {
+            let docUri = ${JSON.stringify(docUri.toString())};
+            let updatedJSON = '';
+            let selectedService = ${JSON.stringify(selectedService.toString())};
 
-        // Handle the message inside the webview
-        window.addEventListener('message', event => {
-            let message = event.data; // The JSON data our extension sent
-            switch (message.command) {
-                case 'update':
-                    docUri = message.docUri;
-                    updatedJSON = message.json
-                    drawAPIEditor();
-                    break;
-            }
-        });
+            // Handle the message inside the webview
+            window.addEventListener('message', event => {
+                let message = event.data; // The JSON data our extension sent
+                switch (message.command) {
+                    case 'update':
+                        docUri = message.docUri;
+                        updatedJSON = message.json
+                        drawAPIEditor();
+                        break;
+                }
+            });
 
-        function getSwaggerJson(docUri, serviceName) {
-            return new Promise((resolve, reject) => {
-                webViewRPCHandler.invokeRemoteMethod('getSwaggerDef', [docUri, serviceName], (resp) => {
-                    resolve(resp);
-                });
-            })
-        }
-
-        function onDidJsonChange(event, changedObj, oasJson) {
-            webViewRPCHandler.invokeRemoteMethod('triggerSwaggerDefChange', [JSON.stringify(oasJson), docUri]);
-        }
-
-        function drawAPIEditor() {
-            if(updatedJSON === '') {
-                console.log('------------- redraw -----------')
-                getSwaggerJson(docUri, selectedService).then((response)=>{
-                    try {
-                        let width = window.innerWidth - 6;
-                        let height = window.innerHeight;
-                        debugger;
-                        ballerinaComposer.renderAPIEditor(document.getElementById("api-visualizer"), response.ballerinaOASJson, onDidJsonChange, false);
-                    } catch (e) {
-                        console.log(e.stack);
-                    }
+            function getSwaggerJson(docUri, serviceName) {
+                return new Promise((resolve, reject) => {
+                    webViewRPCHandler.invokeRemoteMethod('getSwaggerDef', [docUri, serviceName], (resp) => {
+                        resolve(resp);
+                    });
                 })
-            } else {
-                console.log('------------ update ------------')
-                console.log(updatedJSON);
-                ballerinaComposer.renderAPIEditor(document.getElementById("api-visualizer"), updatedJSON, onDidJsonChange, true);
             }
-            
+
+            function onDidJsonChange(event, changedObj, oasJson) {
+                webViewRPCHandler.invokeRemoteMethod('triggerSwaggerDefChange', [JSON.stringify(oasJson), docUri]);
+            }
+
+            function drawAPIEditor() {
+                if(updatedJSON === '') {
+                    console.log('------------- redraw -----------')
+                    getSwaggerJson(docUri, selectedService).then((response)=>{
+                        try {
+                            let width = window.innerWidth - 6;
+                            let height = window.innerHeight;
+                            ballerinaComposer.renderAPIEditor(document.getElementById("api-visualizer"), response.ballerinaOASJson, onDidJsonChange);
+                        } catch (e) {
+                            console.log(e.stack);
+                        }
+                    })
+                } else {
+                    console.log('------------ update ------------')
+                    console.log(updatedJSON);
+                    ballerinaComposer.renderAPIEditor(document.getElementById("api-visualizer"), updatedJSON, onDidJsonChange);
+                }
+                
+            }
+
+            drawAPIEditor();
         }
-
-        window.onresize = drawAPIEditor;
-        drawAPIEditor();
-        drawAPIEditor();
-
     `;
 
-    return getLibraryWebViewContent(context, body, script, styles);
+    return getLibraryWebViewContent(context, body, script, styles, true);
 }

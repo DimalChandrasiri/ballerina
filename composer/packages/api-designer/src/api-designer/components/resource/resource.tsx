@@ -78,7 +78,8 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
                         text={openApiResource}
                         placeholderText="Add a description"
                     />
-                    <Button
+                    {isExpandAll || active ?
+                        <Button
                         title="Add operation to resource."
                         size="mini"
                         compact
@@ -87,7 +88,8 @@ class OpenApiResource extends React.Component<OpenApiResourceProps, OpenApiResou
                         icon="plus"
                         onClick={(e) => {
                             this.handleShowAddOperation(e); }
-                        } />
+                        } /> : ""
+                    }
                 </Accordion.Title>
                 <Accordion.Content className="resource-content" active={isExpandAll || active} >
                     <OpenApiOperationsList

@@ -144,7 +144,7 @@ function createAPIEditorPanel(selectedService: string, renderHtml: string,
 
     const remoteMethods: WebViewMethod[] = [
         {
-            methodName: "openExample",
+            methodName: "getSwaggerDef",
             handler: (args: any[]): Thenable<any> => {
                 return langClient.getBallerinaOASDef(args[0], args[1]);
             }

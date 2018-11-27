@@ -19,7 +19,7 @@
 
 import * as React from "react";
 import { Message } from "semantic-ui-react";
-import * as SwaggerParser from "swagger-parser";
+import { validate } from "swagger-parser";
 import * as Swagger from "swagger-schema-official";
 import uniqid from "uniqid";
 
@@ -36,7 +36,7 @@ import InlineEdit from "./util-components/inline-edit";
 import "./components/style/main.less";
 
 export interface OasProps {
-    openApiJson: Swagger.Spec;
+    openApiJson: any;
     onDidAddResource?: (resourse: OpenApiResponse | string, swagger: Swagger.Spec) => void;
     onDidAddOperation?: (operation: OpenApiOperation, swagger: Swagger.Spec) => void;
     onDidAddParameter?: (parameter: OpenApiParameter, swagger: Swagger.Spec) => void;
@@ -99,7 +99,8 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
     }
 
     public componentDidMount() {
-        const { openApiJson } = this.props;
+        let { openApiJson } = this.props;
+        openApiJson = typeof openApiJson !== "object" ? JSON.parse(openApiJson) : openApiJson;
 
         this.setState({
             openApiJson
@@ -110,7 +111,8 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
     }
 
     public componentWillReceiveProps(nextProps: OasProps) {
-        const { openApiJson } = nextProps;
+        let { openApiJson } = nextProps;
+        openApiJson = typeof openApiJson !== "object" ? JSON.parse(openApiJson) : openApiJson;
 
         this.setState({
             openApiJson
@@ -130,10 +132,10 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
         const resourceName = addedResource.name.replace(" ", "");
         const operations: { [index: string]: Swagger.Operation } = {};
 
-        addedResource.methods.forEach((method) => {
+        addedResource.methods.forEach((method, index) => {
             operations[method.toLowerCase()] = {
                 description: "",
-                operationId: "method_" + uniqid(),
+                operationId: index === 0 ? resourceName : "resource" + index,
                 parameters: [],
                 responses : {
                         200: {
@@ -156,6 +158,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                 }
             }
         }), () => {
+
             if (this.state.openApiJson.paths["/" + resourceName]) {
                 if (onDidAddResource) {
                     onDidAddResource(resourceName, this.state.openApiJson);
@@ -185,11 +188,27 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
         const { onDidAddOperation, onDidChange } = this.props;
         const path = operationsObj.path;
         const operations = this.state.openApiJson.paths[path];
+        const paths = this.state.openApiJson.paths;
+        let resourceIndex: number = 0;
 
-        operationsObj.method.forEach((method) => {
+        Object.keys(paths).forEach((e) => {
+            const op = paths[e];
+            if (Object.keys(op).length > 0) {
+                Object.keys(op).forEach((ea) => {
+                    const lastValue: string = op[ea].operationId.split("-").pop();
+                    if (lastValue.match(/\b(s|resource\w)\b/g) !== null) {
+                        if (resourceIndex <= Number(lastValue.split("resource")[1])) {
+                            resourceIndex = Number(lastValue.split("resource")[1]) + 1;
+                        }
+                    }
+                });
+            }
+        });
+
+        operationsObj.method.forEach((method, index) => {
             operations[method.toLowerCase()] = {
                 description: "",
-                operationId: "method_" + uniqid(),
+                operationId: Object.keys(operations).length === 0 ? path  : "resource" + resourceIndex,
                 parameters: [],
                 responses : {
                         200: {
@@ -200,6 +219,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                 summary: "",
                 tags: []
             };
+            resourceIndex++;
         });
 
         this.setState((prevState) => ({
@@ -392,7 +412,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
      * @param onvalidattion Function to be run as a callback after validation
      */
     public validateOpenApiJson(json: Swagger.Spec , onvalidattion?: (validJson: any) => void) {
-        SwaggerParser.validate(json).then((validjson) => {
+        validate(json).then((validjson) => {
             if (onvalidattion) {
                 onvalidattion(validjson);
             }
@@ -451,9 +471,7 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
 
         if (status && !inline) {
             return (
-                <HideComponent hideOn={5000} callback={this.handleMessageHide}>
-                    <Message error content={isError.message} />
-                </HideComponent>
+                <Message error content={isError.message} />
             );
         }
 
