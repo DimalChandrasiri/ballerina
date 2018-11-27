@@ -1,4 +1,4 @@
-import { ASTKindChecker, Block, CompilationUnit, Function, Visitor } from "@ballerina/ast-model";
+import { ASTKindChecker, Block, CompilationUnit, Function, If, Visitor, While, Foreach } from "@ballerina/ast-model";
 import { DiagramConfig } from "../config/default";
 import { DiagramUtils } from "../diagram/diagram-utils";
 import { CompilationUnitViewState, FunctionViewState, ViewState } from "../view-model/index";
@@ -66,11 +66,14 @@ export const visitor: Visitor = {
         // Position default worker
         viewState.defaultWorker.x = viewState.client.x + viewState.client.w + config.lifeLine.gutter.h;
         viewState.defaultWorker.y = viewState.client.y;
+        // Position drop down menu for adding workers and endpoints
+        viewState.menu.x = viewState.defaultWorker.x + viewState.defaultWorker.w + config.lifeLine.gutter.h;
+        viewState.menu.y = viewState.defaultWorker.y;
 
         // Position the body block node
         if (node.body) {
             const bodyViewState: ViewState = node.body.viewState;
-            bodyViewState.bBox.x = viewState.defaultWorker.x;
+            bodyViewState.bBox.x = viewState.defaultWorker.x + viewState.defaultWorker.leftMargin;
             bodyViewState.bBox.y = viewState.defaultWorker.y + config.lifeLine.header.height;
         }
 
@@ -88,4 +91,28 @@ export const visitor: Visitor = {
             height += element.viewState.bBox.h;
         });
     },
+
+    beginVisitWhile(node: While) {
+        const viewState: ViewState = node.viewState;
+        node.body.viewState.bBox.x = viewState.bBox.x;
+        node.body.viewState.bBox.y = viewState.bBox.y + config.flowCtrl.header.height;
+    },
+
+    beginVisitForeach(node: Foreach) {
+        const viewState: ViewState = node.viewState;
+        node.body.viewState.bBox.x = viewState.bBox.x;
+        node.body.viewState.bBox.y = viewState.bBox.y + config.flowCtrl.header.height;
+    },
+
+    beginVisitIf(node: If) {
+        const viewState: ViewState = node.viewState;
+        node.body.viewState.bBox.x = viewState.bBox.x;
+        node.body.viewState.bBox.y = viewState.bBox.y + config.flowCtrl.header.height;
+
+        if (node.elseStatement) {
+            node.elseStatement.viewState.bBox.x = viewState.bBox.x + node.body.viewState.bBox.w;
+            node.elseStatement.viewState.bBox.y = viewState.bBox.y +
+                config.flowCtrl.header.height + node.body.viewState.bBox.h;
+        }
+    }
 };
