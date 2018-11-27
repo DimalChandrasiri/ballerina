@@ -6,12 +6,11 @@ export function getWebViewResourceRoot(context: ExtensionContext): Uri {
 }
 
 export function getLibraryWebViewContent(context: ExtensionContext,
-        body: string, scripts: string, styles: string, isAPIDesigner: boolean) {
+        body: string, scripts: string, styles: string) {
     const resourceRoot = getWebViewResourceRoot(context).toString();
     const composerResourcesRoot = process.env.COMPOSER_DEBUG === "true" 
                 ? process.env.COMPOSER_DEV_HOST
                 : `${resourceRoot}/composer`;
-    const jsModule = isAPIDesigner ? 'apiEditor' : 'composer';
     return `
     <!DOCTYPE html>
     <html>

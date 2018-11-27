@@ -26,5 +26,5 @@ export function render(context: ExtensionContext, langClient: ExtendedLangClient
         }
     `;
 
-    return getLibraryWebViewContent(context, body, script, styles, false);
+    return getLibraryWebViewContent(context, body, script, styles);
 }

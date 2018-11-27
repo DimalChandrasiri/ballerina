@@ -98,7 +98,7 @@ function renderDiagram(context: ExtensionContext, docUri: Uri): string {
         }
     `;
 
-    return getLibraryWebViewContent(context, body, script, styles, false);
+    return getLibraryWebViewContent(context, body, script, styles);
 }
 
 export function renderError() {

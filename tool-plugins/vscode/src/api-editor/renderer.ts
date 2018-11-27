@@ -95,5 +95,5 @@ export function apiEditorRender(context: ExtensionContext, langClient: ExtendedL
 
     `;
 
-    return getLibraryWebViewContent(context, body, script, styles, true);
+    return getLibraryWebViewContent(context, body, script, styles);
 }

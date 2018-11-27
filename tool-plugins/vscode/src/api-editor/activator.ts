@@ -21,7 +21,7 @@ import { ExtendedLangClient } from '../core/extended-language-client';
 import * as _ from 'lodash';
 import { apiEditorRender } from './renderer';
 import { BallerinaExtension } from '../core';
-import { WebViewRPCHandler } from '../utils';
+import { WebViewRPCHandler, WebViewMethod } from '../utils';
 
 const DEBOUNCE_WAIT = 500;
 
@@ -142,17 +142,20 @@ function createAPIEditorPanel(selectedService: string, renderHtml: string,
 
     oasEditorPanel.webview.html = renderHtml;
 
-    WebViewRPCHandler.create([{
-        methodName: 'getSwaggerDef',
-        handler: (args: any[]) => {
-            return langClient.getBallerinaOASDef(args[0], args[1]);
+    const remoteMethods: WebViewMethod[] = [
+        {
+            methodName: "openExample",
+            handler: (args: any[]): Thenable<any> => {
+                return langClient.getBallerinaOASDef(args[0], args[1]);
+            }
+        },{
+            methodName: 'triggerSwaggerDefChange',
+            handler: (args: any[]) => {
+                return langClient.triggerSwaggerDefChange(args[0], args[1]);
+            }
         }
-    },{
-        methodName: 'triggerSwaggerDefChange',
-        handler: (args: any[]) => {
-            return langClient.triggerSwaggerDefChange(args[0], args[1]);
-        }
-    }], oasEditorPanel.webview);
+    ];
+    WebViewRPCHandler.create(oasEditorPanel.webview, langClient, remoteMethods);
 
     oasEditorPanel.webview.onDidReceiveMessage(message => {
         switch (message.command) {
