@@ -4,7 +4,7 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 module.exports = {
     output: {
       path: path.resolve(__dirname, 'build'),
-      filename: '[name].js',
+      filename: 'composer.js',
       library: 'ballerinaComposer',
       libraryTarget: 'umd'
     },
