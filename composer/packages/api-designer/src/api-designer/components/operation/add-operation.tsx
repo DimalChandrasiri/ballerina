@@ -62,12 +62,17 @@ class OpenApiAddOperation extends React.Component<OpenApiAddOperationProps, Open
 
     }
 
-    public componentDidMount() {
-        this.populateOperationMethods();
+    public componentWillReceiveProps(nextProps: OpenApiAddOperationProps) {
+        const { resourcePath, openApiJson } = nextProps;
+        this.populateOperationMethods(resourcePath, openApiJson);
     }
 
-    public populateOperationMethods() {
+    public componentDidMount() {
         const { resourcePath, openApiJson } = this.props;
+        this.populateOperationMethods(resourcePath, openApiJson);
+    }
+
+    public populateOperationMethods(resourcePath: string, openApiJson: any) {
         const methodOpts: OpenApiOperationMethod[] = [];
 
         const availableMethods = ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"].filter((method) => {
