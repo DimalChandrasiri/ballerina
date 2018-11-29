@@ -21,7 +21,6 @@ import * as React from "react";
 import { Message } from "semantic-ui-react";
 import { validate } from "swagger-parser";
 import * as Swagger from "swagger-schema-official";
-import uniqid from "uniqid";
 
 import { OpenApiOperation } from "./components/operation/add-operation";
 import { OpenApiParameter } from "./components/parameter/add-parameter";
@@ -495,7 +494,8 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                             <div className="description">
                                 <InlineEdit
                                     model={openApiJson}
-                                    attribute="description"
+                                    attribute="info.description"
+                                    initialValue={info.description}
                                     isEditable
                                     isTextArea
                                     text={info.description}
@@ -505,7 +505,8 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                             <div>
                                 <InlineEdit
                                     model={openApiJson}
-                                    attribute="description"
+                                    attribute="info.termsOfService"
+                                    initialValue={info.termsOfService}
                                     isEditable
                                     isUrl
                                     urlLink={info.termsOfService}
@@ -517,7 +518,8 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                                 {info.license ?
                                     <InlineEdit
                                         model={openApiJson}
-                                        attribute="description"
+                                        attribute="info.license"
+                                        initialValue={info.license}
                                         isEditable
                                         isUrl
                                         text={info.license.name}
@@ -527,7 +529,8 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                                 :
                                     <InlineEdit
                                         model={openApiJson}
-                                        attribute="description"
+                                        attribute="info.license"
+                                        initialValue=""
                                         isEditable
                                         isUrl
                                         text=""
@@ -540,7 +543,8 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                                 {info.contact ?
                                     <InlineEdit
                                         model={openApiJson}
-                                        attribute="description"
+                                        attribute="info.contact"
+                                        initialValue={info.contact}
                                         isEditable
                                         isUrl
                                         text={info.contact.name}
@@ -550,7 +554,8 @@ class OpenApiVisualizer extends React.Component<OasProps, OpenApiState> {
                                 :
                                     <InlineEdit
                                         model={openApiJson}
-                                        attribute="description"
+                                        attribute="info.contact"
+                                        initialValue=""
                                         isEditable
                                         isUrl
                                         text=""

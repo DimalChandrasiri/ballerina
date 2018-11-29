@@ -29,8 +29,10 @@ export interface InlineEditProps {
     isTextArea?: boolean;
     isUrl?: boolean;
     urlLink?: string;
+
     model: any;
     attribute: string;
+    initialValue: any;
 }
 
 export interface InlineEditState {
@@ -82,8 +84,8 @@ class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
         this.setState({
             stateText: e.target.value
         }, () => {
-            const { model, attribute } = this.props;
-            this.handleChangeEvent(model, attribute);
+            const { model, attribute, initialValue } = this.props;
+            debugger;
         });
     }
 
@@ -189,14 +191,12 @@ class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
                                     transparent
                                     fluid
                                     placeholder={placeholderText}
-                                    onBlur={this.handleFocusOut}
                                     value={urlLinkState}
                                 />
                                 <Form.Input
                                     transparent
                                     fluid
                                     placeholder="Write a link name"
-                                    onBlur={this.handleFocusOut}
                                     value={stateText}
                                 />
                                 <Form.Button width={1} inverted color="black" icon="check" />
