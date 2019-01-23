@@ -21,6 +21,7 @@ export interface OpenApiProps {
 export interface OpenApiState {
     showOpenApiAddPath: boolean;
     openApiJson: Swagger.OpenAPIObject;
+    showType: string;
 }
 
 class OpenApiVisualizer extends React.Component<OpenApiProps, OpenApiState> {
@@ -37,12 +38,14 @@ class OpenApiVisualizer extends React.Component<OpenApiProps, OpenApiState> {
                 paths: this.props.openApiJson.paths
             },
             showOpenApiAddPath: false,
+            showType: "collapse"
         };
 
         this.handleShowOpenApiAddPath = this.handleShowOpenApiAddPath.bind(this);
         this.onAddOpenApiPath = this.onAddOpenApiPath.bind(this);
         this.onAddOpenApiOperation = this.onAddOpenApiOperation.bind(this);
         this.onInlineValueChange = this.onInlineValueChange.bind(this);
+        this.onExpandAll = this.onExpandAll.bind(this);
     }
 
     public componentDidMount() {
@@ -67,7 +70,7 @@ class OpenApiVisualizer extends React.Component<OpenApiProps, OpenApiState> {
 
     public render() {
         const { openApiJson } = this.props;
-        const { showOpenApiAddPath } = this.state;
+        const { showOpenApiAddPath, showType } = this.state;
 
         const appContext: OpenApiContext = {
             onAddOpenApiOperation: this.onAddOpenApiOperation,
@@ -76,9 +79,8 @@ class OpenApiVisualizer extends React.Component<OpenApiProps, OpenApiState> {
             onAddOpenApiResponse: this.onAddOpenApiResponse,
             onInlineValueChange: this.onInlineValueChange,
             openApiJson,
+            showType
         };
-
-        debugger;
 
         return (
             <OpenApiContextProvider value={appContext}>
@@ -87,10 +89,17 @@ class OpenApiVisualizer extends React.Component<OpenApiProps, OpenApiState> {
                     <Icon name="plus" />
                     Add Resource
                 </Button>
+                <Button.Group size="mini">
+                    <Button type="resources" onClick={this.onExpandAll}>List Resources</Button>
+                    <Button type="operations" onClick={this.onExpandAll}>List Operations</Button>
+                    <Button type="all" onClick={this.onExpandAll}>
+                        {showType !== "collapse" ? "Collapse All" : "Expand All"}
+                    </Button>
+                </Button.Group>
                 {showOpenApiAddPath &&
                     <AddOpenApiPath onAddOpenApiPath={appContext.onAddOpenApiPath} />
                 }
-                <OpenApiPathList paths={openApiJson.paths} />
+                <OpenApiPathList showType={showType} paths={openApiJson.paths} />
             </OpenApiContextProvider>
         );
     }
@@ -189,6 +198,40 @@ class OpenApiVisualizer extends React.Component<OpenApiProps, OpenApiState> {
             }
 
         });
+    }
+
+    private onExpandAll(e: any) {
+        const type = e.target.attributes.getNamedItem("type").value;
+
+        switch (type) {
+            case "resources":
+                this.setState({
+                    showType: "resources"
+                });
+                break;
+            case "operations":
+                this.setState({
+                    showType: "operations"
+                });
+                break;
+            case "all":
+                const { showType } = this.state;
+                if (showType === "all" || showType === "resources" || showType === "operations") {
+                    this.setState({
+                        showType: "collapse"
+                    });
+                } else {
+                    this.setState({
+                        showType: "all"
+                    });
+                }
+                break;
+            default:
+                this.setState({
+                    showType: "collapsed"
+                });
+                break;
+        }
     }
 
     private onAddOpenApiParameter(parameter: Swagger.ParameterObject) {

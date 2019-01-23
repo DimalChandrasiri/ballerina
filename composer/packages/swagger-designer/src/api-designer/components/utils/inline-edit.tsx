@@ -149,6 +149,7 @@ class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
                             onBlur={this.cancelEditing}
                             onChange={this.onValueChange}
                             onKeyDown={this.onKeyDown}
+                            id="paragraph"
                         >
                             {text}
                         </textarea>
@@ -246,7 +247,6 @@ class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
             const { changeModel, changeAttribute } = this.props;
             const { valueChanged } = this.state;
 
-            debugger;
             if (valueChanged) {
                 this.persistValueChange(changeModel, changeAttribute);
                 this.setState({
@@ -257,7 +257,7 @@ class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
     }
 
     private onKeyDown(e: React.KeyboardEvent) {
-        if (e.keyCode === 13) {
+        if (e.keyCode === 13 && e.currentTarget.id !== "paragraph") {
             this.onDoneEditing();
         }
     }
