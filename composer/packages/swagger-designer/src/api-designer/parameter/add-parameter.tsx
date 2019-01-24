@@ -136,7 +136,7 @@ class OpenApiAddParameter extends React.Component<OpenApiAddParameterProps, Open
     }
 
     private populateParameterInField() {
-        const paramInDefaults = ["header", "path", "query", "cookie"];
+        const paramInDefaults = ["Path", "Query"];
         const paramInList: OpenApiParameterIn[] = [];
 
         paramInDefaults.forEach((response) => {

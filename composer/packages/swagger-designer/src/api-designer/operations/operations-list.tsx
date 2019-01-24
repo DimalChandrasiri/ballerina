@@ -19,7 +19,7 @@ interface OpenApiOperationProp {
 
 interface OpenApiOperationState {
     activeIndex: number[];
-    showAddParameter: boolean;
+    showAddParameter: number[];
 }
 
 class OpenApiOperation extends React.Component<OpenApiOperationProp, OpenApiOperationState> {
@@ -28,7 +28,7 @@ class OpenApiOperation extends React.Component<OpenApiOperationProp, OpenApiOper
 
         this.state = {
             activeIndex: [],
-            showAddParameter: false
+            showAddParameter: []
         };
 
         this.onAccordionTitleClick = this.onAccordionTitleClick.bind(this);
@@ -103,10 +103,10 @@ class OpenApiOperation extends React.Component<OpenApiOperationProp, OpenApiOper
                                     <div className="title">
                                         <p>Parameters</p>
                                         <a onClick={() => {
-                                            this.handleShowAddParameter();
+                                            this.handleShowAddParameter(index);
                                         }} >Add Parameter</a>
                                     </div>
-                                    {showAddParameter &&
+                                    {showAddParameter.includes(index) &&
                                         <OpenApiContextConsumer>
                                             {(appContext: OpenApiContext) => {
                                                 return (
@@ -130,7 +130,6 @@ class OpenApiOperation extends React.Component<OpenApiOperationProp, OpenApiOper
                                 <div className="op-section">
                                     <div className="title">
                                         <p>Responses</p>
-                                        <a >Add Responses</a>
                                     </div>
                                     {pathItem[openApiOperation].responses &&
                                         <OpenApiResponseList
@@ -146,18 +145,17 @@ class OpenApiOperation extends React.Component<OpenApiOperationProp, OpenApiOper
         );
     }
 
-    public handleShowAddParameter(show?: boolean) {
-        const { showAddParameter } = this.state;
-        if (show !== undefined && !show) {
-            this.setState({
-                showAddParameter: false,
-            });
+    public handleShowAddParameter(id: number) {
+        if (this.state.showAddParameter.includes(id)) {
+            this.setState({showAddParameter: this.state.showAddParameter.filter((index) => {
+                return index !== id;
+            })});
+
         } else {
             this.setState({
-                showAddParameter: !showAddParameter,
+                showAddParameter: [...this.state.showAddParameter, id],
             });
         }
-
     }
 
     private onAccordionTitleClick(e: React.MouseEvent, titleProps: AccordionTitleProps) {

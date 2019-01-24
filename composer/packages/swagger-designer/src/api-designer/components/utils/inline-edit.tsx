@@ -166,7 +166,7 @@ class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
             }
             return (
                 <div className="inline-editor paragraph markdown" onClick={this.enableEditing}>
-                    <ReactMarkdown source={text} />
+                    <ReactMarkdown escapeHtml={false} source={text} />
                 </div>
             );
         } else if (typeof text === "string" && isParagraph) {
