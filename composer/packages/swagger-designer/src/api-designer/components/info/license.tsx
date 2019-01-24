@@ -26,7 +26,7 @@ class OpenApiLicense extends React.Component<OpenApiLicenseProps, any> {
                                 text={license}
                                 changeModel={context!.openApiJson}
                                 changeAttribute={{key: "info.license", changeValue: ""}}
-                                placeholderText="+ License info"
+                                placeholderText="Please include apropriate license info"
                                 onInlineValueChange={context!.onInlineValueChange}
                             />
                         );
@@ -39,7 +39,7 @@ class OpenApiLicense extends React.Component<OpenApiLicenseProps, any> {
                                 }}
                                 changeModel={context!.openApiJson}
                                 changeAttribute={{key: "info.license", changeValue: ""}}
-                                placeholderText="+ License info"
+                                placeholderText="Please include apropriate license info"
                                 onInlineValueChange={context!.onInlineValueChange}
                             />
                         );

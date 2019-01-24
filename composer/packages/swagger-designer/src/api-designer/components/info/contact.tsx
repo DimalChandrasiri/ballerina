@@ -26,7 +26,7 @@ class OpenApiContact extends React.Component<OpenApiContactProps, any> {
                                 text={contact}
                                 changeModel={context!.openApiJson}
                                 changeAttribute={{key: "info.contact", changeValue: ""}}
-                                placeholderText="+ Contact information"
+                                placeholderText="Please include apropriate contact info"
                                 onInlineValueChange={context!.onInlineValueChange}
                             />
                         );
@@ -40,7 +40,7 @@ class OpenApiContact extends React.Component<OpenApiContactProps, any> {
                                 }}
                                 changeModel={context!.openApiJson}
                                 changeAttribute={{key: "info.contact", changeValue: ""}}
-                                placeholderText="+ Contact information"
+                                placeholderText="Please include apropriate contact info"
                                 onInlineValueChange={context!.onInlineValueChange}
                             />
                         );

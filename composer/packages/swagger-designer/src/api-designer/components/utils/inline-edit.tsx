@@ -143,7 +143,7 @@ class InlineEdit extends React.Component<InlineEditProps, InlineEditState> {
             if (isEditing) {
                 return (
                     <div className="inline-editor editing">
-                        <textarea className="inline-editor-textarea"
+                        <textarea
                             autoFocus
                             placeholder={placeholderText}
                             onBlur={this.cancelEditing}
