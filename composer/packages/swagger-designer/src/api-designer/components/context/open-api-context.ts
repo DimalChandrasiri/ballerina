@@ -44,7 +44,7 @@ const context = React.createContext<OpenApiContext>({
         openapi: "",
         paths: {}
     },
-    showType: "collapsed"
+    showType: ""
 });
 
 export const OpenApiContextProvider = context.Provider;

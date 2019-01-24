@@ -9,6 +9,8 @@ import InlineEdit from "../components/utils/inline-edit";
 import OpenApiParameterList from "../parameter/parameter-list";
 import OpenApiResponseList from "../response/response-list";
 
+import OpenApiAddParameter from "../parameter/add-parameter";
+
 interface OpenApiOperationProp {
     pathItem: Swagger.PathItemObject;
     path: string;
@@ -17,6 +19,7 @@ interface OpenApiOperationProp {
 
 interface OpenApiOperationState {
     activeIndex: number[];
+    showAddParameter: boolean;
 }
 
 class OpenApiOperation extends React.Component<OpenApiOperationProp, OpenApiOperationState> {
@@ -24,7 +27,8 @@ class OpenApiOperation extends React.Component<OpenApiOperationProp, OpenApiOper
         super(props);
 
         this.state = {
-            activeIndex: []
+            activeIndex: [],
+            showAddParameter: false
         };
 
         this.onAccordionTitleClick = this.onAccordionTitleClick.bind(this);
@@ -47,7 +51,7 @@ class OpenApiOperation extends React.Component<OpenApiOperationProp, OpenApiOper
 
     public render() {
         const { pathItem, path } = this.props;
-        const { activeIndex } = this.state;
+        const { activeIndex, showAddParameter } = this.state;
 
         return (
             <Accordion>
@@ -98,8 +102,25 @@ class OpenApiOperation extends React.Component<OpenApiOperationProp, OpenApiOper
                                 <div className="op-section">
                                     <div className="title">
                                         <p>Parameters</p>
-                                        <a >Add Parameter</a>
+                                        <a onClick={() => {
+                                            this.handleShowAddParameter();
+                                        }} >Add Parameter</a>
                                     </div>
+                                    {showAddParameter &&
+                                        <OpenApiContextConsumer>
+                                            {(appContext: OpenApiContext) => {
+                                                return (
+                                                    <OpenApiAddParameter
+                                                        openApiJson={appContext.openApiJson}
+                                                        onAddParameter={appContext!.onAddOpenApiParameter}
+                                                        operation={openApiOperation}
+                                                        resourcePath={path}
+                                                    />
+                                                );
+                                            }}
+                                        </OpenApiContextConsumer>
+
+                                    }
                                     {pathItem[openApiOperation].parameters &&
                                         <OpenApiParameterList
                                             parameterList={pathItem[openApiOperation].parameters}
@@ -123,6 +144,20 @@ class OpenApiOperation extends React.Component<OpenApiOperationProp, OpenApiOper
                 })}
             </Accordion>
         );
+    }
+
+    public handleShowAddParameter(show?: boolean) {
+        const { showAddParameter } = this.state;
+        if (show !== undefined && !show) {
+            this.setState({
+                showAddParameter: false,
+            });
+        } else {
+            this.setState({
+                showAddParameter: !showAddParameter,
+            });
+        }
+
     }
 
     private onAccordionTitleClick(e: React.MouseEvent, titleProps: AccordionTitleProps) {

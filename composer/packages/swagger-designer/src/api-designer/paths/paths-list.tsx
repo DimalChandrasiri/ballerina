@@ -35,6 +35,7 @@ class OpenApiPathList extends React.Component<OpenApiPathProps, OpenApiPathState
     public componentWillReceiveProps(nextProps: OpenApiPathProps) {
         const { paths, showType } = nextProps;
         const activePaths: number[] = [];
+        let hideForm: boolean = this.state.showAddOperation;
 
         if (showType === "operations" || showType === "resources" || showType === "all") {
             Object.keys(paths).sort().map((openApiResource, index) => {
@@ -42,8 +43,13 @@ class OpenApiPathList extends React.Component<OpenApiPathProps, OpenApiPathState
             });
         }
 
+        if (showType === "collapse") {
+            hideForm = false;
+        }
+
         this.setState({
-            activeIndex: activePaths
+            activeIndex: activePaths,
+            showAddOperation: hideForm
         });
     }
 

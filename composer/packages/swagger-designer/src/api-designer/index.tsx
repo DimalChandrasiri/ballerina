@@ -38,12 +38,13 @@ class OpenApiVisualizer extends React.Component<OpenApiProps, OpenApiState> {
                 paths: this.props.openApiJson.paths
             },
             showOpenApiAddPath: false,
-            showType: "collapse"
+            showType: "all"
         };
 
         this.handleShowOpenApiAddPath = this.handleShowOpenApiAddPath.bind(this);
         this.onAddOpenApiPath = this.onAddOpenApiPath.bind(this);
         this.onAddOpenApiOperation = this.onAddOpenApiOperation.bind(this);
+        this.onAddOpenApiParameter = this.onAddOpenApiParameter.bind(this);
         this.onInlineValueChange = this.onInlineValueChange.bind(this);
         this.onExpandAll = this.onExpandAll.bind(this);
     }
@@ -227,15 +228,94 @@ class OpenApiVisualizer extends React.Component<OpenApiProps, OpenApiState> {
                 }
                 break;
             default:
-                this.setState({
-                    showType: "collapsed"
-                });
                 break;
         }
     }
 
     private onAddOpenApiParameter(parameter: Swagger.ParameterObject) {
-        // console.log('add-parameter');
+        const { onDidAddParameter, onDidChange } = this.props;
+        const { openApiJson } = this.state;
+        const path = parameter.resourcePath;
+        const method = parameter.operation;
+
+        if (openApiJson.paths[path][method].parameters) {
+            this.setState((prevState) => ({
+                ...prevState,
+                openApiJson: {
+                    ...prevState.openApiJson,
+                    paths: {
+                        ...prevState.openApiJson.paths,
+                        [path] : {
+                            ...prevState.openApiJson.paths[path],
+                            [method] : {
+                                ...prevState.openApiJson.paths[path][method],
+                                parameters : [
+                                    ...prevState.openApiJson.paths[path][method].parameters,
+                                    {
+                                        allowEmptyValue: parameter.allowedEmptyValues,
+                                        description: parameter.description,
+                                        in: parameter.parameterIn,
+                                        isRequired: parameter.isRequired,
+                                        name: parameter.name,
+                                        schema: {
+                                            type: parameter.type
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }), () => {
+
+                if (onDidAddParameter) {
+                    onDidAddParameter(parameter, this.state.openApiJson);
+                }
+
+                if (onDidChange) {
+                    onDidChange(EVENTS.ADD_PARAMETER, this.state.openApiJson);
+                }
+
+            });
+        } else {
+            this.setState((prevState) => ({
+                ...prevState,
+                openApiJson: {
+                    ...prevState.openApiJson,
+                    paths: {
+                        ...prevState.openApiJson.paths,
+                        [path] : {
+                            ...prevState.openApiJson.paths[path],
+                            [method] : {
+                                ...prevState.openApiJson.paths[path][method],
+                                parameters : [
+                                    {
+                                        allowEmptyValue: parameter.allowedEmptyValues,
+                                        description: parameter.description,
+                                        in: parameter.parameterIn,
+                                        isRequired: parameter.isRequired,
+                                        name: parameter.name,
+                                        schema: {
+                                            type: parameter.type
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+            }), () => {
+
+                if (onDidAddParameter) {
+                    onDidAddParameter(parameter, this.state.openApiJson);
+                }
+
+                if (onDidChange) {
+                    onDidChange(EVENTS.ADD_PARAMETER, this.state.openApiJson);
+                }
+
+            });
+        }
     }
 
     private onAddOpenApiResponse(response: Swagger.ResponseObject) {
@@ -245,13 +325,15 @@ class OpenApiVisualizer extends React.Component<OpenApiProps, OpenApiState> {
     private onInlineValueChange(openApiJson: Swagger.OpenAPIObject) {
         const { onDidChange } = this.props;
 
-        this.setState({
+        this.setState((prevState) => ({
+            ...prevState,
             openApiJson
-        }, () => {
+        }), () => {
             if (onDidChange) {
                 onDidChange(EVENTS.ON_INLINE_CHANGE, this.state.openApiJson);
             }
         });
+
     }
 
     private handleShowOpenApiAddPath() {

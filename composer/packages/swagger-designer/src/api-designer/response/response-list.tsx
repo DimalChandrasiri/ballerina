@@ -23,7 +23,7 @@ class OpenApiResponseList extends React.Component<OpenApiResponseListProps, any>
                 </Table.Row>
                 </Table.Header>
                 <Table.Body>
-                    {Object.keys(responsesList).map((param: string, index: number) => {
+                    {Object.keys(responsesList).map((param: any, index: number) => {
                         return (
                             <Table.Row>
                                 <Table.Cell className="parameter-name-cell">
@@ -33,6 +33,7 @@ class OpenApiResponseList extends React.Component<OpenApiResponseListProps, any>
                                 </Table.Cell>
                                 <Table.Cell className="parameter-desc-cell">
                                     <div className="markdown">
+                                        {responsesList[param].description}
                                     </div>
                                 </Table.Cell>
                             </Table.Row>
