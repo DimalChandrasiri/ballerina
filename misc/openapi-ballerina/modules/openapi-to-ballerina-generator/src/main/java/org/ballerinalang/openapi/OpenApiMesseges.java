@@ -35,11 +35,10 @@ public class OpenApiMesseges {
     public static final String GEN_CONTRACT_BALLERINA_DOC_MANDATORY = "Ballerina document location is not provided " +
             "to generate the OpenApi contract. The command should match the following. \nballerina openapi " +
             "gen-contract [<module-name>]:<service-name> -i <ballerina-file>";
-    public static final String CONTRACT_SERVICE_MANDATORY = "A service name is mandatory to generate an " +
-            "OpenApi contract.";
+    public static final String GEN_CONTRACT_BALLERINA_MODULE_NOT_FOUND = "The module is not found in the location " +
+            "provided. Please specify a valid ballerina module.";
 
-
-
+    
 
     public static final String GEN_SERVICE_MODULE_REQUIRED = "A module name and a service name is required to " +
                                                              "generate the service from the provided OpenAPI file. " +
@@ -57,7 +56,8 @@ public class OpenApiMesseges {
     public static final String SOURCE_DIRECTORY_EXCEPTION = "Unable to create source directory. File system error " +
                                                             "occured.";
     public static final String MODULE_MD_EXCEPTION = "Unable to create moudle.md file. File system error occured.";
-    public static final String DEFINITION_EXISTS = "There is already an OpenApi contract in the location.";
+    public static final String DEFINITION_EXISTS = "The location provided already contains an OpenApi contract " +
+            "imilar to the provided contract.";
 
     private OpenApiMesseges() {
         throw new AssertionError();
