@@ -1,7 +1,6 @@
 package org.ballerinalang.openapi.cmd;
 
 import org.ballerinalang.ballerina.openapi.convertor.service.OpenApiConverterUtils;
-import org.ballerinalang.openapi.OpenApiMesseges;
 import org.ballerinalang.tool.BLauncherCmd;
 import org.ballerinalang.tool.LauncherUtils;
 import picocli.CommandLine;
@@ -11,6 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+
+import static org.ballerinalang.openapi.OpenApiMesseges.*;
 
 
 /**
@@ -59,9 +60,9 @@ public class OpenApiGenContractCmd implements BLauncherCmd {
         }
 
         if (moduleArgs == null) {
-            throw LauncherUtils.createLauncherException(OpenApiMesseges.GEN_CONTRACT_PARAM_MANDATORY);
+            throw LauncherUtils.createLauncherException(GEN_CONTRACT_PARAM_MANDATORY);
         } else if (moduleArgs.size() == 1 && balFile == null) {
-            throw LauncherUtils.createLauncherException(OpenApiMesseges.GEN_CONTRACT_BALLERINA_DOC_MANDATORY);
+            throw LauncherUtils.createLauncherException(GEN_CONTRACT_BALLERINA_DOC_MANDATORY);
         }
 
         //When module and service name is available
@@ -90,7 +91,7 @@ public class OpenApiGenContractCmd implements BLauncherCmd {
         Path outPutPath = Paths.get(exportLocation);
 
         if (!checkModuleExist(module)) {
-            throw LauncherUtils.createLauncherException("The module provided is not found in the current location.");
+            throw LauncherUtils.createLauncherException(GEN_CONTRACT_BALLERINA_MODULE_NOT_FOUND);
         }
 
         try {

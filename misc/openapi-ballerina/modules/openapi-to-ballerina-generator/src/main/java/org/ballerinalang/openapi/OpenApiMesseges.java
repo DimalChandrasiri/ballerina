@@ -38,7 +38,7 @@ public class OpenApiMesseges {
     public static final String GEN_CONTRACT_BALLERINA_MODULE_NOT_FOUND = "The module is not found in the location " +
             "provided. Please specify a valid ballerina module.";
 
-    
+
 
     public static final String GEN_SERVICE_MODULE_REQUIRED = "A module name and a service name is required to " +
                                                              "generate the service from the provided OpenAPI file. " +
