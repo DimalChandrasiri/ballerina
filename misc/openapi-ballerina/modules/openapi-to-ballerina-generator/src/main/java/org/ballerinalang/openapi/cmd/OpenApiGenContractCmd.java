@@ -59,9 +59,9 @@ public class OpenApiGenContractCmd implements BLauncherCmd {
         }
 
         if (moduleArgs == null) {
-            throw LauncherUtils.createLauncherException(OpenApiMesseges.CONTRACT_SERVICE_MANDATORY);
+            throw LauncherUtils.createLauncherException(OpenApiMesseges.GEN_CONTRACT_PARAM_MANDATORY);
         } else if (moduleArgs.size() == 1 && balFile == null) {
-            throw LauncherUtils.createLauncherException(OpenApiMesseges.CONTRACT_BALLERINA_DOC_MANDATORY);
+            throw LauncherUtils.createLauncherException(OpenApiMesseges.GEN_CONTRACT_BALLERINA_DOC_MANDATORY);
         }
 
         //When module and service name is available

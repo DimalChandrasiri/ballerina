@@ -29,10 +29,14 @@ public class OpenApiMesseges {
     public static final String OPENAPI_CLIENT_EXCEPTION = "Error occurred when generating client for openapi contract";
 
 
+    public static final String GEN_CONTRACT_PARAM_MANDATORY = "Mandatory options are missing in order to generate" +
+            " an OpenApi contract. The command should match the following. \nballerina openapi gen-contract " +
+            "[<module-name>]:<service-name> -i <ballerina-file>";
+    public static final String GEN_CONTRACT_BALLERINA_DOC_MANDATORY = "Ballerina document location is not provided " +
+            "to generate the OpenApi contract. The command should match the following. \nballerina openapi " +
+            "gen-contract [<module-name>]:<service-name> -i <ballerina-file>";
     public static final String CONTRACT_SERVICE_MANDATORY = "A service name is mandatory to generate an " +
             "OpenApi contract.";
-    public static final String CONTRACT_BALLERINA_DOC_MANDATORY = "Please specify a ballerina document path in " +
-            "order generate an OpenApi contract for the service ";
 
 
 
