@@ -11,7 +11,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static org.ballerinalang.openapi.OpenApiMesseges.*;
+import static org.ballerinalang.openapi.OpenApiMesseges.GEN_CONTRACT_BALLERINA_DOC_MANDATORY;
+import static org.ballerinalang.openapi.OpenApiMesseges.GEN_CONTRACT_BALLERINA_MODULE_NOT_FOUND;
+import static org.ballerinalang.openapi.OpenApiMesseges.GEN_CONTRACT_PARAM_MANDATORY;
 
 
 /**
@@ -23,7 +25,7 @@ import static org.ballerinalang.openapi.OpenApiMesseges.*;
 public class OpenApiGenContractCmd implements BLauncherCmd {
     private static final String CMD_NAME = "openapi-gen-contract";
 
-    private static final PrintStream outStream = System.err;
+    private PrintStream outStream;
 
     @CommandLine.Parameters(index = "0", split = ":")
     private List<String> moduleArgs;
@@ -45,6 +47,14 @@ public class OpenApiGenContractCmd implements BLauncherCmd {
 
     @CommandLine.Option(names = { "-h", "--help" }, hidden = true)
     private boolean helpFlag;
+
+    public OpenApiGenContractCmd() {
+        this.outStream = System.err;
+    }
+
+    public OpenApiGenContractCmd(PrintStream outStream, String executionPath) {
+        this.outStream = outStream;
+    }
 
     @Override
     public void execute() {
@@ -78,7 +88,7 @@ public class OpenApiGenContractCmd implements BLauncherCmd {
             String service = moduleArgs.get(0);
             Path servicePath = Paths.get(balFile);
 
-            genOASfromFile(service, servicePath);
+            genOASfromFile(service, servicePath, CMD_NAME);
         }
     }
 
@@ -107,11 +117,11 @@ public class OpenApiGenContractCmd implements BLauncherCmd {
      *
      * @param serviceName - Service Name
      */
-    private void genOASfromFile(String serviceName, Path servicePath) {
+    private void genOASfromFile(String serviceName, Path servicePath, String genType) {
         Path outPath = Paths.get(exportLocation);
 
         try {
-            OpenApiConverterUtils.generateOAS3Definitions(servicePath, outPath, serviceName);
+            OpenApiConverterUtils.generateOAS3Definitions(servicePath, outPath, serviceName, CMD_NAME);
         } catch (Exception e) {
             throw LauncherUtils.createLauncherException(
                     "Error occurred when exporting openapi file for service file at " + servicePath.toString()

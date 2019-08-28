@@ -57,7 +57,7 @@ public class OpenApiResourcesTest {
         String oasSrc =
             FileUtils.readFileToString(oasDefinitionsPath.resolve("path-annotation-no-forward-slash.yaml").toFile());
         
-        String generatedOAS = OpenApiConverterUtils.generateOAS3Definitions(balSrc, "hello");
+        String generatedOAS = OpenApiConverterUtils.generateOAS3Definitions(balSrc, "hello", "");
         
         SwaggerDeserializationResult resultParseResult = new SwaggerParser().readWithInfo(generatedOAS);
         SwaggerDeserializationResult oasSrcParseResult = new SwaggerParser().readWithInfo(oasSrc);
@@ -78,7 +78,7 @@ public class OpenApiResourcesTest {
         String oasSrc =
             FileUtils.readFileToString(oasDefinitionsPath.resolve("path-annotation-no-forward-slash.yaml").toFile());
         
-        String generatedOAS = OpenApiConverterUtils.generateOAS3Definitions(balSrc, "hello");
+        String generatedOAS = OpenApiConverterUtils.generateOAS3Definitions(balSrc, "hello",  "");
         
         SwaggerDeserializationResult resultParseResult = new SwaggerParser().readWithInfo(generatedOAS);
         SwaggerDeserializationResult oasSrcParseResult = new SwaggerParser().readWithInfo(oasSrc);

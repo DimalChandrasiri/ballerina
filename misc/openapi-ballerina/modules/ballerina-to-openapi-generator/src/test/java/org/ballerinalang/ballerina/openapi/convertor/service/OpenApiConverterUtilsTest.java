@@ -219,7 +219,7 @@ public class OpenApiConverterUtilsTest {
         String serviceName = "";
         try {
             String openApiDefinition = OpenApiConverterUtils.generateOAS3Definitions(
-                    serviceWithMultipleHTTPMethodsInResourceLevel, serviceName);
+                    serviceWithMultipleHTTPMethodsInResourceLevel, serviceName, "");
             Assert.assertNotNull(openApiDefinition);
         } catch (OpenApiConverterException e) {
             Assert.fail("Error while converting ballerina service to openApi definition");
@@ -233,7 +233,7 @@ public class OpenApiConverterUtilsTest {
         String serviceName = "hello";
         try {
             String openApiDefinition = OpenApiConverterUtils.generateOAS3Definitions(
-                    serviceWithNoHTTPMethodsAtResourceLevel, serviceName);
+                    serviceWithNoHTTPMethodsAtResourceLevel, serviceName, "");
             Assert.assertNotNull(openApiDefinition);
         } catch (OpenApiConverterException e) {
             Assert.fail("Error while converting ballerina service to openApi definition");
@@ -246,7 +246,7 @@ public class OpenApiConverterUtilsTest {
         String serviceName = "hello";
         try {
             String openApiDefinition = OpenApiConverterUtils.generateOAS3Definitions(serviceWithOneHTTPMethod,
-                    serviceName);
+                    serviceName, "");
             Assert.assertNotNull(openApiDefinition);
         } catch (OpenApiConverterException e) {
             Assert.fail("Error while converting ballerina service to openApi definition");
@@ -259,7 +259,7 @@ public class OpenApiConverterUtilsTest {
         String serviceName = "hello";
         try {
             String openApiDefinition = OpenApiConverterUtils.generateOAS3Definitions(
-                    sampleOpenApiWithTwoResources, serviceName);
+                    sampleOpenApiWithTwoResources, serviceName, "");
             Assert.assertNotNull(openApiDefinition);
         } catch (OpenApiConverterException e) {
             Assert.fail("Error while converting ballerina service to openApi definition");
@@ -272,7 +272,7 @@ public class OpenApiConverterUtilsTest {
         String serviceName = "hello";
         try {
             String openAPI3Definition = OpenApiConverterUtils.generateOAS3Definitions(
-                    sampleOpenApiWithMultipleResourceAndVerbs, serviceName);
+                    sampleOpenApiWithMultipleResourceAndVerbs, serviceName, "");
             String openApiDefinition = OpenApiConverterUtils.generateOpenApiDefinitions(
                     sampleOpenApiWithMultipleResourceAndVerbs, serviceName);
             Assert.assertNotNull(openApiDefinition);
@@ -288,7 +288,7 @@ public class OpenApiConverterUtilsTest {
     public void testWithEchoService() {
         try {
             String openAPI3Definition = OpenApiConverterUtils.generateOAS3Definitions(
-                    echoServiceBal, null);
+                    echoServiceBal, null, "");
             String openApiDefinition = OpenApiConverterUtils.generateOpenApiDefinitions(
                     echoServiceBal, null);
             Assert.assertNotNull(openApiDefinition);
@@ -303,7 +303,8 @@ public class OpenApiConverterUtilsTest {
     @Test(description = "Test OAS definition generation when input ballerina service is invalid", enabled = false)
     public void testServiceWithTypo() {
         try {
-            String oasDef = OpenApiConverterUtils.generateOAS3Definitions(invalidEchoServiceBal, null);
+            String oasDef = OpenApiConverterUtils.generateOAS3Definitions(invalidEchoServiceBal,
+                    null, "");
             Assert.fail("Error was not thrown for invalid ballerina service");
         } catch (OpenApiConverterException e) {
             Assert.assertEquals(e.getMessage(), "Please check if input source is valid and complete");

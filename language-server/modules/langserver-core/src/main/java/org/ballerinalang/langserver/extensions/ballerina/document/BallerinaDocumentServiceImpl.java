@@ -113,7 +113,7 @@ public class BallerinaDocumentServiceImpl implements BallerinaDocumentService {
         try {
             String fileContent = documentManager.getFileContent(compilationPath);
             String openApiDefinition = OpenApiConverterUtils
-                    .generateOAS3Definitions(fileContent, request.getBallerinaService());
+                    .generateOAS3Definitions(fileContent, request.getBallerinaService(),  "");
             reply.setBallerinaOASJson(convertToJson(openApiDefinition));
         } catch (Exception e) {
             reply.isIsError(true);
