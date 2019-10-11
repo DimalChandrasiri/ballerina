@@ -105,6 +105,7 @@ dependencies {
     dist project(':ballerina-packerina')
     dist project(':openapi-ballerina:ballerina-to-openapi-generator')
     dist project(':openapi-ballerina:openapi-to-ballerina-generator')
+    dist project(':openapi-ballerina:openapi-command')
     dist project(':openapi-ballerina:openapi-validator')
     dist project(':openapi-ballerina:ballerina-client-generator')
     dist project(':docerina')

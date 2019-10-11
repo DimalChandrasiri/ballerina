@@ -172,8 +172,12 @@ public class Main {
             if (msg == null) {
                 throw LauncherUtils.createUsageExceptionWithHelp("internal error occurred");
             } else if (msg.startsWith(MISSING_REQUIRED_PARAMETER_PREFIX)) {
-                    throw LauncherUtils.createUsageExceptionWithHelp("flag " + msg.substring(msg.indexOf("'"))
-                                                                     + " needs an argument");
+                if (msg.contains(":")) {
+                    throw LauncherUtils.createUsageExceptionWithHelp("flag " + msg.substring(msg.indexOf(":"))
+                            + " needs an argument");
+                } else {
+                    throw LauncherUtils.createUsageExceptionWithHelp(msg);
+                }
             }
             throw LauncherUtils.createUsageExceptionWithHelp(LauncherUtils.makeFirstLetterLowerCase(msg));
         }

@@ -317,7 +317,6 @@ public class CodeGenerator {
                     }
                 });
             }
-
         }
 
         for (GenSrcFile file : sources) {
