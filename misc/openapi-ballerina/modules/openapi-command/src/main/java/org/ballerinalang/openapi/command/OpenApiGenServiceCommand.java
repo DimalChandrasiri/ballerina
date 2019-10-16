@@ -125,7 +125,7 @@ public class OpenApiGenServiceCommand implements BLauncherCmd {
         }
 
         //Check if not in a ballerina project
-        if (OpenApiCodeGenUtils.isBallerinaProject(Paths.get(executionPath))) {
+        if (!OpenApiCodeGenUtils.isBallerinaProject(Paths.get(executionPath))) {
             throw LauncherUtils.createLauncherException(OpenApiCommandMessages.INVALID_SERVICE_GEN_LOCATION);
         }
 

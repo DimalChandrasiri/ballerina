@@ -5,4 +5,5 @@ package org.ballerinalang.openapi.constants;
  */
 public class OpenApiServiceGeneratorConstants {
     public static final String MODULE_MD = "Module.md";
+    public static final String UNTITLED_SERVICE = "UntitledAPI";
 }

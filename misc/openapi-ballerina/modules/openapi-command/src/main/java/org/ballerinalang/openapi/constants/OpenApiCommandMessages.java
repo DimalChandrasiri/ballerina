@@ -5,7 +5,7 @@ package org.ballerinalang.openapi.constants;
  */
 public class OpenApiCommandMessages {
     public static final String EXPERIMENTAL_FEATURE = "\nNOTE :This is an experimental tool, which only supports a " +
-            "limited set of functionality. \n\n";
+            "limited set of functionality. \n";
 
     /**
      * Service Gen Constants.

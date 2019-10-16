@@ -6,6 +6,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.ballerinalang.openapi.constants.OpenApiCommandConstants;
+
 /**
  * Util methods used for OpenApi Code Generation.
  */
@@ -71,5 +73,28 @@ public class OpenApiCodeGenUtils {
                 writer.close();
             }
         }
+    }
+
+    /**
+     * This will escape special characters in ballerina identifiers.
+     *
+     * @param identifier - identifier string
+     * @param isVar - is a variable name or type
+     * @return escaped string
+     */
+    public static String escapeIdentifiers(String identifier, boolean isVar) {
+        if (identifier.matches("^[a-zA-Z0-9_]*$")
+                && !OpenApiCommandConstants.BAL_KEYWORDS.stream().anyMatch(identifier::equals) && !isVar) {
+            return identifier;
+        }
+        if (!identifier.matches("[a-zA-Z]+") ||
+                OpenApiCommandConstants.BAL_KEYWORDS.stream().anyMatch(identifier::equals)) {
+            if ((isVar && OpenApiCommandConstants.BAL_KEYWORDS.stream().anyMatch(identifier::equals))
+                    || !OpenApiCommandConstants.BAL_KEYWORDS.stream().anyMatch(identifier::equals)) {
+                identifier = identifier.replaceAll("([\\\\?!<>*\\-=^+(){}|.$])", "\\\\$1");
+                identifier = "'" + identifier;
+            }
+        }
+        return identifier;
     }
 }

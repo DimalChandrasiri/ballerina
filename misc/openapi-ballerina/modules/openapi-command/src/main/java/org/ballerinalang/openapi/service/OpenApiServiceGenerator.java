@@ -1,8 +1,12 @@
 package org.ballerinalang.openapi.service;
 
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.ballerinalang.openapi.constants.OpenApiServiceGeneratorConstants;
 import org.ballerinalang.openapi.models.GenSrcFile;
+import org.ballerinalang.openapi.models.OpenApiObject;
 import org.ballerinalang.openapi.utils.OpenApiCodeGenUtils;
+import org.ballerinalang.openapi.utils.OpenApiTypeExtractorUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,9 +26,10 @@ public class OpenApiServiceGenerator {
     /**
      * Generates Ballerina source for the given OpenApi contract and write to the output location.
      *
-     * @param serviceName
-     * @param contractPath
-     * @param outputPath
+     * @param serviceName - Custom service name
+     * @param contractPath - Open Api contract path
+     * @param outputPath - Where the generated files should be saved
+     * @throws IOException - exception if read error
      */
     public void generateService(String serviceName, String contractPath, String outputPath) throws IOException {
         List<GenSrcFile> generatedFiles = generateBallerinaSource(serviceName, contractPath);
@@ -36,6 +41,14 @@ public class OpenApiServiceGenerator {
     }
 
     private List<GenSrcFile> generateBallerinaSource(String serviceName, String contractPath) {
+        OpenAPI definition = new OpenAPIV3Parser().read(contractPath);
+
+        if (definition == null) {
+            //Throw exception if parse is not working
+        }
+
+        final OpenApiObject definitionObject = OpenApiTypeExtractorUtils.extractOpenApiTypes(definition);
+
         return null;
     }
 

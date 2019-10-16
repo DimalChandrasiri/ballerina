@@ -23,7 +23,8 @@ configurations.all {
 }
 
 dependencies {
-    implementation 'info.picocli:picocli:4.0.1'
+    implementation 'info.picocli:picocli:4.0.4'
+    implementation 'io.swagger.parser.v3:swagger-parser-v3:2.0.15'
     implementation project(':ballerina-tool')
     implementation project(':ballerina-lang')
 }
