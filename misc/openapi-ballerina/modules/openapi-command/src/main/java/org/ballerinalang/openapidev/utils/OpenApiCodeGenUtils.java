@@ -1,4 +1,4 @@
-package org.ballerinalang.openapi.utils;
+package org.ballerinalang.openapidev.utils;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -6,7 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.ballerinalang.openapi.constants.OpenApiCommandConstants;
+import org.ballerinalang.openapidev.constants.OpenApiCommandConstants;
 
 /**
  * Util methods used for OpenApi Code Generation.

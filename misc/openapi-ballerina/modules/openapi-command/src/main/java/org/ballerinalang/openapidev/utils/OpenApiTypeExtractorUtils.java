@@ -1,4 +1,4 @@
-package org.ballerinalang.openapi.utils;
+package org.ballerinalang.openapidev.utils;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -7,17 +7,15 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.Paths;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponses;
-import org.ballerinalang.openapi.models.OpenApiObject;
-import org.ballerinalang.openapi.models.OpenApiOperationObject;
-import org.ballerinalang.openapi.models.OpenApiParameterObject;
-import org.ballerinalang.openapi.models.OpenApiPathObject;
+import org.ballerinalang.openapidev.models.OpenApiObject;
+import org.ballerinalang.openapidev.models.OpenApiOperationObject;
+import org.ballerinalang.openapidev.models.OpenApiParameterObject;
+import org.ballerinalang.openapidev.models.OpenApiPathObject;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import static org.ballerinalang.openapi.utils.OpenApiCodeGenUtils.escapeIdentifiers;
 
 /**
  * This class will contain functions to extract types from a given OpenApi object.
@@ -107,7 +105,7 @@ public class OpenApiTypeExtractorUtils {
             final Parameter nextParameter = parameterIterator.next();
             OpenApiParameterObject parameter = new OpenApiParameterObject();
 
-            parameter.setParamName(escapeIdentifiers(nextParameter.getName(), false));
+            parameter.setParamName(OpenApiCodeGenUtils.escapeIdentifiers(nextParameter.getName(), false));
         }
     }
 

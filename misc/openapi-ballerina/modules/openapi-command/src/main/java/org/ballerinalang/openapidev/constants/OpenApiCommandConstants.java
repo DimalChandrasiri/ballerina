@@ -1,4 +1,4 @@
-package org.ballerinalang.openapi.constants;
+package org.ballerinalang.openapidev.constants;
 
 import java.util.Arrays;
 import java.util.Collections;

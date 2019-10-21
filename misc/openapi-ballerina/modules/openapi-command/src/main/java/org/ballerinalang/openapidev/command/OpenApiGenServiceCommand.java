@@ -1,9 +1,9 @@
-package org.ballerinalang.openapi.command;
+package org.ballerinalang.openapidev.command;
 
-import org.ballerinalang.openapi.constants.OpenApiCommandConstants;
-import org.ballerinalang.openapi.constants.OpenApiCommandMessages;
-import org.ballerinalang.openapi.service.OpenApiServiceGenerator;
-import org.ballerinalang.openapi.utils.OpenApiCodeGenUtils;
+import org.ballerinalang.openapidev.constants.OpenApiCommandConstants;
+import org.ballerinalang.openapidev.constants.OpenApiCommandMessages;
+import org.ballerinalang.openapidev.service.OpenApiServiceGenerator;
+import org.ballerinalang.openapidev.utils.OpenApiCodeGenUtils;
 import org.ballerinalang.tool.BLauncherCmd;
 import org.ballerinalang.tool.LauncherUtils;
 import picocli.CommandLine;
@@ -99,19 +99,19 @@ public class OpenApiGenServiceCommand implements BLauncherCmd {
 
         //Validate service arguments
         if (null == serviceArgs || serviceArgs.size() == 0) {
-            LauncherUtils.createLauncherException(OpenApiCommandMessages.NULL_SERVICE_ARGS);
+            throw LauncherUtils.createLauncherException(OpenApiCommandMessages.NULL_SERVICE_ARGS);
         } else if (serviceArgs.size() == 1) {
-            LauncherUtils.createLauncherException(OpenApiCommandMessages.SINGLE_SERVICE_ARG);
+            throw LauncherUtils.createLauncherException(OpenApiCommandMessages.SINGLE_SERVICE_ARG);
         } else if (serviceArgs.size() == 2 && serviceArgs.get(0).isEmpty()) {
-            LauncherUtils.createLauncherException(OpenApiCommandMessages.MODULE_NAME_REQUIRED);
+            throw LauncherUtils.createLauncherException(OpenApiCommandMessages.MODULE_NAME_REQUIRED);
         } else if (!serviceArgs.get(0).matches("[A-Za-z0-9]+")
                 || !serviceArgs.get(1).matches("[A-Za-z0-9]+")) {
-            LauncherUtils.createLauncherException(OpenApiCommandMessages.INVALID_ARGS);
+            throw LauncherUtils.createLauncherException(OpenApiCommandMessages.INVALID_ARGS);
         }
 
         //Validate command arguments and contract location
         if (commandArgs == null) {
-            LauncherUtils.createLauncherException(OpenApiCommandMessages.CONTRACT_REQUIRED);
+            throw LauncherUtils.createLauncherException(OpenApiCommandMessages.CONTRACT_REQUIRED);
         }
 
         String moduleName = serviceArgs.get(0);
@@ -119,9 +119,9 @@ public class OpenApiGenServiceCommand implements BLauncherCmd {
         openapiContract = new File(commandArgs.get(0));
 
         if (!openapiContract.exists()) {
-            LauncherUtils.createLauncherException(OpenApiCommandMessages.CONTRACT_NOT_EXIST);
+            throw LauncherUtils.createLauncherException(OpenApiCommandMessages.CONTRACT_NOT_EXIST);
         } else if (!openapiContract.isFile()) {
-            LauncherUtils.createLauncherException(OpenApiCommandMessages.CONTRACT_IS_NOT_FILE);
+            throw LauncherUtils.createLauncherException(OpenApiCommandMessages.CONTRACT_IS_NOT_FILE);
         }
 
         //Check if not in a ballerina project

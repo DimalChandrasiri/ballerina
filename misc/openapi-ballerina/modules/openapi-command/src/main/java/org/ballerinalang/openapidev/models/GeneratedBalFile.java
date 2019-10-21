@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.ballerinalang.openapi.models;
+package org.ballerinalang.openapidev.models;
 
 /**
  * Model class to hold generated source file information.
  */
-public class GenSrcFile {
+public class GeneratedBalFile {
     private String content;
     private String fileName;
     private String pkgName;
@@ -44,7 +44,7 @@ public class GenSrcFile {
         }
     }
 
-    public GenSrcFile(GenFileType type, String pkgName, String fileName, String content) {
+    public GeneratedBalFile(GenFileType type, String pkgName, String fileName, String content) {
         this.type = type;
         this.pkgName = pkgName;
         this.fileName = fileName;

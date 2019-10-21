@@ -64,7 +64,7 @@ public class LauncherUtils {
 
     public static BLauncherException createLauncherException(String errorMsg) {
         BLauncherException launcherException = new BLauncherException();
-        launcherException.addMessage("error: " + errorMsg);
+        launcherException.addMessage("Error: " + errorMsg);
         return launcherException;
     }
 

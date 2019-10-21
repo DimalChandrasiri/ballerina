@@ -1,18 +1,18 @@
-package org.ballerinalang.openapi.command;
+package org.ballerinalang.openapidev.command;
 
-import org.ballerinalang.openapi.constants.OpenApiCommandConstants;
+import org.ballerinalang.openapidev.constants.OpenApiCommandConstants;
 import org.ballerinalang.tool.BLauncherCmd;
 import picocli.CommandLine;
 
 /**
- * This class will implement the "openapi" sub-command "gen-contract" for Ballerina OpenApi tool.
+ * This class will implement the "openapi" sub-command "gen-client" for Ballerina OpenApi tool.
  *
- * Ex: ballerina openapi gen-contract [moduleName]:serviceName [-i: ballerinaFile] [-o: contractFile] [-s: skip-bind]
+ * Ex: ballerina openapi (gen-client) [moduleName]:clientName -o[output directory name]
  */
 @CommandLine.Command(
-    name = OpenApiCommandConstants.OPENAPI_GEN_CONTRACT_COMMAND
+    name = OpenApiCommandConstants.OPENAPI_GEN_CLIENT_COMMAND
 )
-public class OpenApiGenContractCommand implements BLauncherCmd {
+public class OpenApiGenClientCommand implements BLauncherCmd {
     @Override
     public void execute() {
 

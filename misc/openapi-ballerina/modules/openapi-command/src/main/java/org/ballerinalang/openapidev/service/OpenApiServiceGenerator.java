@@ -1,12 +1,12 @@
-package org.ballerinalang.openapi.service;
+package org.ballerinalang.openapidev.service;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
-import org.ballerinalang.openapi.constants.OpenApiServiceGeneratorConstants;
-import org.ballerinalang.openapi.models.GenSrcFile;
-import org.ballerinalang.openapi.models.OpenApiObject;
-import org.ballerinalang.openapi.utils.OpenApiCodeGenUtils;
-import org.ballerinalang.openapi.utils.OpenApiTypeExtractorUtils;
+import org.ballerinalang.openapidev.constants.OpenApiServiceGeneratorConstants;
+import org.ballerinalang.openapidev.models.GeneratedBalFile;
+import org.ballerinalang.openapidev.models.OpenApiObject;
+import org.ballerinalang.openapidev.utils.OpenApiCodeGenUtils;
+import org.ballerinalang.openapidev.utils.OpenApiTypeExtractorUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +32,7 @@ public class OpenApiServiceGenerator {
      * @throws IOException - exception if read error
      */
     public void generateService(String serviceName, String contractPath, String outputPath) throws IOException {
-        List<GenSrcFile> generatedFiles = generateBallerinaSource(serviceName, contractPath);
+        List<GeneratedBalFile> generatedFiles = generateBallerinaSource(serviceName, contractPath);
 
         Path srcPath = OpenApiCodeGenUtils.getSourcePath(balSourcePackage, outputPath);
         Path implPath = OpenApiCodeGenUtils.getImplPath(balSourcePackage, srcPath);
@@ -40,7 +40,7 @@ public class OpenApiServiceGenerator {
         writeGeneratedSources(generatedFiles, srcPath, implPath);
     }
 
-    private List<GenSrcFile> generateBallerinaSource(String serviceName, String contractPath) {
+    private List<GeneratedBalFile> generateBallerinaSource(String serviceName, String contractPath) {
         OpenAPI definition = new OpenAPIV3Parser().read(contractPath);
 
         if (definition == null) {
@@ -52,7 +52,7 @@ public class OpenApiServiceGenerator {
         return null;
     }
 
-    private void writeGeneratedSources(List<GenSrcFile> sources, Path srcPath, Path implPath) throws IOException {
+    private void writeGeneratedSources(List<GeneratedBalFile> sources, Path srcPath, Path implPath) throws IOException {
         // Remove old generated files - if any - before regenerate
         // if srcPackage was not provided and source was written to main package nothing will be deleted.
         if (balSourcePackage != null && !balSourcePackage.isEmpty() && Files.exists(srcPath)) {
@@ -73,7 +73,7 @@ public class OpenApiServiceGenerator {
             }
         }
 
-        for (GenSrcFile file : sources) {
+        for (GeneratedBalFile file : sources) {
             Path filePath;
             // We only overwrite files of overwritable type.
             // So non overwritable files will be written to disk only once.

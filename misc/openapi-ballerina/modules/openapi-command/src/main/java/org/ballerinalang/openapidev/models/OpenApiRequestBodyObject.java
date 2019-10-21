@@ -1,4 +1,4 @@
-package org.ballerinalang.openapi.models;
+package org.ballerinalang.openapidev.models;
 
 import java.util.List;
 

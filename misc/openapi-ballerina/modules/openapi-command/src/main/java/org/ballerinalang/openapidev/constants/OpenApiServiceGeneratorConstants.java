@@ -1,4 +1,4 @@
-package org.ballerinalang.openapi.constants;
+package org.ballerinalang.openapidev.constants;
 
 /**
  * This class contains all the constants needed for Service Generation Process.

@@ -1,6 +1,6 @@
-package org.ballerinalang.openapi.command;
+package org.ballerinalang.openapidev.command;
 
-import org.ballerinalang.openapi.constants.OpenApiCommandConstants;
+import org.ballerinalang.openapidev.constants.OpenApiCommandConstants;
 import org.ballerinalang.tool.BLauncherCmd;
 import picocli.CommandLine;
 

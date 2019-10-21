@@ -1,4 +1,4 @@
-package org.ballerinalang.openapi.models;
+package org.ballerinalang.openapidev.models;
 
 /**
  * Open Api Parameter Object.

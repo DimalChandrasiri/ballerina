@@ -1,4 +1,4 @@
-package org.ballerinalang.openapi.constants;
+package org.ballerinalang.openapidev.constants;
 
 /**
  * This class containts messages related to OpenApi command tool.
