@@ -31,4 +31,5 @@ public class OpenApiCommandMessages {
             "a valid OpenApi contract file.";
     public static final String UNHANDLED_SERVICE_GEN_ERROR = "Unhandled error occurred while generating Ballerina " +
             "service for the provided OpenApi contract.";
+
 }

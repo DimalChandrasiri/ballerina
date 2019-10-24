@@ -6,6 +6,7 @@ import org.ballerinalang.openapidev.constants.OpenApiServiceGeneratorConstants;
 import org.ballerinalang.openapidev.models.GeneratedBalFile;
 import org.ballerinalang.openapidev.models.OpenApiObject;
 import org.ballerinalang.openapidev.utils.OpenApiCodeGenUtils;
+import org.ballerinalang.openapidev.utils.OpenApiTypeExtractor;
 import org.ballerinalang.openapidev.utils.OpenApiTypeExtractorUtils;
 
 import java.io.File;
@@ -40,6 +41,13 @@ public class OpenApiServiceGenerator {
         writeGeneratedSources(generatedFiles, srcPath, implPath);
     }
 
+    /**
+     * Generates Ballerina source for a given OpenApi contract.
+     *
+     * @param serviceName
+     * @param contractPath
+     * @return
+     */
     private List<GeneratedBalFile> generateBallerinaSource(String serviceName, String contractPath) {
         OpenAPI definition = new OpenAPIV3Parser().read(contractPath);
 
@@ -47,7 +55,7 @@ public class OpenApiServiceGenerator {
             //Throw exception if parse is not working
         }
 
-        final OpenApiObject definitionObject = OpenApiTypeExtractorUtils.extractOpenApiTypes(definition);
+        final OpenApiObject definitionObject = OpenApiTypeExtractor.extractOpenApiType(definition);
 
         return null;
     }

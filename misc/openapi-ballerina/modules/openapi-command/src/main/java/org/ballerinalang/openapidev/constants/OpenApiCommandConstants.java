@@ -20,6 +20,7 @@ public class OpenApiCommandConstants {
     public static final String OUTPUT_LOCATION_LONG = "--output";
 
     public static final String CURRENT_DIR = "user.dir";
+    public static final String RESOURCE_NAME_PREFIX = "resource_";
 
     //TODO Update keywords if Ballerina Grammer changes
     private static final String[] KEYWORDS = new String[]{"abort", "aborted", "abstract", "all", "annotation",

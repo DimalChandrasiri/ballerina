@@ -1,21 +1,6 @@
 package org.ballerinalang.openapidev.utils;
 
-import io.swagger.v3.oas.models.Components;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.Operation;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.Paths;
-import io.swagger.v3.oas.models.parameters.Parameter;
-import io.swagger.v3.oas.models.responses.ApiResponses;
-import org.ballerinalang.openapidev.models.OpenApiObject;
-import org.ballerinalang.openapidev.models.OpenApiOperationObject;
-import org.ballerinalang.openapidev.models.OpenApiParameterObject;
-import org.ballerinalang.openapidev.models.OpenApiPathObject;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class will contain functions to extract types from a given OpenApi object.
@@ -27,7 +12,7 @@ public class OpenApiTypeExtractorUtils {
      *
      * @param definition - Open Api object
      * @return - returns an OpenApiObject with all extracted types
-     */
+
     public static OpenApiObject extractOpenApiTypes(OpenAPI definition) {
         OpenApiObject typeObject = new OpenApiObject();
 
@@ -42,7 +27,7 @@ public class OpenApiTypeExtractorUtils {
      *
      * @param pathList - path list from Open Api Object
      * @param typeObject - retrieved types will be added to the type object
-     */
+
     private static void extractTypesFromPaths(Paths pathList, OpenApiObject typeObject) {
         final Iterator<Map.Entry<String, PathItem>> pathIterator = pathList.entrySet().iterator();
         List<OpenApiPathObject> paths = new ArrayList<>();
@@ -56,7 +41,7 @@ public class OpenApiTypeExtractorUtils {
             pathObject.setPathName(pathKey);
 
             if (!nextPath.getValue().readOperations().isEmpty()) {
-                final List<Operation> operations = pathValue.readOperations();
+                final Map<PathItem.HttpMethod, Operation> operations = pathValue.readOperationsMap();
                 extractTypesFromOperations(operations, pathObject);
             }
 
@@ -67,37 +52,69 @@ public class OpenApiTypeExtractorUtils {
     /**
      * This method will extract types from Operations list.
      *
-     * @param operationsList - OpenApi operations list
+     * @param operationMap - OpenApi operations list
      * @param pathObject - will contain extracted operation types
-     */
-    private static void extractTypesFromOperations(List<Operation> operationsList, OpenApiPathObject pathObject) {
-        final Iterator<Operation> operationIterator = operationsList.iterator();
+
+    private static void extractTypesFromOperations(Map<PathItem.HttpMethod, Operation> operationMap, OpenApiPathObject pathObject) {
+        final Iterator<Map.Entry<PathItem.HttpMethod, Operation>> operationIterator =
+                operationMap.entrySet().iterator();
         List<OpenApiOperationObject> operationObjects = new ArrayList<>();
+        
+        //Iterate operation map to extract operation data
+        while (operationIterator.hasNext()) {
+            final Map.Entry<PathItem.HttpMethod, Operation> nextOperation = operationIterator.next();
+            final PathItem.HttpMethod operationMethod = nextOperation.getKey();
+            final Operation operationObject = nextOperation.getValue();
+
+            /**
+             * 1. Strip operation id for resource name
+             * 2. If no operation id, warn
+             * 3. generate custom operation id using operation method
+             * 4. extract parameters
+             * 5. extract responses
+             * 6. extract request body
+
+
+            //Create new operation type object and add type of operation
+            OpenApiOperationObject operationTypeObject = new OpenApiOperationObject();
+            operationTypeObject.setOperationMethod(operationMethod.toString().toLowerCase(Locale.ENGLISH));
+
+            if (operationObject.getOperationId() !=  null && operationObject.getOperationId().isEmpty()) {
+                operationTypeObject.set
+            } else {
+
+            }
+
+        }
 
         while (operationIterator.hasNext()) {
-            final Operation nextOperation = operationIterator.next();
+            final Map.Entry<PathItem.HttpMethod, Operation> nextOperation = operationIterator.next();
+            final Operation nextOperationObject = nextOperation.getValue();
+
+            //New Operation Type Object
             OpenApiOperationObject operation = new OpenApiOperationObject();
+            operation.setOperationType(nextOperation.getKey().toString());
 
-            if (nextOperation.getParameters() != null && !nextOperation.getParameters().isEmpty()) {
-                extractParameterTypes(nextOperation.getParameters(), operation);
+            if (nextOperationObject.getParameters() != null && !nextOperationObject.getParameters().isEmpty()) {
+                extractParameterTypes(nextOperationObject.getParameters(), operation);
             }
 
-            if (nextOperation.getResponses() != null && !nextOperation.getResponses().isEmpty()) {
-                extractResponseTypes(nextOperation.getResponses(), operation);
+            if (nextOperationObject.getResponses() != null && !nextOperationObject.getResponses().isEmpty()) {
+                extractResponseTypes(nextOperationObject.getResponses(), operation);
             }
 
-            if (nextOperation.getRequestBody() != null) {
+            if (nextOperationObject.getRequestBody() != null) {
                 //iterate request bodies
             }
         }
     }
 
     /**
-     * This method will iterate parameters to retrieve types
+     * This method will iterate parameters to retrieve types.
      *
      * @param parameterList - open api parameters list
      * @param operationObject - retrieved types will be added to the operation object
-     */
+
     private static void extractParameterTypes(List<Parameter> parameterList, OpenApiOperationObject operationObject) {
         final Iterator<Parameter> parameterIterator = parameterList.iterator();
 
@@ -110,11 +127,11 @@ public class OpenApiTypeExtractorUtils {
     }
 
     /**
-     * This method will iterate response types to retrieve types
+     * This method will iterate response types to retrieve types.
      *
      * @param responses - open api responses list
      * @param operationObject - retrieved types will be added to the operation object
-     */
+
     private static void  extractResponseTypes(ApiResponses responses, OpenApiOperationObject operationObject) {
 
     }
@@ -124,8 +141,9 @@ public class OpenApiTypeExtractorUtils {
      *
      * @param components - open api components object
      * @param typeObject - retrieved types will be added to the type object
-     */
+
     private static void extractComponentTypes(Components components, OpenApiObject typeObject) {
 
     }
+    */
 }

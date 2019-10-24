@@ -3,11 +3,11 @@ package org.ballerinalang.openapidev.models;
 import java.util.List;
 
 /**
- * Open Api path Object.
+ * This class will represent extracted path data from an OpenApi Object.
  */
-public class OpenApiPathObject {
-    private String pathName;
-    private List<OpenApiOperationObject> operations;
+public class OpenApiPath {
+    String pathName;
+    List<OpenApiOperation> operations;
 
     public String getPathName() {
         return pathName;
@@ -17,11 +17,11 @@ public class OpenApiPathObject {
         this.pathName = pathName;
     }
 
-    public List<OpenApiOperationObject> getOperations() {
+    public List<OpenApiOperation> getOperations() {
         return operations;
     }
 
-    public void setOperations(List<OpenApiOperationObject> operations) {
+    public void setOperations(List<OpenApiOperation> operations) {
         this.operations = operations;
     }
 }

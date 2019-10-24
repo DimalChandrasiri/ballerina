@@ -1,13 +1,9 @@
 package org.ballerinalang.openapidev.models;
 
-/**
- * Open Api Schema Property Object.
- */
-public class OpenApiSchemaPropertyObject {
+public class OpenApiProperty {
     private String propertyName;
     private String propertyType;
     private boolean isArray;
-    private boolean isRestRecord;
 
     public String getPropertyName() {
         return propertyName;
@@ -31,13 +27,5 @@ public class OpenApiSchemaPropertyObject {
 
     public void setArray(boolean array) {
         isArray = array;
-    }
-
-    public boolean isRestRecord() {
-        return isRestRecord;
-    }
-
-    public void setRestRecord(boolean restRecord) {
-        isRestRecord = restRecord;
     }
 }

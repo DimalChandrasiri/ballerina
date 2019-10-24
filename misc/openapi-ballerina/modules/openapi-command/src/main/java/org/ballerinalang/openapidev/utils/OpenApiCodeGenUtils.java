@@ -1,12 +1,12 @@
 package org.ballerinalang.openapidev.utils;
 
+import org.ballerinalang.openapidev.constants.OpenApiCommandConstants;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import org.ballerinalang.openapidev.constants.OpenApiCommandConstants;
 
 /**
  * Util methods used for OpenApi Code Generation.
@@ -96,5 +96,9 @@ public class OpenApiCodeGenUtils {
             }
         }
         return identifier;
+    }
+
+    public static String stripSpecialCharacters(String identifier) {
+        return "'" + identifier.replaceAll("([\\\\?!<>*\\-=^+(){}|.$])", "\\\\$1");
     }
 }

@@ -1,28 +1,22 @@
 package org.ballerinalang.openapidev.models;
 
-import io.swagger.v3.oas.models.tags.Tag;
-
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * This class contains OpenApi information to generate Ballerina Service.
+ * This class will represent extracted OpenApi object types
  */
 public class OpenApiObject {
-    private String moduleName;
-    private String serviceName;
-    private String definitionPath;
-    private List<OpenApiPathObject> paths;
-    private OpenApiComponentObject component;
-    private List<Tag> tags;
-    private List<OpenApiServerObject> servers = new ArrayList<>();
+    String serviceName;
+    String contractPath;
+    OpenApiComponent components;
+    List<OpenApiPath> paths;
 
-    public String getModuleName() {
-        return moduleName;
+    public OpenApiComponent getComponents() {
+        return components;
     }
 
-    public void setModuleName(String moduleName) {
-        this.moduleName = moduleName;
+    public void setComponents(OpenApiComponent components) {
+        this.components = components;
     }
 
     public String getServiceName() {
@@ -33,43 +27,19 @@ public class OpenApiObject {
         this.serviceName = serviceName;
     }
 
-    public String getDefinitionPath() {
-        return definitionPath;
+    public String getContractPath() {
+        return contractPath;
     }
 
-    public void setDefinitionPath(String definitionPath) {
-        this.definitionPath = definitionPath;
+    public void setContractPath(String contractPath) {
+        this.contractPath = contractPath;
     }
 
-    public List<OpenApiServerObject> getServers() {
-        return servers;
-    }
-
-    public void setServers(List<OpenApiServerObject> servers) {
-        this.servers = servers;
-    }
-
-    public List<OpenApiPathObject> getPaths() {
+    public List<OpenApiPath> getPaths() {
         return paths;
     }
 
-    public void setPaths(List<OpenApiPathObject> paths) {
+    public void setPaths(List<OpenApiPath> paths) {
         this.paths = paths;
-    }
-
-    public OpenApiComponentObject getComponent() {
-        return component;
-    }
-
-    public void setComponent(OpenApiComponentObject component) {
-        this.component = component;
-    }
-
-    public List<Tag> getTags() {
-        return tags;
-    }
-
-    public void setTags(List<Tag> tags) {
-        this.tags = tags;
     }
 }
